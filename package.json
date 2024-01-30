@@ -1,0 +1,14 @@
+{
+  "name": "agoric-basics",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "useWorkspaces": true,
+  "workspaces": [
+    "contract"
+  ],
+  "scripts": {
+    "lint": "yarn workspaces run lint",
+    "test": "yarn workspaces run test"
+  }
+}
