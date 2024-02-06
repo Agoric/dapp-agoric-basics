@@ -49,7 +49,7 @@ test('exercise 2: start zoe instance', async t => {
     playMoneyIssuer,
     {
       // TODO: initialize the instance with the expected joinPrice to pass the test below
-      joinPrice: joinPrice,
+      joinPrice,
     },
   );
   const terms = await E(zoe).getTerms(instance);
