@@ -1,4 +1,4 @@
-# Agoric Dapp Starter: Offer Up
+# Agoric Dapp Starter: Agoric Basics
 
 This is a simple app for the [Agoric smart contract platform](https://docs.agoric.com/).
 

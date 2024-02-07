@@ -29,7 +29,7 @@ const watcher = makeAgoricChainStorageWatcher(ENDPOINTS.API, 'agoriclocal');
 
 interface AppState {
   wallet?: Wallet;
-  offerUpInstance?: unknown;
+  agoricBasicsInstance?: unknown;
   brands?: Record<string, unknown>;
   purses?: Array<Purse>;
 }
@@ -42,7 +42,9 @@ const setup = async () => {
     instances => {
       console.log('got instances', instances);
       useAppStore.setState({
-        offerUpInstance: instances.find(([name]) => name === 'offerUp')!.at(1),
+        agoricBasicsInstance: instances
+          .find(([name]) => name === 'agoricBasics')!
+          .at(1),
       });
     },
   );
@@ -70,8 +72,8 @@ const connectWallet = async () => {
 };
 
 const makeOffer = (giveValue: bigint, wantChoices: Record<string, bigint>) => {
-  const { wallet, offerUpInstance, brands } = useAppStore.getState();
-  if (!offerUpInstance) throw Error('no contract instance');
+  const { wallet, agoricBasicsInstance, brands } = useAppStore.getState();
+  if (!agoricBasicsInstance) throw Error('no contract instance');
   if (!(brands && brands.IST && brands.Item))
     throw Error('brands not available');
 
@@ -82,7 +84,7 @@ const makeOffer = (giveValue: bigint, wantChoices: Record<string, bigint>) => {
   wallet?.makeOffer(
     {
       source: 'contract',
-      instance: offerUpInstance,
+      instance: agoricBasicsInstance,
       publicInvitationMaker: 'makeTradeInvitation',
     },
     { give, want },
@@ -130,7 +132,7 @@ function App() {
   return (
     <>
       <Logos />
-      <h1>Items Listed on Offer Up</h1>
+      <h1>Items Listed on Agoric Basics</h1>
 
       <div className="card">
         <Trade

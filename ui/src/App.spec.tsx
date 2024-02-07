@@ -6,9 +6,12 @@ describe('App.tsx', () => {
   it('renders app title', async () => {
     render(<App />);
 
-    const titleElement = await screen.findByText('Items Listed on Offer Up', {
-      selector: 'h1',
-    });
+    const titleElement = await screen.findByText(
+      'Items Listed on Agoric Basics',
+      {
+        selector: 'h1',
+      },
+    );
     expect(titleElement).toBeTruthy();
   });
 
