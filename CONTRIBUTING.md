@@ -7,19 +7,46 @@ yarn test
 ```
 
 ```
+yarn test
 yarn run v1.22.21
 $ ava --verbose
 
 start proposal module evaluating
-bundles/ add: assetContract from /home/connolly/projects/dapp-offer-up/contract/src/offer-up.contract.js
-  ✔ bundle-source › bundleSource() bundles the contract for use with zoe (1s)
-    ℹ 7fffb45de65f0c887401d4a5c5185ad87d41e3842d6eb2e10559a06c747358fe0dc5ef41fd4c04457c5e9bb27ed85e48ea1ff8bdeac524063b7743205f4817e6
+bundles/ add: assetContract from /Users/luqi/github/Agoric/dapp-agoric-basics/contract/src/agoric-basics.contract.js
+  ✔ bundle-source › bundleSource() bundles the contract for use with zoe (960ms)
+    ℹ 1ec13424eb2a4e76ed175ae38e42a85bd5d54d0d21c28bbfb54805f1188f7ac3276cc1a525d1cc78fbdbfa430802355ba910d10c4e3b9f0cd8f88a500a0e1db0
     ℹ Object @Alleged: BundleInstallation {}
-bundles/ bundled 85 files in bundle-assetContract.js at 2024-01-23T02:30:57.437Z
-startOfferUpContract()...
+bundles/ bundled 155 files in bundle-assetContract.js at 2024-02-07T19:45:55.154Z
+startAgoricBasicsContract()...
   ✔ contract › Install the contract
     ℹ Object @Alleged: BundleInstallation {}
-  ✔ contract › Start the contract (901ms)
+agoric: run: running /Users/luqi/github/Agoric/dapp-agoric-basics/contract/scripts/build-contract-deployer.js
+start proposal module evaluating
+/Users/luqi/github/Agoric/dapp-agoric-basics/contract/bundles add: agoric-basics from /Users/luqi/github/Agoric/dapp-agoric-basics/contract/src/agoric-basics.contract.js
+/Users/luqi/github/Agoric/dapp-agoric-basics/contract/bundles bundled 155 files in bundle-agoric-basics.js at 2024-02-07T19:45:55.537Z
+  ✔ build-proposal › proposal builder generates compressed bundles less than 1MB (2.2s)
+    ℹ agoric run stdout: agoric: run: Deploy script will run with Node.js ESM
+      bundle-source --to /Users/luqi/github/Agoric/dapp-agoric-basics/contract/bundles /Users/luqi/github/Agoric/dapp-agoric-basics/contract/src/agoric-basics.contract.js agoric-basics
+      creating start-agoric-basics-permit.json
+      creating start-agoric-basics.js
+      You can now run a governance submission command like:
+        agd tx gov submit-proposal swingset-core-eval start-agoric-basics-permit.json start-agoric-basics.js \
+          --title="Enable <something>" --description="Evaluate start-agoric-basics.js" --deposit=1000000ubld \
+          --gas=auto --gas-adjustment=1.2
+      Remember to install bundles before submitting the proposal:
+        agd tx swingset install-bundle @/Users/luqi/.agoric/cache/b1-1ec13424eb2a4e76ed175ae38e42a85bd5d54d0d21c28bbfb54805f1188f7ac3276cc1a525d1cc78fbdbfa430802355ba910d10c4e3b9f0cd8f88a500a0e1db0.json
+        agd tx swingset install-bundle @/Users/luqi/.agoric/cache/b1-404e6c68f4ca70f434e7e06e537027ca57539746f093ec3c46900451e65b7896807a8e94c36a0b719ad1b4cc24c5cae8ace02bb3df9e12470d26c8decfbdb168.json
+
+
+    ℹ {
+        bundleId: 'b1-1ec13424eb2a4e76ed175ae38e42a85bd5d54d0d21c28bbfb54805f1188f7ac3276cc1a525d1cc78fbdbfa430802355ba910d10c4e3b9f0cd8f88a500a0e1db0',
+        compressedSize: '0.31427860260009766 MB',
+      }
+    ℹ {
+        bundleId: 'b1-404e6c68f4ca70f434e7e06e537027ca57539746f093ec3c46900451e65b7896807a8e94c36a0b719ad1b4cc24c5cae8ace02bb3df9e12470d26c8decfbdb168',
+        compressedSize: '0.15766525268554688 MB',
+      }
+  ✔ contract › Start the contract (910ms)
     ℹ terms: {
         tradePrice: {
           brand: Object @Alleged: PlayMoney brand {},
@@ -28,7 +55,7 @@ startOfferUpContract()...
       }
     ℹ Object @Alleged: InstanceHandle {}
 CoreEval script: started contract Object [Alleged: InstanceHandle] {}
-  ✔ contract › Alice trades: give some play money, want items (939ms)
+  ✔ contract › Alice trades: give some play money, want items (930ms)
     ℹ Object @Alleged: InstanceHandle {}
     ℹ Alice gives {
         Price: {
@@ -50,14 +77,10 @@ CoreEval script: started contract Object [Alleged: InstanceHandle] {}
         ],
       }
 CoreEval script: share via agoricNames: Object [Alleged: Item brand] {}
-offerUp (re)started
------ OfferUp.2  2 trade give { Price: { brand: Object [Alleged: PlayMoney brand] {}, value: 5n } } want Object [copyBag] { payload: [ [ 'scroll', 1n ], [ 'map', 1n ] ] }
-bundles/ add: centralSupply from /home/connolly/projects/dapp-offer-up/node_modules/@agoric/vats/src/centralSupply.js
-bundles/ bundled 132 files in bundle-centralSupply.js at 2024-01-23T02:30:59.505Z
------ OfferUp.2  2 trade give {
-  Price: { brand: Object [Alleged: ZDEFAULT brand] {}, value: 250000n }
-} want Object [copyBag] { payload: [ [ 'scroll', 1n ], [ 'map', 1n ] ] }
-  ✔ contract › Trade in IST rather than play money (2.5s)
+agoricBasics (re)started
+bundles/ add: centralSupply from /Users/luqi/github/Agoric/dapp-agoric-basics/node_modules/@agoric/vats/src/centralSupply.js
+bundles/ bundled 119 files in bundle-centralSupply.js at 2024-02-07T19:45:56.736Z
+  ✔ contract › Trade in IST rather than play money (1.9s)
     ℹ Alice gives {
         Price: {
           brand: Object @Alleged: ZDEFAULT brand {},
@@ -77,7 +100,7 @@ bundles/ bundled 132 files in bundle-centralSupply.js at 2024-01-23T02:30:59.505
           ],
         ],
       }
-  ✔ contract › use the code that will go on chain to start the contract (2.5s)
+  ✔ contract › use the code that will go on chain to start the contract (1.9s)
     ℹ Alice gives {
         Price: {
           brand: Object @Alleged: ZDEFAULT brand {},
@@ -97,13 +120,10 @@ bundles/ bundled 132 files in bundle-centralSupply.js at 2024-01-23T02:30:59.505
           ],
         ],
       }
------ OfferUp.2  2 trade give {
-  Price: { brand: Object [Alleged: ZDEFAULT brand] {}, value: 250000n }
-} want Object [copyBag] { payload: [ [ 'scroll', 1n ], [ 'map', 1n ] ] }
   ─
 
-  6 tests passed
-Done in 4.74s.
+  7 tests passed
+✨  Done in 3.94s.
 ```
 
 Any `Error#1: changed ...` diagnostics are benign reports of updated files
