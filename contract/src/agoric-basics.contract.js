@@ -50,7 +50,7 @@ const bagCounts = bag => {
  * @typedef {{
  *   tradePrice: Amount;
  *   maxItems?: bigint;
- * }} OfferUpTerms
+ * }} AgoricBasicsTerms
  */
 
 export const meta = {
@@ -67,7 +67,7 @@ export const customTermsShape = meta.customTermsShape;
  *   - creates a new non-fungible asset type for Items, and
  *   - handles offers to buy up to `maxItems` items at a time.
  *
- * @param {ZCF<OfferUpTerms>} zcf
+ * @param {ZCF<AgoricBasicsTerms>} zcf
  */
 export const start = async zcf => {
   const { tradePrice, maxItems = 3n } = zcf.getTerms();

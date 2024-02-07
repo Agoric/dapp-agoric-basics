@@ -41,8 +41,8 @@ const publishBrandInfo = async (chainStorage, board, brand) => {
  *
  * @param {BootstrapPowers} permittedPowers
  */
-export const startOfferUpContract = async permittedPowers => {
-  console.error('startOfferUpContract()...');
+export const startAgoricBasicsContract = async permittedPowers => {
+  console.error('startAgoricBasicsContract()...');
   const {
     consume: { board, chainStorage, startUpgradable, zoe },
     brand: {
@@ -56,11 +56,11 @@ export const startOfferUpContract = async permittedPowers => {
       produce: { Item: produceItemIssuer },
     },
     installation: {
-      consume: { offerUp: offerUpInstallationP },
+      consume: { agoricBasics: agoricBasicsInstallationP },
     },
     instance: {
       // @ts-expect-error dynamic extension to promise space
-      produce: { offerUp: produceInstance },
+      produce: { agoricBasics: produceInstance },
     },
   } = permittedPowers;
 
@@ -70,12 +70,12 @@ export const startOfferUpContract = async permittedPowers => {
   const terms = { tradePrice: AmountMath.make(istBrand, 25n * CENT) };
 
   // agoricNames gets updated each time; the promise space only once XXXXXXX
-  const installation = await offerUpInstallationP;
+  const installation = await agoricBasicsInstallationP;
 
   const { instance } = await E(startUpgradable)({
     installation,
     issuerKeywordRecord: { Price: istIssuer },
-    label: 'offerUp',
+    label: 'agoricBasics',
     terms,
   });
   console.log('CoreEval script: started contract', instance);
@@ -95,12 +95,12 @@ export const startOfferUpContract = async permittedPowers => {
   produceItemIssuer.resolve(issuer);
 
   await publishBrandInfo(chainStorage, board, brand);
-  console.log('offerUp (re)started');
+  console.log('agoricBasics (re)started');
 };
 
 /** @type { import("@agoric/vats/src/core/lib-boot").BootstrapManifest } */
-const offerUpManifest = {
-  [startOfferUpContract.name]: {
+const agoricBasicsManifest = {
+  [startAgoricBasicsContract.name]: {
     consume: {
       agoricNames: true,
       board: true, // to publish boardAux info for NFT brand
@@ -108,19 +108,19 @@ const offerUpManifest = {
       startUpgradable: true, // to start contract and save adminFacet
       zoe: true, // to get contract terms, including issuer/brand
     },
-    installation: { consume: { offerUp: true } },
+    installation: { consume: { agoricBasics: true } },
     issuer: { consume: { IST: true }, produce: { Item: true } },
     brand: { consume: { IST: true }, produce: { Item: true } },
-    instance: { produce: { offerUp: true } },
+    instance: { produce: { agoricBasics: true } },
   },
 };
-harden(offerUpManifest);
+harden(agoricBasicsManifest);
 
-export const getManifestForOfferUp = ({ restoreRef }, { offerUpRef }) => {
+export const getManifestForAgoricBasics = ({ restoreRef }, { agoricBasicsRef }) => {
   return harden({
-    manifest: offerUpManifest,
+    manifest: agoricBasicsManifest,
     installations: {
-      offerUp: restoreRef(offerUpRef),
+      agoricBasics: restoreRef(agoricBasicsRef),
     },
   });
 };
