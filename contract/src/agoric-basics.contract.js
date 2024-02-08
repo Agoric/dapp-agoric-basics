@@ -22,7 +22,6 @@
 import { Far } from '@endo/far';
 import { M, getCopyBagEntries } from '@endo/patterns';
 import { AssetKind } from '@agoric/ertp/src/amountMath.js';
-import { AmountShape } from '@agoric/ertp/src/typeGuards.js';
 import { atomicRearrange } from '@agoric/zoe/src/contractSupport/atomicTransfer.js';
 import '@agoric/zoe/exported.js';
 
@@ -52,15 +51,6 @@ const bagCounts = bag => {
  *   maxTickets?: bigint;
  * }} AgoricBasicsTerms
  */
-
-export const meta = {
-  customTermsShape: M.splitRecord(
-    { tradePrice: AmountShape },
-    { maxTickets: M.bigint() },
-  ),
-};
-// compatibility with an earlier contract metadata API
-export const customTermsShape = meta.customTermsShape;
 
 /**
  * Start a contract that
