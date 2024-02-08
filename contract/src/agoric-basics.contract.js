@@ -1,5 +1,5 @@
 /**
- * @file Contract to mint and sell a few Item NFTs at a time.
+ * @file Contract to mint and sell a few ticket NFTs at a time.
  *
  * We declare variables (including functions) before using them,
  * so you may want to skip ahead and come back to some details.
@@ -45,18 +45,18 @@ const bagCounts = bag => {
 /**
  * In addition to the standard `issuers` and `brands` terms,
  * this contract is parameterized by terms for price and,
- * optionally, a maximum number of items sold for that price (default: 3).
+ * optionally, a maximum number of tickets sold for that price (default: 3).
  *
  * @typedef {{
  *   tradePrice: Amount;
- *   maxItems?: bigint;
+ *   maxTickets?: bigint;
  * }} AgoricBasicsTerms
  */
 
 export const meta = {
   customTermsShape: M.splitRecord(
     { tradePrice: AmountShape },
-    { maxItems: M.bigint() },
+    { maxTickets: M.bigint() },
   ),
 };
 // compatibility with an earlier contract metadata API
@@ -64,34 +64,34 @@ export const customTermsShape = meta.customTermsShape;
 
 /**
  * Start a contract that
- *   - creates a new non-fungible asset type for Items, and
- *   - handles offers to buy up to `maxItems` items at a time.
+ *   - creates a new non-fungible asset type for Tickets, and
+ *   - handles offers to buy up to `maxTickets` tickets at a time.
  *
  * @param {ZCF<AgoricBasicsTerms>} zcf
  */
 export const start = async zcf => {
-  const { tradePrice, maxItems = 3n } = zcf.getTerms();
+  const { tradePrice, maxTickets = 3n } = zcf.getTerms();
 
   /**
-   * a new ERTP mint for items, accessed thru the Zoe Contract Facet.
+   * a new ERTP mint for tickets, accessed thru the Zoe Contract Facet.
    * Note: `makeZCFMint` makes the associated brand and issuer available
    * in the contract's terms.
    *
    * AssetKind.COPY_BAG can express non-fungible (or rather: semi-fungible)
    * amounts such as: 3 potions and 1 map.
    */
-  const itemMint = await zcf.makeZCFMint('Item', AssetKind.COPY_BAG);
-  const { brand: itemBrand } = itemMint.getIssuerRecord();
+  const ticketMint = await zcf.makeZCFMint('Ticket', AssetKind.COPY_BAG);
+  const { brand: ticketBrand } = ticketMint.getIssuerRecord();
 
   /**
    * a pattern to constrain proposals given to {@link tradeHandler}
    *
    * The `Price` amount must be >= `tradePrice` term.
-   * The `Items` amount must use the `Item` brand and a bag value.
+   * The `Tickets` amount must use the `Ticket` brand and a bag value.
    */
   const proposalShape = harden({
     give: { Price: M.gte(tradePrice) },
-    want: { Items: { brand: itemBrand, value: M.bag() } },
+    want: { Tickets: { brand: ticketBrand, value: M.bag() } },
     exit: M.any(),
   });
 
@@ -103,37 +103,37 @@ export const start = async zcf => {
     // give and want are guaranteed by Zoe to match proposalShape
     const { want } = buyerSeat.getProposal();
 
-    sum(bagCounts(want.Items.value)) <= maxItems ||
-      Fail`max ${q(maxItems)} items allowed: ${q(want.Items)}`;
+    sum(bagCounts(want.Tickets.value)) <= maxTickets ||
+      Fail`max ${q(maxTickets)} tickets allowed: ${q(want.Tickets)}`;
 
-    const newItems = itemMint.mintGains(want);
+    const newTickets = ticketMint.mintGains(want);
     atomicRearrange(
       zcf,
       harden([
         // price from buyer to proceeds
         [buyerSeat, proceeds, { Price: tradePrice }],
-        // new items to buyer
-        [newItems, buyerSeat, want],
+        // new tickets to buyer
+        [newTickets, buyerSeat, want],
       ]),
     );
 
     buyerSeat.exit(true);
-    newItems.exit();
+    newTickets.exit();
     return 'trade complete';
   };
 
   /**
-   * Make an invitation to trade for items.
+   * Make an invitation to trade for tickets.
    *
    * Proposal Keywords used in offers using these invitations:
    *   - give: `Price`
-   *   - want: `Items`
+   *   - want: `Tickets`
    */
   const makeTradeInvitation = () =>
-    zcf.makeInvitation(tradeHandler, 'buy items', undefined, proposalShape);
+    zcf.makeInvitation(tradeHandler, 'buy tickets', undefined, proposalShape);
 
   // Mark the publicFacet Far, i.e. reachable from outside the contract
-  const publicFacet = Far('Items Public Facet', {
+  const publicFacet = Far('Tickets Public Facet', {
     makeTradeInvitation,
   });
   return harden({ publicFacet });

@@ -91,7 +91,7 @@ const alice = async (t, zoe, instance, purse, choices = ['map', 'scroll']) => {
   const choiceBag = makeCopyBag(choices.map(name => [name, 1n]));
   const proposal = {
     give: { Price: tradePrice },
-    want: { Items: AmountMath.make(brands.Item, choiceBag) },
+    want: { Tickets: AmountMath.make(brands.Ticket, choiceBag) },
   };
   const pmt = await E(purse).withdraw(tradePrice);
   t.log('Alice gives', proposal.give);
@@ -100,15 +100,15 @@ const alice = async (t, zoe, instance, purse, choices = ['map', 'scroll']) => {
   const toTrade = E(publicFacet).makeTradeInvitation();
 
   const seat = E(zoe).offer(toTrade, proposal, { Price: pmt });
-  const items = await E(seat).getPayout('Items');
+  const tickets = await E(seat).getPayout('Tickets');
 
-  const actual = await E(issuers.Item).getAmountOf(items);
+  const actual = await E(issuers.Ticket).getAmountOf(tickets);
   t.log('Alice payout brand', actual.brand);
   t.log('Alice payout value', actual.value);
-  t.deepEqual(actual, proposal.want.Items);
+  t.deepEqual(actual, proposal.want.Tickets);
 };
 
-test('Alice trades: give some play money, want items', async t => {
+test('Alice trades: give some play money, want tickets', async t => {
   const { zoe, bundle } = t.context;
 
   const money = makeIssuerKit('PlayMoney');
@@ -197,11 +197,11 @@ test('use the code that will go on chain to start the contract', async t => {
       consume: { zoe, chainStorage, startUpgradable, board },
       brand: {
         consume: { IST: pFor(feeBrand) },
-        produce: { Item: sync.brand },
+        produce: { Ticket: sync.brand },
       },
       issuer: {
         consume: { IST: pFor(feeIssuer) },
-        produce: { Item: sync.issuer },
+        produce: { Ticket: sync.issuer },
       },
       installation: { consume: { agoricBasics: sync.installation.promise } },
       instance: { produce: { agoricBasics: sync.instance } },

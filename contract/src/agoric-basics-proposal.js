@@ -48,12 +48,12 @@ export const startAgoricBasicsContract = async permittedPowers => {
     brand: {
       consume: { IST: istBrandP },
       // @ts-expect-error dynamic extension to promise space
-      produce: { Item: produceItemBrand },
+      produce: { Ticket: produceTicketBrand },
     },
     issuer: {
       consume: { IST: istIssuerP },
       // @ts-expect-error dynamic extension to promise space
-      produce: { Item: produceItemIssuer },
+      produce: { Ticket: produceTicketIssuer },
     },
     installation: {
       consume: { agoricBasics: agoricBasicsInstallationP },
@@ -80,8 +80,8 @@ export const startAgoricBasicsContract = async permittedPowers => {
   });
   console.log('CoreEval script: started contract', instance);
   const {
-    brands: { Item: brand },
-    issuers: { Item: issuer },
+    brands: { Ticket: brand },
+    issuers: { Ticket: issuer },
   } = await E(zoe).getTerms(instance);
 
   console.log('CoreEval script: share via agoricNames:', brand);
@@ -89,10 +89,10 @@ export const startAgoricBasicsContract = async permittedPowers => {
   produceInstance.reset();
   produceInstance.resolve(instance);
 
-  produceItemBrand.reset();
-  produceItemIssuer.reset();
-  produceItemBrand.resolve(brand);
-  produceItemIssuer.resolve(issuer);
+  produceTicketBrand.reset();
+  produceTicketIssuer.reset();
+  produceTicketBrand.resolve(brand);
+  produceTicketIssuer.resolve(issuer);
 
   await publishBrandInfo(chainStorage, board, brand);
   console.log('agoricBasics (re)started');
@@ -109,8 +109,8 @@ const agoricBasicsManifest = {
       zoe: true, // to get contract terms, including issuer/brand
     },
     installation: { consume: { agoricBasics: true } },
-    issuer: { consume: { IST: true }, produce: { Item: true } },
-    brand: { consume: { IST: true }, produce: { Item: true } },
+    issuer: { consume: { IST: true }, produce: { Ticket: true } },
+    brand: { consume: { IST: true }, produce: { Ticket: true } },
     instance: { produce: { agoricBasics: true } },
   },
 };
