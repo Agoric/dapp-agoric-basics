@@ -46,25 +46,43 @@ function ConcertTicketForm() {
   };
 
   return (
-    <form onSubmit={(event) => event.preventDefault()}>
+    <form onSubmit={(event) => event.preventDefault()} style={{ borderRadius: 8, backgroundColor: '#ddd', padding: '20px', margin: '20px auto', maxWidth: 500, border: '1px solid #000' }}>
       {Object.entries(numTickets).map(([sectionName, sectionData]) => (
-        <div key={sectionName} style={{ display: 'flex', alignItems: 'center' }}>
-          <label htmlFor={sectionName} style={{ marginRight: '10px' }}>{sectionData.name}</label>
-          <input
-            type="number"
-            name={sectionName}
-            id={sectionName}
-            value={sectionData.numTickets}
-            onChange={handleInputChange}
-          />
-          <span style={{ marginLeft: '10px' }}>({sectionData.pricePerTicket} IST each)</span>
+        <div key={sectionName}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+            <label htmlFor={sectionName}>{sectionData.name} ({sectionData.pricePerTicket} IST each):</label>
+            <input
+              type="number"
+              name={sectionName}
+              id={sectionName}
+              value={sectionData.numTickets}
+              onChange={handleInputChange}
+              style={{ backgroundColor: '#ff0', border: '1px solid #ccc', padding: '5px', borderRadius: '5px', width: '80px' }}
+            />
+          </div>
         </div>
       ))}
 
-      <p>Total Cost: {totalCost} IST</p>
-      <button type="button" onClick={handleMint} disabled={totalCost === 0}>
-        MINT
-      </button>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', marginTop: '20px' }}>
+        <label htmlFor="totalCost">Total Cost:</label>
+        <input
+          type="text"
+          name="totalCost"
+          id="totalCost"
+          value={totalCost}
+          readOnly
+          style={{ backgroundColor: '#ff0', border: '1px solid #ccc', padding: '5px', borderRadius: '5px', width: '80px' }}
+        />
+      </div>
+
+      {/* <button type="button" onClick={handleMint} disabled={totalCost === 0}>MINT</button> */}
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+        <span></span>
+        <button type="button" onClick={handleMint} disabled={totalCost === 0} style={{ margin: '10px auto 0 0' }}>
+          MINT
+        </button>
+      </div>
     </form>
   );
 }
