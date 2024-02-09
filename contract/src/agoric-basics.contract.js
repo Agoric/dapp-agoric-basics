@@ -29,22 +29,10 @@ import { AmountMath, AmountShape } from '@agoric/ertp';
 const { Fail, quote: q } = assert;
 
 // #region bag utilities
-/** @type { (xs: bigint[]) => bigint } */
-const sum = xs => xs.reduce((acc, x) => acc + x, 0n);
-
-/**
- * @param {import('@endo/patterns').CopyBag} bag
- * @returns {bigint[]}
- */
-const bagCounts = bag => {
-  const entries = getCopyBagEntries(bag);
-  return entries.map(([_k, ct]) => ct);
-};
-
 /**
  *
  * @param {import('@endo/patterns').CopyBag} bag
- * @param {Object.<string, {tradePrice: Amount, maxTickets: bigint}>} inventory
+ * @param {[key: string]: {tradePrice: Amount, maxTickets: bigint}} inventory
  * @returns {boolean}
  */
 export const hasInventory = (bag, inventory) => {
@@ -81,7 +69,7 @@ const multiply = (amount, n) => {
  *
  * @param {Amount} sum
  * @param {[string, bigint]} entry
- * @param {Object.<string, {tradePrice: Amount, maxTickets: bigint}>} inventory
+ * @param {[key: string]: {tradePrice: Amount, maxTickets: bigint}} inventory
  * @returns {Amount}
  */
 const addMultiples = (sum, entry, inventory) => {
@@ -92,7 +80,7 @@ const addMultiples = (sum, entry, inventory) => {
 /**
  *
  * @param {import('@endo/patterns').CopyBag} bag
- * @param {Object.<string, {tradePrice: Amount, maxTickets: bigint}>} inventory
+ * @param {[key: string]: {tradePrice: Amount, maxTickets: bigint}} inventory
  * @returns {Amount}
  */
 export const bagPrice = (bag, inventory) => {
@@ -112,7 +100,7 @@ export const bagPrice = (bag, inventory) => {
  * optionally, a maximum number of tickets sold for that price (default: 3).
  *
  * @typedef {{
- *   inventory: Object.<string, {tradePrice: Amount, maxTickets: bigint}>;
+ *   inventory: {[key: string]: {tradePrice: Amount, maxTickets: bigint}}
  * }} AgoricBasicsTerms
  */
 

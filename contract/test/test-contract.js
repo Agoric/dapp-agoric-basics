@@ -27,7 +27,6 @@ const contractPath = myRequire.resolve(`../src/agoric-basics.contract.js`);
 const test = anyTest;
 
 const UNIT6 = 1_000_000n;
-const CENT = UNIT6 / 100n;
 
 /**
  * Tests assume access to the zoe service and that contracts are bundled.
