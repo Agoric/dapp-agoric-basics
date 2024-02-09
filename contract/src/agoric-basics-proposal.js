@@ -67,7 +67,18 @@ export const startAgoricBasicsContract = async permittedPowers => {
   const istIssuer = await istIssuerP;
   const istBrand = await istBrandP;
 
-  const terms = { tradePrice: AmountMath.make(istBrand, 25n * CENT) };
+  const terms = {
+    inventory: {
+      frontRow: {
+        tradePrice: AmountMath.make(istBrand, 3n),
+        maxTickets: 3n,
+      },
+      middleRow: {
+        tradePrice: AmountMath.make(istBrand, 2n),
+        maxTickets: 3n,
+      },
+    },
+  };
 
   // agoricNames gets updated each time; the promise space only once XXXXXXX
   const installation = await agoricBasicsInstallationP;
@@ -116,7 +127,10 @@ const agoricBasicsManifest = {
 };
 harden(agoricBasicsManifest);
 
-export const getManifestForAgoricBasics = ({ restoreRef }, { agoricBasicsRef }) => {
+export const getManifestForAgoricBasics = (
+  { restoreRef },
+  { agoricBasicsRef },
+) => {
   return harden({
     manifest: agoricBasicsManifest,
     installations: {
