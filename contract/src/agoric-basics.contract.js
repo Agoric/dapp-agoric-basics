@@ -24,6 +24,7 @@ import { M, getCopyBagEntries } from '@endo/patterns';
 import { AssetKind } from '@agoric/ertp/src/amountMath.js';
 import { atomicRearrange } from '@agoric/zoe/src/contractSupport/atomicTransfer.js';
 import '@agoric/zoe/exported.js';
+import { AmountMath, AmountShape } from '@agoric/ertp';
 
 const { Fail, quote: q } = assert;
 
@@ -39,6 +40,70 @@ const bagCounts = bag => {
   const entries = getCopyBagEntries(bag);
   return entries.map(([_k, ct]) => ct);
 };
+
+/**
+ *
+ * @param {import('@endo/patterns').CopyBag} bag
+ * @param {Object.<string, {tradePrice: Amount, maxTickets: bigint}>} inventory
+ * @returns {boolean}
+ */
+export const hasInventory = (bag, inventory) => {
+  const entries = getCopyBagEntries(bag);
+  for (const [k, ct] of entries) {
+    if (k in inventory) {
+      const { maxTickets } = inventory[k];
+      if (ct > maxTickets) {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+/**
+ *
+ * @param {Amount} amount
+ * @param {number} n
+ * @returns {Amount}
+ */
+const multiply = (amount, n) => {
+  const arr = Array.from({ length: n });
+  return arr.reduce(
+    (sum, _) => AmountMath.add(amount, sum),
+    AmountMath.make(amount.brand, 0n),
+  );
+};
+
+/**
+ *
+ * @param {Amount} sum
+ * @param {[string, bigint]} entry
+ * @param {Object.<string, {tradePrice: Amount, maxTickets: bigint}>} inventory
+ * @returns {Amount}
+ */
+const addMultiples = (sum, entry, inventory) => {
+  const multiple = multiply(inventory[entry[0]].tradePrice, Number(entry[1]));
+  return AmountMath.add(multiple, sum);
+};
+
+/**
+ *
+ * @param {import('@endo/patterns').CopyBag} bag
+ * @param {Object.<string, {tradePrice: Amount, maxTickets: bigint}>} inventory
+ * @returns {Amount}
+ */
+export const bagPrice = (bag, inventory) => {
+  const entries = getCopyBagEntries(bag);
+  const brand = Object.values(inventory)[0].tradePrice.brand;
+  return entries.reduce(
+    (sum, entry) => addMultiples(sum, entry, inventory),
+    // TODO: a better way to create empty amount
+    AmountMath.make(brand, 0n),
+  );
+};
 // #endregion
 
 /**
@@ -47,8 +112,7 @@ const bagCounts = bag => {
  * optionally, a maximum number of tickets sold for that price (default: 3).
  *
  * @typedef {{
- *   tradePrice: Amount;
- *   maxTickets?: bigint;
+ *   inventory: Object.<string, {tradePrice: Amount, maxTickets: bigint}>;
  * }} AgoricBasicsTerms
  */
 
@@ -60,7 +124,7 @@ const bagCounts = bag => {
  * @param {ZCF<AgoricBasicsTerms>} zcf
  */
 export const start = async zcf => {
-  const { tradePrice, maxTickets = 3n } = zcf.getTerms();
+  const { inventory } = zcf.getTerms();
 
   /**
    * a new ERTP mint for tickets, accessed thru the Zoe Contract Facet.
@@ -80,7 +144,7 @@ export const start = async zcf => {
    * The `Tickets` amount must use the `Ticket` brand and a bag value.
    */
   const proposalShape = harden({
-    give: { Price: M.gte(tradePrice) },
+    give: { Price: AmountShape },
     want: { Tickets: { brand: ticketBrand, value: M.bag() } },
     exit: M.any(),
   });
@@ -91,17 +155,23 @@ export const start = async zcf => {
   /** @type {OfferHandler} */
   const tradeHandler = buyerSeat => {
     // give and want are guaranteed by Zoe to match proposalShape
-    const { want } = buyerSeat.getProposal();
+    const { give, want } = buyerSeat.getProposal();
 
-    sum(bagCounts(want.Tickets.value)) <= maxTickets ||
-      Fail`max ${q(maxTickets)} tickets allowed: ${q(want.Tickets)}`;
+    hasInventory(want.Tickets.value, inventory) ||
+      Fail`${q(want.Tickets.value)} wanted, which exceeds inventory ${q(
+        inventory,
+      )}`;
+
+    const totalPrice = bagPrice(want.Tickets.value, inventory);
+    AmountMath.isGTE(give.Price, totalPrice) ||
+      Fail`Total price is ${q(totalPrice)}, but ${q(give.Price)} was given`;
 
     const newTickets = ticketMint.mintGains(want);
     atomicRearrange(
       zcf,
       harden([
         // price from buyer to proceeds
-        [buyerSeat, proceeds, { Price: tradePrice }],
+        [buyerSeat, proceeds, { Price: totalPrice }],
         // new tickets to buyer
         [newTickets, buyerSeat, want],
       ]),
