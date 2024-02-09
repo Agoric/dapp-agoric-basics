@@ -33,7 +33,9 @@ function ConcertTicketForm() {
   const calculateTotalCost = (newNumTickets: TicketSelection) => {
     let cost = 0;
     for (const section in newNumTickets) {
-      cost += newNumTickets[section].numTickets * newNumTickets[section].pricePerTicket;
+      cost +=
+        newNumTickets[section].numTickets *
+        newNumTickets[section].pricePerTicket;
     }
     return cost;
   };
@@ -46,24 +48,48 @@ function ConcertTicketForm() {
   };
 
   return (
-    <form onSubmit={(event) => event.preventDefault()} style={{ borderRadius: 8, backgroundColor: '#ddd', padding: '20px', margin: '20px auto', maxWidth: 500, border: '1px solid #000' }}>
+    <form
+      onSubmit={event => event.preventDefault()}
+      style={{
+        borderRadius: 8,
+        backgroundColor: '#ddd',
+        padding: '20px',
+        margin: '20px auto',
+        maxWidth: 500,
+        border: '1px solid #000',
+      }}
+    >
       {Object.entries(numTickets).map(([sectionName, sectionData]) => (
         <div key={sectionName}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
-            <label htmlFor={sectionName}>{sectionData.name} ({sectionData.pricePerTicket} IST each):</label>
+            <label htmlFor={sectionName}>
+              {sectionData.name} ({sectionData.pricePerTicket} IST each):
+            </label>
             <input
               type="number"
               name={sectionName}
               id={sectionName}
               value={sectionData.numTickets}
               onChange={handleInputChange}
-              style={{ backgroundColor: '#ff0', border: '1px solid #ccc', padding: '5px', borderRadius: '5px', width: '80px' }}
+              style={{
+                backgroundColor: '#ff0',
+                border: '1px solid #ccc',
+                padding: '5px',
+                borderRadius: '5px',
+                width: '80px',
+              }}
             />
           </div>
         </div>
       ))}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', marginTop: '20px' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          marginTop: '20px',
+        }}
+      >
         <label htmlFor="totalCost">Total Cost:</label>
         <input
           type="text"
@@ -71,7 +97,13 @@ function ConcertTicketForm() {
           id="totalCost"
           value={totalCost}
           readOnly
-          style={{ backgroundColor: '#ff0', border: '1px solid #ccc', padding: '5px', borderRadius: '5px', width: '80px' }}
+          style={{
+            backgroundColor: '#ff0',
+            border: '1px solid #ccc',
+            padding: '5px',
+            borderRadius: '5px',
+            width: '80px',
+          }}
         />
       </div>
 
@@ -79,7 +111,12 @@ function ConcertTicketForm() {
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
         <span></span>
-        <button type="button" onClick={handleMint} disabled={totalCost === 0} style={{ margin: '10px auto 0 0' }}>
+        <button
+          type="button"
+          onClick={handleMint}
+          disabled={totalCost === 0}
+          style={{ margin: '10px auto 0 0' }}
+        >
           MINT
         </button>
       </div>
