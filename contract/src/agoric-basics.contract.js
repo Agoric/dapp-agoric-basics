@@ -32,7 +32,7 @@ const { Fail, quote: q } = assert;
 /**
  *
  * @param {import('@endo/patterns').CopyBag} bag
- * @param {[key: string]: {tradePrice: Amount, maxTickets: bigint}} inventory
+ * @param {Inventory} inventory
  * @returns {boolean}
  */
 export const hasInventory = (bag, inventory) => {
@@ -69,7 +69,7 @@ const multiply = (amount, n) => {
  *
  * @param {Amount} sum
  * @param {[string, bigint]} entry
- * @param {[key: string]: {tradePrice: Amount, maxTickets: bigint}} inventory
+ * @param {Inventory} inventory
  * @returns {Amount}
  */
 const addMultiples = (sum, entry, inventory) => {
@@ -80,19 +80,24 @@ const addMultiples = (sum, entry, inventory) => {
 /**
  *
  * @param {import('@endo/patterns').CopyBag} bag
- * @param {[key: string]: {tradePrice: Amount, maxTickets: bigint}} inventory
+ * @param {Inventory} inventory
  * @returns {Amount}
  */
 export const bagPrice = (bag, inventory) => {
+  /** @type {[string, bigint][]} */
   const entries = getCopyBagEntries(bag);
-  const brand = Object.values(inventory)[0].tradePrice.brand;
+  const values = Object.values(inventory);
+  values.length > 0 || Fail`inventory must not be empty`;
+  const brand = values[0].tradePrice.brand;
   return entries.reduce(
     (sum, entry) => addMultiples(sum, entry, inventory),
     // TODO: a better way to create empty amount
-    AmountMath.make(brand, 0n),
+    AmountMath.makeEmpty(brand),
   );
 };
 // #endregion
+
+/** @typedef {{[key: string]: {tradePrice: Amount, maxTickets: NatValue}}} Inventory */
 
 /**
  * In addition to the standard `issuers` and `brands` terms,
@@ -100,7 +105,7 @@ export const bagPrice = (bag, inventory) => {
  * optionally, a maximum number of tickets sold for that price (default: 3).
  *
  * @typedef {{
- *   inventory: {[key: string]: {tradePrice: Amount, maxTickets: bigint}}
+ *   inventory: Inventory
  * }} AgoricBasicsTerms
  */
 

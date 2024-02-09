@@ -27,6 +27,7 @@ const contractPath = myRequire.resolve(`../src/agoric-basics.contract.js`);
 const test = anyTest;
 
 const UNIT6 = 1_000_000n;
+const CENT = UNIT6 / 100n;
 
 /**
  * Tests assume access to the zoe service and that contracts are bundled.
@@ -155,19 +156,19 @@ const alice = async (
   t.deepEqual(actual, proposal.want.Tickets);
 };
 
-const makeTerms = brand => {
+const makeTerms = (brand, baseUnit) => {
   return {
     inventory: {
       frontRow: {
-        tradePrice: AmountMath.make(brand, 3n),
+        tradePrice: AmountMath.make(brand, baseUnit * 3n),
         maxTickets: 3n,
       },
       middleRow: {
-        tradePrice: AmountMath.make(brand, 2n),
+        tradePrice: AmountMath.make(brand, baseUnit * 2n),
         maxTickets: 3n,
       },
       lastRow: {
-        tradePrice: AmountMath.make(brand, 1n),
+        tradePrice: AmountMath.make(brand, baseUnit * 1n),
         maxTickets: 3n,
       },
     },
@@ -179,7 +180,7 @@ test('Alice trades: give some play money, want tickets', async t => {
 
   const money = makeIssuerKit('PlayMoney');
   const issuers = { Price: money.issuer };
-  const terms = makeTerms(money.brand);
+  const terms = makeTerms(money.brand, 1n);
 
   /** @type {ERef<Installation<AssetContractFn>>} */
   const installation = E(zoe).install(bundle);
@@ -206,7 +207,7 @@ test('Trade in IST rather than play money', async t => {
     const installation = E(zoe).install(bundle);
     const feeIssuer = await E(zoe).getFeeIssuer();
     const feeBrand = await E(feeIssuer).getBrand();
-    const terms = makeTerms(feeBrand);
+    const terms = makeTerms(feeBrand, 5n * CENT);
     return E(zoe).startInstance(installation, { Price: feeIssuer }, terms);
   };
 
