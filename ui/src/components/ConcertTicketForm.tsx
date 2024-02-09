@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import SeatingChart from './SeatingChart.tsx';
 
 interface TicketSection {
   name: string;
@@ -59,9 +60,14 @@ function ConcertTicketForm() {
         border: '1px solid #000',
       }}
     >
+      <h2>Concert tickets available:</h2>
+      <div style={{ float: 'right', margin: '1em' }}>
+        <SeatingChart />
+      </div>
+
       {Object.entries(numTickets).map(([sectionName, sectionData]) => (
         <div key={sectionName}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr' }}>
             <label htmlFor={sectionName}>
               {sectionData.name} ({sectionData.pricePerTicket} IST each):
             </label>
@@ -86,7 +92,7 @@ function ConcertTicketForm() {
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
+          gridTemplateColumns: '2fr 1fr',
           marginTop: '20px',
         }}
       >
