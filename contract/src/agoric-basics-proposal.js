@@ -67,7 +67,16 @@ export const startAgoricBasicsContract = async permittedPowers => {
   const istIssuer = await istIssuerP;
   const istBrand = await istBrandP;
 
-  const terms = { tradePrice: AmountMath.make(istBrand, 25n * CENT) };
+  const i1 = AmountMath.make(istBrand, 1n * IST_UNIT);
+  const i2 = AmountMath.make(istBrand, 2n * IST_UNIT);
+  const i3 = AmountMath.make(istBrand, 3n * IST_UNIT);
+  const terms = {
+    inventory: {
+      frontRow: { tradePrice: i3, maxTickets: 3n },
+      middleRow: { tradePrice: i2, maxTickets: 3n },
+      lastRow: { tradePrice: i1, maxTickets: 3n },
+    },
+  };
 
   // agoricNames gets updated each time; the promise space only once XXXXXXX
   const installation = await agoricBasicsInstallationP;
