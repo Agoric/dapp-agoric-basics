@@ -16,6 +16,7 @@ import { AmountMath, makeIssuerKit } from '@agoric/ertp';
 
 import { makeStableFaucet } from './mintStable.js';
 import { startAgoricBasicsContract } from '../src/agoric-basics-proposal.js';
+import { hasInventory, bagPrice } from '../src/agoric-basics.contract.js';
 
 /** @typedef {typeof import('../src/agoric-basics.contract.js').start} AssetContractFn */
 
@@ -47,6 +48,40 @@ const makeTestContext = async _t => {
 
 test.before(async t => (t.context = await makeTestContext(t)));
 
+test('hasInventory works', async t => {
+  const money = makeIssuerKit('PlayMoney');
+  const inventory = {
+    a: { tradePrice: AmountMath.make(money.brand, 1n), maxTickets: 1n },
+  };
+  const enough = makeCopyBag([['a', 1n]]);
+  const notEnough = makeCopyBag([
+    ['a', 1n],
+    ['b', 2n],
+  ]);
+  t.true(hasInventory(enough, inventory));
+  t.false(hasInventory(notEnough, inventory));
+});
+
+test('bagPrice works', async t => {
+  const money = makeIssuerKit('PlayMoney');
+  const inventory = {
+    a: { tradePrice: AmountMath.make(money.brand, 1n), maxTickets: 3n },
+    b: { tradePrice: AmountMath.make(money.brand, 2n), maxTickets: 3n },
+    c: { tradePrice: AmountMath.make(money.brand, 3n), maxTickets: 3n },
+  };
+  const bag = makeCopyBag([
+    ['a', 1n],
+    ['b', 2n],
+    ['c', 3n],
+  ]);
+  t.true(
+    AmountMath.isEqual(
+      bagPrice(bag, inventory),
+      AmountMath.make(money.brand, 14n),
+    ),
+  );
+});
+
 // IDEA: use test.serial and pass work products
 // between tests using t.context.
 
@@ -63,7 +98,14 @@ test('Start the contract', async t => {
 
   const money = makeIssuerKit('PlayMoney');
   const issuers = { Price: money.issuer };
-  const terms = { tradePrice: AmountMath.make(money.brand, 5n) };
+  const terms = {
+    inventory: {
+      frontRow: {
+        tradePrice: AmountMath.make(money.brand, 3n),
+        maxTickets: 3n,
+      },
+    },
+  };
   t.log('terms:', terms);
 
   /** @type {ERef<Installation<AssetContractFn>>} */
@@ -82,20 +124,26 @@ test('Start the contract', async t => {
  * @param {Purse} purse
  * @param {string[]} choices
  */
-const alice = async (t, zoe, instance, purse, choices = ['map', 'scroll']) => {
+const alice = async (
+  t,
+  zoe,
+  instance,
+  purse,
+  choices = ['frontRow', 'middleRow'],
+) => {
   const publicFacet = E(zoe).getPublicFacet(instance);
   // @ts-expect-error Promise<Instance> seems to work
   const terms = await E(zoe).getTerms(instance);
-  const { issuers, brands, tradePrice } = terms;
+  const { issuers, brands } = terms;
 
   const choiceBag = makeCopyBag(choices.map(name => [name, 1n]));
+  const totalPrice = bagPrice(choiceBag, terms.inventory);
   const proposal = {
-    give: { Price: tradePrice },
+    give: { Price: totalPrice },
     want: { Tickets: AmountMath.make(brands.Ticket, choiceBag) },
   };
-  const pmt = await E(purse).withdraw(tradePrice);
+  const pmt = await E(purse).withdraw(totalPrice);
   t.log('Alice gives', proposal.give);
-  // #endregion makeProposal
 
   const toTrade = E(publicFacet).makeTradeInvitation();
 
@@ -108,12 +156,31 @@ const alice = async (t, zoe, instance, purse, choices = ['map', 'scroll']) => {
   t.deepEqual(actual, proposal.want.Tickets);
 };
 
+const makeTerms = brand => {
+  return {
+    inventory: {
+      frontRow: {
+        tradePrice: AmountMath.make(brand, 3n),
+        maxTickets: 3n,
+      },
+      middleRow: {
+        tradePrice: AmountMath.make(brand, 2n),
+        maxTickets: 3n,
+      },
+      lastRow: {
+        tradePrice: AmountMath.make(brand, 1n),
+        maxTickets: 3n,
+      },
+    },
+  };
+};
+
 test('Alice trades: give some play money, want tickets', async t => {
   const { zoe, bundle } = t.context;
 
   const money = makeIssuerKit('PlayMoney');
   const issuers = { Price: money.issuer };
-  const terms = { tradePrice: AmountMath.make(money.brand, 5n) };
+  const terms = makeTerms(money.brand);
 
   /** @type {ERef<Installation<AssetContractFn>>} */
   const installation = E(zoe).install(bundle);
@@ -140,12 +207,8 @@ test('Trade in IST rather than play money', async t => {
     const installation = E(zoe).install(bundle);
     const feeIssuer = await E(zoe).getFeeIssuer();
     const feeBrand = await E(feeIssuer).getBrand();
-    const tradePrice = AmountMath.make(feeBrand, 25n * CENT);
-    return E(zoe).startInstance(
-      installation,
-      { Price: feeIssuer },
-      { tradePrice },
-    );
+    const terms = makeTerms(feeBrand);
+    return E(zoe).startInstance(installation, { Price: feeIssuer }, terms);
   };
 
   const { zoe, bundle, bundleCache, feeMintAccess } = t.context;
