@@ -20,7 +20,7 @@
 // @ts-check
 
 import { Far } from '@endo/far';
-import { M, getCopyBagEntries } from '@endo/patterns';
+import { M, getCopyBagEntries, makeCopyBag } from '@endo/patterns';
 import { AssetKind } from '@agoric/ertp/src/amountMath.js';
 import { atomicRearrange } from '@agoric/zoe/src/contractSupport/atomicTransfer.js';
 import '@agoric/zoe/exported.js';
@@ -130,6 +130,20 @@ export const start = async zcf => {
   const ticketMint = await zcf.makeZCFMint('Ticket', AssetKind.COPY_BAG);
   const { brand: ticketBrand } = ticketMint.getIssuerRecord();
 
+  const inventoryBag = makeCopyBag(
+    Object.entries(inventory).map(([ticket, { maxTickets }], _i) => [
+      ticket,
+      maxTickets,
+    ]),
+  );
+  const toMint = {
+    Tickets: {
+      brand: ticketBrand,
+      value: inventoryBag,
+    },
+  };
+  const inventorySeat = ticketMint.mintGains(toMint);
+
   /**
    * a pattern to constrain proposals given to {@link tradeHandler}
    *
@@ -150,28 +164,26 @@ export const start = async zcf => {
     // give and want are guaranteed by Zoe to match proposalShape
     const { give, want } = buyerSeat.getProposal();
 
-    hasInventory(want.Tickets.value, inventory) ||
-      Fail`${q(want.Tickets.value)} wanted, which exceeds inventory ${q(
-        inventory,
-      )}`;
+    AmountMath.isGTE(
+      inventorySeat.getCurrentAllocation()['Tickets'],
+      want.Tickets,
+    ) || Fail`Not enough inventory, ${q(want.Tickets)} wanted`;
 
     const totalPrice = bagPrice(want.Tickets.value, inventory);
     AmountMath.isGTE(give.Price, totalPrice) ||
       Fail`Total price is ${q(totalPrice)}, but ${q(give.Price)} was given`;
 
-    const newTickets = ticketMint.mintGains(want);
     atomicRearrange(
       zcf,
       harden([
         // price from buyer to proceeds
         [buyerSeat, proceeds, { Price: totalPrice }],
         // new tickets to buyer
-        [newTickets, buyerSeat, want],
+        [inventorySeat, buyerSeat, want],
       ]),
     );
 
     buyerSeat.exit(true);
-    newTickets.exit();
     return 'trade complete';
   };
 
