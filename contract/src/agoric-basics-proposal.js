@@ -13,7 +13,6 @@ const BOARD_AUX = 'boardAux';
 const marshalData = makeMarshal(_val => Fail`data only`);
 
 const IST_UNIT = 1_000_000n;
-const CENT = IST_UNIT / 100n;
 
 /**
  * Make a storage node for auxilliary data for a value on the board.
@@ -125,7 +124,10 @@ const agoricBasicsManifest = {
 };
 harden(agoricBasicsManifest);
 
-export const getManifestForAgoricBasics = ({ restoreRef }, { agoricBasicsRef }) => {
+export const getManifestForAgoricBasics = (
+  { restoreRef },
+  { agoricBasicsRef },
+) => {
   return harden({
     manifest: agoricBasicsManifest,
     installations: {

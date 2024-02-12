@@ -165,7 +165,7 @@ export const start = async zcf => {
     const { give, want } = buyerSeat.getProposal();
 
     AmountMath.isGTE(
-      inventorySeat.getCurrentAllocation()['Tickets'],
+      inventorySeat.getCurrentAllocation().Tickets,
       want.Tickets,
     ) || Fail`Not enough inventory, ${q(want.Tickets)} wanted`;
 
