@@ -31,28 +31,6 @@ const { Fail, quote: q } = assert;
 // #region bag utilities
 /**
  *
- * @param {import('@endo/patterns').CopyBag} bag
- * @param {Inventory} inventory
- * @returns {boolean}
- */
-export const hasInventory = (bag, inventory) => {
-  const entries = getCopyBagEntries(bag);
-  for (const [k, ct] of entries) {
-    if (k in inventory) {
-      const { maxTickets } = inventory[k];
-      if (ct > maxTickets) {
-        return false;
-      }
-    } else {
-      return false;
-    }
-  }
-
-  return true;
-};
-
-/**
- *
  * @param {Amount} amount
  * @param {number} n
  * @returns {Amount}

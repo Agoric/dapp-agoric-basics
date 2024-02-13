@@ -16,7 +16,7 @@ import { AmountMath, makeIssuerKit } from '@agoric/ertp';
 
 import { makeStableFaucet } from './mintStable.js';
 import { startAgoricBasicsContract } from '../src/agoric-basics-proposal.js';
-import { hasInventory, bagPrice } from '../src/agoric-basics.contract.js';
+import { bagPrice } from '../src/agoric-basics.contract.js';
 
 /** @typedef {typeof import('../src/agoric-basics.contract.js').start} AssetContractFn */
 
@@ -48,31 +48,13 @@ const makeTestContext = async _t => {
 
 test.before(async t => (t.context = await makeTestContext(t)));
 
-test('hasInventory works', async t => {
+test('bagPrice calculates the total price correctly', async t => {
   const money = makeIssuerKit('PlayMoney');
-  const inventory = {
-    a: { tradePrice: AmountMath.make(money.brand, 1n), maxTickets: 1n },
-  };
-  const enough = makeCopyBag([['a', 1n]]);
-  const notEnough = makeCopyBag([
-    ['a', 1n],
-    ['b', 2n],
-  ]);
-  t.true(hasInventory(enough, inventory));
-  t.false(hasInventory(notEnough, inventory));
-});
-
-test('bagPrice works', async t => {
-  const money = makeIssuerKit('PlayMoney');
-  const inventory = {
-    a: { tradePrice: AmountMath.make(money.brand, 1n), maxTickets: 3n },
-    b: { tradePrice: AmountMath.make(money.brand, 2n), maxTickets: 3n },
-    c: { tradePrice: AmountMath.make(money.brand, 3n), maxTickets: 3n },
-  };
+  const inventory = makeInventory(money.brand, 1n);
   const bag = makeCopyBag([
-    ['a', 1n],
-    ['b', 2n],
-    ['c', 3n],
+    ['frontRow', 3n],
+    ['middleRow', 2n],
+    ['lastRow', 1n],
   ]);
   t.true(
     AmountMath.isEqual(
@@ -156,22 +138,26 @@ const alice = async (
   t.deepEqual(actual, proposal.want.Tickets);
 };
 
+const makeInventory = (brand, baseUnit) => {
+  return {
+    frontRow: {
+      tradePrice: AmountMath.make(brand, baseUnit * 3n),
+      maxTickets: 3n,
+    },
+    middleRow: {
+      tradePrice: AmountMath.make(brand, baseUnit * 2n),
+      maxTickets: 3n,
+    },
+    lastRow: {
+      tradePrice: AmountMath.make(brand, baseUnit * 1n),
+      maxTickets: 3n,
+    },
+  };
+};
+
 const makeTerms = (brand, baseUnit) => {
   return {
-    inventory: {
-      frontRow: {
-        tradePrice: AmountMath.make(brand, baseUnit * 3n),
-        maxTickets: 3n,
-      },
-      middleRow: {
-        tradePrice: AmountMath.make(brand, baseUnit * 2n),
-        maxTickets: 3n,
-      },
-      lastRow: {
-        tradePrice: AmountMath.make(brand, baseUnit * 1n),
-        maxTickets: 3n,
-      },
-    },
+    inventory: makeInventory(brand, baseUnit),
   };
 };
 
