@@ -77,7 +77,7 @@ export const bagPrice = (bag, inventory) => {
 
 /**
  * Inventory contains price and maximum for each type of tickets
- * For example:
+ * @example
  * {
  *   frontRow: {
  *     tradePrice: AmountMath.make(istBrand, 3n),
