@@ -48,6 +48,29 @@ const makeTestContext = async _t => {
 
 test.before(async t => (t.context = await makeTestContext(t)));
 
+const makeInventory = (brand, baseUnit) => {
+  return {
+    frontRow: {
+      tradePrice: AmountMath.make(brand, baseUnit * 3n),
+      maxTickets: 3n,
+    },
+    middleRow: {
+      tradePrice: AmountMath.make(brand, baseUnit * 2n),
+      maxTickets: 3n,
+    },
+    lastRow: {
+      tradePrice: AmountMath.make(brand, baseUnit * 1n),
+      maxTickets: 3n,
+    },
+  };
+};
+
+const makeTerms = (brand, baseUnit) => {
+  return {
+    inventory: makeInventory(brand, baseUnit),
+  };
+};
+
 test('bagPrice calculates the total price correctly', async t => {
   const money = makeIssuerKit('PlayMoney');
   const inventory = makeInventory(money.brand, 1n);
@@ -136,29 +159,6 @@ const alice = async (
   t.log('Alice payout brand', actual.brand);
   t.log('Alice payout value', actual.value);
   t.deepEqual(actual, proposal.want.Tickets);
-};
-
-const makeInventory = (brand, baseUnit) => {
-  return {
-    frontRow: {
-      tradePrice: AmountMath.make(brand, baseUnit * 3n),
-      maxTickets: 3n,
-    },
-    middleRow: {
-      tradePrice: AmountMath.make(brand, baseUnit * 2n),
-      maxTickets: 3n,
-    },
-    lastRow: {
-      tradePrice: AmountMath.make(brand, baseUnit * 1n),
-      maxTickets: 3n,
-    },
-  };
-};
-
-const makeTerms = (brand, baseUnit) => {
-  return {
-    inventory: makeInventory(brand, baseUnit),
-  };
 };
 
 test('Alice trades: give some play money, want tickets', async t => {
