@@ -15,7 +15,7 @@ import { makeZoeKitForTest } from '@agoric/zoe/tools/setup-zoe.js';
 import { AmountMath, makeIssuerKit } from '@agoric/ertp';
 
 import { makeStableFaucet } from './mintStable.js';
-import { startAgoricBasicsContract } from '../src/agoric-basics-proposal.js';
+import { startAgoricBasicsContract, makeInventory, makeTerms } from '../src/agoric-basics-proposal.js';
 import { bagPrice } from '../src/agoric-basics.contract.js';
 
 /** @typedef {typeof import('../src/agoric-basics.contract.js').start} AssetContractFn */
@@ -47,29 +47,6 @@ const makeTestContext = async _t => {
 };
 
 test.before(async t => (t.context = await makeTestContext(t)));
-
-const makeInventory = (brand, baseUnit) => {
-  return {
-    frontRow: {
-      tradePrice: AmountMath.make(brand, baseUnit * 3n),
-      maxTickets: 3n,
-    },
-    middleRow: {
-      tradePrice: AmountMath.make(brand, baseUnit * 2n),
-      maxTickets: 3n,
-    },
-    lastRow: {
-      tradePrice: AmountMath.make(brand, baseUnit * 1n),
-      maxTickets: 3n,
-    },
-  };
-};
-
-const makeTerms = (brand, baseUnit) => {
-  return {
-    inventory: makeInventory(brand, baseUnit),
-  };
-};
 
 test('bagPrice calculates the total price correctly', async t => {
   const money = makeIssuerKit('PlayMoney');
@@ -103,14 +80,7 @@ test('Start the contract', async t => {
 
   const money = makeIssuerKit('PlayMoney');
   const issuers = { Price: money.issuer };
-  const terms = {
-    inventory: {
-      frontRow: {
-        tradePrice: AmountMath.make(money.brand, 3n),
-        maxTickets: 3n,
-      },
-    },
-  };
+  const terms = makeTerms(money.brand, 1n);
   t.log('terms:', terms);
 
   /** @type {ERef<Installation<AssetContractFn>>} */

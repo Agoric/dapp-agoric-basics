@@ -14,6 +14,29 @@ const marshalData = makeMarshal(_val => Fail`data only`);
 
 const IST_UNIT = 1_000_000n;
 
+export const makeInventory = (brand, baseUnit) => {
+  return {
+    frontRow: {
+      tradePrice: AmountMath.make(brand, baseUnit * 3n),
+      maxTickets: 3n,
+    },
+    middleRow: {
+      tradePrice: AmountMath.make(brand, baseUnit * 2n),
+      maxTickets: 3n,
+    },
+    lastRow: {
+      tradePrice: AmountMath.make(brand, baseUnit * 1n),
+      maxTickets: 3n,
+    },
+  };
+};
+
+export const makeTerms = (brand, baseUnit) => {
+  return {
+    inventory: makeInventory(brand, baseUnit),
+  };
+};
+
 /**
  * Make a storage node for auxilliary data for a value on the board.
  *
@@ -66,16 +89,7 @@ export const startAgoricBasicsContract = async permittedPowers => {
   const istIssuer = await istIssuerP;
   const istBrand = await istBrandP;
 
-  const i1 = AmountMath.make(istBrand, 1n * IST_UNIT);
-  const i2 = AmountMath.make(istBrand, 2n * IST_UNIT);
-  const i3 = AmountMath.make(istBrand, 3n * IST_UNIT);
-  const terms = {
-    inventory: {
-      frontRow: { tradePrice: i3, maxTickets: 3n },
-      middleRow: { tradePrice: i2, maxTickets: 3n },
-      lastRow: { tradePrice: i1, maxTickets: 3n },
-    },
-  };
+  const terms = makeTerms(istBrand, 1n * IST_UNIT);
 
   // agoricNames gets updated each time; the promise space only once XXXXXXX
   const installation = await agoricBasicsInstallationP;
