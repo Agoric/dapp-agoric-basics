@@ -1,5 +1,5 @@
 /**
- * @file Test basic trading using the agoric basics contract.
+ * @file Test basic trading using the sell concert tickets contract.
  */
 // @ts-check
 
@@ -15,13 +15,17 @@ import { makeZoeKitForTest } from '@agoric/zoe/tools/setup-zoe.js';
 import { AmountMath, makeIssuerKit } from '@agoric/ertp';
 
 import { makeStableFaucet } from './mintStable.js';
-import { startAgoricBasicsContract, makeInventory, makeTerms } from '../src/agoric-basics-proposal.js';
-import { bagPrice } from '../src/agoric-basics.contract.js';
+import {
+  startSellConcertTicketsContract,
+  makeInventory,
+  makeTerms,
+} from '../src/sell-concert-tickets-proposal.js';
+import { bagPrice } from '../src/sell-concert-tickets.contract.js';
 
-/** @typedef {typeof import('../src/agoric-basics.contract.js').start} AssetContractFn */
+/** @typedef {typeof import('../src/sell-concert-tickets.contract.js').start} AssetContractFn */
 
 const myRequire = createRequire(import.meta.url);
-const contractPath = myRequire.resolve(`../src/agoric-basics.contract.js`);
+const contractPath = myRequire.resolve(`../src/sell-concert-tickets.contract.js`);
 
 /** @type {import('ava').TestFn<Awaited<ReturnType<makeTestContext>>>} */
 const test = anyTest;
@@ -222,8 +226,8 @@ test('use the code that will go on chain to start the contract', async t => {
         consume: { IST: pFor(feeIssuer) },
         produce: { Ticket: sync.issuer },
       },
-      installation: { consume: { agoricBasics: sync.installation.promise } },
-      instance: { produce: { agoricBasics: sync.instance } },
+      installation: { consume: { sellConcertTickets: sync.installation.promise } },
+      instance: { produce: { sellConcertTickets: sync.instance } },
     };
     return powers;
   };
@@ -238,7 +242,7 @@ test('use the code that will go on chain to start the contract', async t => {
 
   // When the BLD staker governance proposal passes,
   // the startup function gets called.
-  await startAgoricBasicsContract(powers);
+  await startSellConcertTicketsContract(powers);
   const instance = await sync.instance.promise;
 
   // Now that we have the instance, resume testing as above.

@@ -63,8 +63,8 @@ const publishBrandInfo = async (chainStorage, board, brand) => {
  *
  * @param {BootstrapPowers} permittedPowers
  */
-export const startAgoricBasicsContract = async permittedPowers => {
-  console.error('startAgoricBasicsContract()...');
+export const startSellConcertTicketsContract = async permittedPowers => {
+  console.error('startSellConcertTicketsContract()...');
   const {
     consume: { board, chainStorage, startUpgradable, zoe },
     brand: {
@@ -78,11 +78,11 @@ export const startAgoricBasicsContract = async permittedPowers => {
       produce: { Ticket: produceTicketIssuer },
     },
     installation: {
-      consume: { agoricBasics: agoricBasicsInstallationP },
+      consume: { sellConcertTickets: sellConcertTicketsInstallationP },
     },
     instance: {
       // @ts-expect-error dynamic extension to promise space
-      produce: { agoricBasics: produceInstance },
+      produce: { sellConcertTickets: produceInstance },
     },
   } = permittedPowers;
 
@@ -92,12 +92,12 @@ export const startAgoricBasicsContract = async permittedPowers => {
   const terms = makeTerms(istBrand, 1n * IST_UNIT);
 
   // agoricNames gets updated each time; the promise space only once XXXXXXX
-  const installation = await agoricBasicsInstallationP;
+  const installation = await sellConcertTicketsInstallationP;
 
   const { instance } = await E(startUpgradable)({
     installation,
     issuerKeywordRecord: { Price: istIssuer },
-    label: 'agoricBasics',
+    label: 'sellConcertTickets',
     terms,
   });
   console.log('CoreEval script: started contract', instance);
@@ -117,12 +117,12 @@ export const startAgoricBasicsContract = async permittedPowers => {
   produceTicketIssuer.resolve(issuer);
 
   await publishBrandInfo(chainStorage, board, brand);
-  console.log('agoricBasics (re)started');
+  console.log('sellConcertTickets (re)started');
 };
 
 /** @type { import("@agoric/vats/src/core/lib-boot").BootstrapManifest } */
-const agoricBasicsManifest = {
-  [startAgoricBasicsContract.name]: {
+const sellConcertTicketsManifest = {
+  [startSellConcertTicketsContract.name]: {
     consume: {
       agoricNames: true,
       board: true, // to publish boardAux info for NFT brand
@@ -130,22 +130,22 @@ const agoricBasicsManifest = {
       startUpgradable: true, // to start contract and save adminFacet
       zoe: true, // to get contract terms, including issuer/brand
     },
-    installation: { consume: { agoricBasics: true } },
+    installation: { consume: { sellConcertTickets: true } },
     issuer: { consume: { IST: true }, produce: { Ticket: true } },
     brand: { consume: { IST: true }, produce: { Ticket: true } },
-    instance: { produce: { agoricBasics: true } },
+    instance: { produce: { sellConcertTickets: true } },
   },
 };
-harden(agoricBasicsManifest);
+harden(sellConcertTicketsManifest);
 
-export const getManifestForAgoricBasics = (
+export const getManifestForSellConcertTickets = (
   { restoreRef },
-  { agoricBasicsRef },
+  { sellConcertTicketsRef },
 ) => {
   return harden({
-    manifest: agoricBasicsManifest,
+    manifest: sellConcertTicketsManifest,
     installations: {
-      agoricBasics: restoreRef(agoricBasicsRef),
+      sellConcertTickets: restoreRef(sellConcertTicketsRef),
     },
   });
 };

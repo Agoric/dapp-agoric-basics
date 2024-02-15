@@ -4,7 +4,7 @@
  * Creates files for starting an instance of the contract:
  * * contract source and instantiation proposal bundles to be published via
  *   `agd tx swingset install-bundle`
- * * start-agoric-basics-permit.json and start-agoric-basics.js to submit the
+ * * start-sell-concert-tickets-permit.json and start-sell-concert-tickets.js to submit the
  *   instantiation proposal via `agd tx gov submit-proposal swingset-core-eval`
  *
  * Usage:
@@ -12,19 +12,22 @@
  */
 
 import { makeHelpers } from '@agoric/deploy-script-support';
-import { getManifestForAgoricBasics } from '../src/agoric-basics-proposal.js';
+import { getManifestForSellConcertTickets } from '../src/sell-concert-tickets-proposal.js';
 
 /** @type {import('@agoric/deploy-script-support/src/externalTypes.js').ProposalBuilder} */
-export const agoricBasicsProposalBuilder = async ({ publishRef, install }) => {
+export const sellConcertTicketsProposalBuilder = async ({
+  publishRef,
+  install,
+}) => {
   return harden({
-    sourceSpec: '../src/agoric-basics-proposal.js',
+    sourceSpec: '../src/sell-concert-tickets-proposal.js',
     getManifestCall: [
-      getManifestForAgoricBasics.name,
+      getManifestForSellConcertTickets.name,
       {
-        agoricBasicsRef: publishRef(
+        sellConcertTicketsRef: publishRef(
           install(
-            '../src/agoric-basics.contract.js',
-            '../bundles/bundle-agoric-basics.js',
+            '../src/sell-concert-tickets.contract.js',
+            '../bundles/bundle-sell-concert-tickets.js',
             {
               persist: true,
             },
@@ -38,5 +41,5 @@ export const agoricBasicsProposalBuilder = async ({ publishRef, install }) => {
 /** @type {DeployScriptFunction} */
 export default async (homeP, endowments) => {
   const { writeCoreProposal } = await makeHelpers(homeP, endowments);
-  await writeCoreProposal('start-agoric-basics', agoricBasicsProposalBuilder);
+  await writeCoreProposal('start-sell-concert-tickets', sellConcertTicketsProposalBuilder);
 };

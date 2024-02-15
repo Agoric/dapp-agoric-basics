@@ -12,7 +12,7 @@ PROPOSAL=$(agd query gov proposals --output json | jq -c '.proposals | length | 
 make fund-acct
 
 agd tx gov submit-proposal swingset-core-eval "$PERMIT" "$SCRIPT" \
-  --title="Start Agoric Basics Contract" --description="Evaluate $SCRIPT" \
+  --title="Start Sell Concert Tickets Contract" --description="Evaluate $SCRIPT" \
   --deposit=10000000ubld --gas=auto --gas-adjustment=1.2 \
   --from user1 --chain-id agoriclocal --keyring-backend=test \
   --yes -b block
