@@ -91,15 +91,24 @@ export const bagPrice = (bag, inventory) => {
  *
  * @typedef {{
  *   inventory: Inventory
- * }} AgoricBasicsTerms
+ * }} SellConcertTicketsTerms
  */
+
+export const meta = {
+  customTermsShape: M.mapOf(
+    M.string(),
+    M.splitRecord({ tradePrice: AmountShape }, { maxTickets: M.nat() }),
+  ),
+};
+// compatibility with an earlier contract metadata API
+export const customTermsShape = meta.customTermsShape;
 
 /**
  * Start a contract that
  *   - creates a new non-fungible asset type for Tickets, and
  *   - handles offers to buy as many tickets as inventory allows
  *
- * @param {ZCF<AgoricBasicsTerms>} zcf
+ * @param {ZCF<SellConcertTicketsTerms>} zcf
  */
 export const start = async zcf => {
   const { inventory } = zcf.getTerms();
