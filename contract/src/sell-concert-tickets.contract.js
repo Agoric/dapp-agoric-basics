@@ -65,11 +65,9 @@ export const bagPrice = (bag, inventory) => {
   /** @type {[string, bigint][]} */
   const entries = getCopyBagEntries(bag);
   const values = Object.values(inventory);
-  values.length > 0 || Fail`inventory must not be empty`;
   const brand = values[0].tradePrice.brand;
   return entries.reduce(
     (sum, entry) => addMultiples(sum, entry, inventory),
-    // TODO: a better way to create empty amount
     AmountMath.makeEmpty(brand),
   );
 };
@@ -105,6 +103,15 @@ export const bagPrice = (bag, inventory) => {
  */
 export const start = async zcf => {
   const { inventory } = zcf.getTerms();
+
+  const inventoryValues = Object.values(inventory);
+
+  // make sure inventory is not empty
+  inventoryValues.length > 0 || Fail`inventory must not be empty`;
+  // make sure all kinds of tickets have the same brand for tradePrice
+  inventoryValues.every(
+    v => v.tradePrice.brand === inventoryValues[0].tradePrice.brand,
+  ) || Fail`inventory must have the same brand for all tickets' tradePrice`;
 
   /**
    * a new ERTP mint for tickets, accessed thru the Zoe Contract Facet.
