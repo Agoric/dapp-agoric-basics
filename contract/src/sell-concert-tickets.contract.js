@@ -95,9 +95,12 @@ export const bagPrice = (bag, inventory) => {
  */
 
 export const meta = {
-  customTermsShape: M.mapOf(
+  customTermsShape: M.recordOf(
     M.string(),
-    M.splitRecord({ tradePrice: AmountShape }, { maxTickets: M.nat() }),
+    // M.splitRecord({ tradePrice: AmountShape, maxTickets: M.nat() }),
+    // getting an error of
+    // customTerms: inventory: [1]: {} - Must have missing properties ["tradePrice","maxTickets"]
+    M.any(),
   ),
 };
 // compatibility with an earlier contract metadata API
