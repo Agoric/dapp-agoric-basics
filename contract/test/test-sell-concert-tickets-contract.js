@@ -134,8 +134,21 @@ const alice = async (
   const toTrade = E(publicFacet).makeTradeInvitation();
 
   const seat = E(zoe).offer(toTrade, proposal, { Price: pmt });
-  const tickets = await E(seat).getPayout('Tickets');
+  const result = await E(seat)
+    .getOfferResult()
+    .catch(err => {
+      if (successfulTrade) {
+        // We expected a successful trade, got err instead.
+        t.fail(err.message);
+      } else {
+        // We expected a unsuccessful trade
+        t.pass();
+      }
+    });
 
+  t.log('result', result);
+
+  const tickets = await E(seat).getPayout('Tickets');
   const actual = await E(issuers.Ticket).getAmountOf(tickets);
   t.log('Alice payout brand', actual.brand);
   t.log('Alice payout value', actual.value);
