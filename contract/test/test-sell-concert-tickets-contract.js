@@ -104,7 +104,7 @@ test('Start the contract', async t => {
  * @param {ERef<import('@agoric/zoe/src/zoeService/utils').Instance<AssetContractFn>} instance
  * @param {Purse} purse
  * @param {[string, NatValue][]} choices
- * @param {boolean} successfulTrade
+ * @param {boolean} expectSuccessfulTrade
  */
 const alice = async (
   t,
@@ -115,7 +115,7 @@ const alice = async (
     ['frontRow', 1n],
     ['middleRow', 1n],
   ],
-  successfulTrade = true,
+  expectSuccessfulTrade = true,
 ) => {
   const publicFacet = E(zoe).getPublicFacet(instance);
   // @ts-expect-error Promise<Instance> seems to work
@@ -134,25 +134,19 @@ const alice = async (
   const toTrade = E(publicFacet).makeTradeInvitation();
 
   const seat = E(zoe).offer(toTrade, proposal, { Price: pmt });
-  const result = await E(seat)
-    .getOfferResult()
-    .catch(err => {
-      if (successfulTrade) {
-        // We expected a successful trade, got err instead.
-        t.fail(err.message);
-      } else {
-        // We expected a unsuccessful trade
-        t.pass();
-      }
-    });
-
+  const resultP = E(seat).getOfferResult();
+  await (expectSuccessfulTrade ? t.notThrowsAsync(resultP) : t.throwsAsync(resultP));
+  if (!expectSuccessfulTrade) {
+    return;
+  }
+  const result = await resultP;
   t.log('result', result);
 
   const tickets = await E(seat).getPayout('Tickets');
   const actual = await E(issuers.Ticket).getAmountOf(tickets);
   t.log('Alice payout brand', actual.brand);
   t.log('Alice payout value', actual.value);
-  if (successfulTrade) {
+  if (expectSuccessfulTrade) {
     t.deepEqual(actual, proposal.want.Tickets);
   } else {
     t.deepEqual(actual, AmountMath.makeEmptyFromAmount(actual));
