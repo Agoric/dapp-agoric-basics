@@ -1,19 +1,34 @@
+/**
+ * @file smart-wallet test tools
+ *
+ * @see {mockWalletFactory}
+ */
 // @ts-check
 import { E, Far } from '@endo/far';
 import { makePromiseKit } from '@endo/promise-kit';
+
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { makeNotifier } from '@agoric/notifier';
+
 import { allValues, mapValues } from '../src/objectTools.js';
-export { allValues, mapValues };
+
+/**
+ * @typedef {import('@agoric/smart-wallet/src/offers.js').OfferSpec} OfferSpec
+ * @typedef {import('@agoric/smart-wallet/src/smartWallet.js').UpdateRecord} UpdateRecord
+ * @typedef {import('@agoric/smart-wallet/src/invitations.js').InvitationSpec} InvitationSpec
+ */
 
 const { values } = Object;
+const { Fail, quote: q } = assert;
+
+const DEPOSIT_FACET_KEY = 'depositFacet'; // XXX does agoric-sdk export this?
 
 /**
  * @param {{
  *   zoe: ERef<ZoeService>;
- *   chainStorage: ERef<StorageNode>;
  *   namesByAddressAdmin: ERef<import('@agoric/vats').NameAdmin>;
  * }} powers
- *
- * @typedef {import('@agoric/smart-wallet').OfferSpec} OfferSpec
+ * @param {IssuerKeywordRecord} issuerKeywordRecord
  *
  * @typedef {Awaited<ReturnType<Awaited<ReturnType<typeof mockWalletFactory>['makeSmartWallet']>>>} MockWallet
  */
@@ -21,13 +36,6 @@ export const mockWalletFactory = (
   { zoe, namesByAddressAdmin },
   issuerKeywordRecord,
 ) => {
-  const DEPOSIT_FACET_KEY = 'depositFacet';
-
-  const { Fail, quote: q } = assert;
-
-  //   const walletsNode = E(chainStorage).makeChildNode('wallet');
-
-  // TODO: provideSmartWallet
   /** @param {string} address */
   const makeSmartWallet = async address => {
     const { nameAdmin: addressAdmin } = await E(
@@ -58,24 +66,14 @@ export const mockWalletFactory = (
           throw Error(`brand not known/supported: ${pBrand}`);
         const purse = purseByBrand.get(pBrand);
         assert(purse);
-        return E(purse).deposit(pmt);
+        const amt = await E(purse).deposit(pmt);
+        console.log('receive', address, amt);
+        return amt;
       },
     });
     await E(addressAdmin).default(DEPOSIT_FACET_KEY, depositFacet);
 
-    /** @param {ERef<Issuer>} issuer */
-    const addIssuer = async issuer => {
-      const brand = await E(issuer).getBrand();
-      if (purseByBrand.has(brand)) {
-        throw Error(`brand already present`);
-      }
-      const purse = await E(issuer).makeEmptyPurse();
-      purseByBrand.set(brand, purse);
-    };
-
-    // const updatesNode = E(walletsNode).makeChildNode(address);
-    // const currentNode = E(updatesNode).makeChildNode('current');
-
+    /** @param {InvitationSpec & { source: 'contract'}} invitationSpec */
     const getContractInvitation = invitationSpec => {
       const {
         instance,
@@ -86,17 +84,24 @@ export const mockWalletFactory = (
       return E(pf)[publicInvitationMaker](...invitationArgs);
     };
 
+    /** @param {InvitationSpec & { source: 'purse'}} invitationSpec */
     const getPurseInvitation = async invitationSpec => {
-      //   const { instance, description } = invitationSpec;
       const invitationAmount = await E(invitationPurse).getCurrentAmount();
-      console.log(
-        '@@TODO: check invitation amount against instance',
-        invitationAmount,
+      // TODO: check instance too
+      const detail = invitationAmount.value.find(
+        d => d.description === invitationSpec.description,
       );
-      return E(invitationPurse).withdraw(invitationAmount);
+      detail ||
+        Fail`${q(invitationSpec.description)} not found in ${q(
+          invitationAmount,
+        )}`;
+      return E(invitationPurse).withdraw(
+        harden({ brand: invitationAmount.brand, value: [detail] }),
+      );
     };
 
     const offerToInvitationMakers = new Map();
+    /** @param {InvitationSpec & { source: 'continuing'}} spec */
     const getContinuingInvitation = async spec => {
       const { previousOffer, invitationMakerName, invitationArgs = [] } = spec;
       const makers =
@@ -107,7 +112,14 @@ export const mockWalletFactory = (
     const seatById = new Map();
     const tryExit = id =>
       E(seatById.get(id) || Fail`${id} not found`).tryExit();
-    /** @param {OfferSpec} offerSpec */
+
+    /**
+     * Execute an offer (spec) and return a stream of updates
+     * that would be sent to vstorage.
+     *
+     * @param {OfferSpec} offerSpec
+     * @returns {AsyncGenerator<UpdateRecord>}
+     */
     async function* executeOffer(offerSpec) {
       const { invitationSpec, proposal = {}, offerArgs } = offerSpec;
       const { source } = invitationSpec;
@@ -160,15 +172,27 @@ export const mockWalletFactory = (
       };
     }
 
+    /**
+     * Get a stream of balance updates for a purse of a given brand.
+     *
+     * @param {Brand} brand
+     */
+    async function* purseUpdates(brand) {
+      const purse =
+        purseByBrand.get(brand) ||
+        Fail`no purse for ${q(brand)}; issuer missing? ${q(
+          issuerKeywordRecord,
+        )}`;
+      const n = makeNotifier(E(purse).getCurrentAmountNotifier());
+      for await (const amount of n) {
+        yield amount;
+      }
+    }
+
     return {
       deposit: depositFacet,
-      offers: Far('Offers', { executeOffer, addIssuer, tryExit }),
-      peek: Far('Wallet Peek', {
-        purseNotifier: brand =>
-          E(
-            purseByBrand.get(brand) || Fail`${q(brand)}`,
-          ).getCurrentAmountNotifier(),
-      }),
+      offers: Far('Offers', { executeOffer, tryExit }),
+      peek: Far('Wallet Peek', { purseUpdates }),
     };
   };
 
@@ -176,22 +200,29 @@ export const mockWalletFactory = (
 };
 
 /**
- * Seat-like API from updates
- * @param {*} updates
+ * Seat-like API from wallet updates
+ *
+ * @param {AsyncGenerator<UpdateRecord>} updates
  */
 export const seatLike = updates => {
   const sync = {
     result: makePromiseKit(),
+    /** @type {PromiseKit<AmountKeywordRecord>} */
     payouts: makePromiseKit(),
   };
   (async () => {
+    await null;
     try {
       // XXX an error here is somehow and unhandled rejection
       for await (const update of updates) {
         if (update.updated !== 'offerStatus') continue;
         const { result, payouts } = update.status;
         if ('result' in update.status) sync.result.resolve(result);
-        if ('payouts' in update.status) sync.payouts.resolve(payouts);
+        if ('payouts' in update.status && payouts) {
+          sync.payouts.resolve(payouts);
+          console.debug('paid out', update.status.id);
+          return;
+        }
       }
     } catch (reason) {
       sync.result.reject(reason);
@@ -201,18 +232,6 @@ export const seatLike = updates => {
   })();
   return harden({
     getOfferResult: () => sync.result.promise,
-    getPayouts: () => sync.payouts.promise,
+    getPayoutAmounts: () => sync.payouts.promise,
   });
-};
-
-export const makeWalletFactory = async (
-  { zoe, namesByAddressAdmin, chainStorage },
-  issuers,
-) => {
-  const invitationIssuer = await E(zoe).getInvitationIssuer();
-  const walletFactory = mockWalletFactory(
-    { zoe, namesByAddressAdmin, chainStorage },
-    { Invitation: invitationIssuer, ...issuers },
-  );
-  return walletFactory;
 };
