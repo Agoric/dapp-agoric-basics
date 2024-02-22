@@ -10,7 +10,7 @@ const MintConcertTicket = ({
   price: number;
 }) => {
   return (
-    <div className="card">
+    <div>
       <Box>
         <NftMint
           tag="NOW LIVE"

@@ -9,10 +9,10 @@ const Inventory = () => {
   const { walletConnection } = useAgoric();
 
   return (
-    <div className="card">
-      <h3>My Wallet</h3>
+    <div className="m-32 align-middle">
+      <h3 className="text-center">My Wallet</h3>
       <div>
-        <ConnectWalletButton />
+        <ConnectWalletButton className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700" />
         {walletConnection && (
           <div style={{ textAlign: 'left' }}>
             <div>
