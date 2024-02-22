@@ -108,7 +108,7 @@ export const customTermsShape = meta.customTermsShape;
 
 /**
  * Start a contract that
- *   - creates a new non-fungible asset type for Tickets, and
+ *   - creates a new semi-fungible asset type for Tickets, and
  *   - handles offers to buy as many tickets as inventory allows
  *
  * @param {ZCF<SellConcertTicketsTerms>} zcf
