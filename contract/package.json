@@ -12,6 +12,8 @@
     "make:help": "make list",
     "start": "yarn docker:make clean start-contract print-key",
     "build": "agoric run scripts/build-contract-deployer.js",
+    "build:deployer": "rollup -c rollup.config.mjs",
+    "build:send-deployer": "yarn run build:deployer src/start-postalSvc.js",
     "test": "ava --verbose",
     "lint": "eslint '**/*.js'",
     "lint:types": "tsc -p jsconfig.json",
