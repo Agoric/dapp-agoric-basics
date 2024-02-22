@@ -1,3 +1,4 @@
+// @ts-check
 import assert from 'node:assert';
 
 const { freeze } = Object;
@@ -5,9 +6,28 @@ const { freeze } = Object;
 const agdBinary = 'agd';
 
 /**
- * @param {{
- *   execFileSync: typeof import('child_process').execFileSync;
- * }} io
+ * @param {Record<string, string | undefined>} record - e.g. { color: 'blue' }
+ * @returns {string[]} - e.g. ['--color', 'blue']
+ */
+export const flags = record => {
+  // TODO? support --yes with boolean?
+
+  /** @type {[string, string][]} */
+  // @ts-expect-error undefined is filtered out
+  const skipUndef = Object.entries(record).filter(([_k, v]) => v !== undefined);
+  return skipUndef.map(([k, v]) => [`--${k}`, v]).flat();
+};
+
+/**
+ * @callback ExecSync
+ * @param {string} file
+ * @param {string[]} args
+ * @param {{ encoding: 'utf-8' } & { [k: string]: unknown }} opts
+ * @returns {string}
+ */
+
+/**
+ * @param {{ execFileSync: ExecSync }} io
  */
 export const makeAgd = ({ execFileSync }) => {
   /**
@@ -18,10 +38,7 @@ export const makeAgd = ({ execFileSync }) => {
    *     }} opts
    */
   const make = ({ home, keyringBackend, rpcAddrs } = {}) => {
-    const keyringArgs = [
-      ...(home ? ['--home', home] : []),
-      ...(keyringBackend ? [`--keyring-backend`, keyringBackend] : []),
-    ];
+    const keyringArgs = flags({ home, 'keyring-backend': keyringBackend });
     if (rpcAddrs) {
       assert.equal(
         rpcAddrs.length,
@@ -29,22 +46,23 @@ export const makeAgd = ({ execFileSync }) => {
         'XXX rpcAddrs must contain only one entry',
       );
     }
-    const nodeArgs = [...(rpcAddrs ? [`--node`, rpcAddrs[0]] : [])];
+    const nodeArgs = flags({ node: rpcAddrs && rpcAddrs[0] });
 
     /**
      * @param {string[]} args
-     * @param {import('child_process').ExecFileSyncOptionsWithStringEncoding} [opts]
+     * @param {*} [opts]
      */
-    const exec = (args, opts) => execFileSync(agdBinary, args, opts).toString();
+    const exec = (args, opts = { encoding: 'utf-8' }) =>
+      execFileSync(agdBinary, args, opts);
 
-    const outJson = ['--output', 'json'];
+    const outJson = flags({ output: 'json' });
 
     const ro = freeze({
       status: async () => JSON.parse(exec([...nodeArgs, 'status'])),
       /**
        * @param {| [kind: 'gov', domain: string, ...rest: any]
        *         | [kind: 'tx', txhash: string]
-       *         | [mod: 'vstorage', kind: 'data' | 'children', path: string],
+       *         | [mod: 'vstorage', kind: 'data' | 'children', path: string]
        * } qArgs
        */
       query: async qArgs => {
@@ -87,21 +105,27 @@ export const makeAgd = ({ execFileSync }) => {
        * @param {{ chainId: string; from: string; yes?: boolean }} opts
        */
       tx: async (txArgs, { chainId, from, yes }) => {
-        const yesArg = yes ? ['--yes'] : [];
         const args = [
-          ...nodeArgs,
-          ...[`--chain-id`, chainId],
-          ...keyringArgs,
-          ...[`--from`, from],
           'tx',
-          ...['--broadcast-mode', 'block'],
           ...txArgs,
-          ...yesArg,
+          ...nodeArgs,
+          ...keyringArgs,
+          ...flags({ 'chain-id': chainId, from }),
+          ...flags({
+            'broadcast-mode': 'block',
+            gas: 'auto',
+            'gas-adjustment': '1.4',
+          }),
+          ...(yes ? ['--yes'] : []),
           ...outJson,
         ];
         const out = exec(args);
         try {
-          return JSON.parse(out);
+          const detail = JSON.parse(out);
+          if (detail.code !== 0) {
+            throw Error(detail.raw_log);
+          }
+          return detail;
         } catch (e) {
           console.error(e);
           console.info('output:', out);
@@ -120,7 +144,7 @@ export const makeAgd = ({ execFileSync }) => {
           return execFileSync(
             agdBinary,
             [...keyringArgs, 'keys', 'add', name, '--recover'],
-            { input: mnemonic },
+            { encoding: 'utf-8', input: mnemonic },
           ).toString();
         },
       },
