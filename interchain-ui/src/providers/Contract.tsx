@@ -14,7 +14,9 @@ const watchContract = (watcher: ChainStorageWatcher) => {
     instances => {
       console.log('Got instances', instances);
       useContractStore.setState({
-        instance: instances.find(([name]) => name === 'offerUp')!.at(1),
+        instance: instances
+          .find(([name]) => name === 'sellConcertTickets')!
+          .at(1),
       });
     },
   );

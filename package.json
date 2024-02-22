@@ -37,6 +37,7 @@
   },
   "scripts": {
     "start:docker": "cd contract && docker compose up -d",
+    "stop:docker": "cd contract && docker compose down",
     "docker:logs": "cd contract; docker compose logs --tail 200 -f",
     "docker:bash": "cd contract; docker compose exec agd bash",
     "docker:make": "cd contract; docker compose exec agd make -C /workspace/contract",
