@@ -5,15 +5,11 @@ import { test as anyTest } from './prepare-test-env-ava.js';
 
 import { createRequire } from 'module';
 
-import { E } from '@endo/far';
-import { AmountMath, AssetKind } from '@agoric/ertp/src/amountMath.js';
-import { makeIssuerKit } from '@agoric/ertp';
+import { E, passStyleOf } from '@endo/far';
+import { AmountMath } from '@agoric/ertp/src/amountMath.js';
 import { startPostalSvc } from '../src/start-postalSvc.js';
-import {
-  bootAndInstallBundles,
-  getBundleId,
-  makeBundleCacheContext,
-} from './boot-tools.js';
+import { bootAndInstallBundles, makeMockTools } from './boot-tools.js';
+import { makeBundleCacheContext, getBundleId } from './bundle-tools.js';
 import { mockWalletFactory } from './wallet-tools.js';
 import {
   payerPete,
@@ -21,10 +17,9 @@ import {
   receiverRose,
   senderContract,
 } from './market-actors.js';
+import { makeAgoricNames, makeNameProxy } from './ui-kit-goals/queryKit.js';
 
-const { entries } = Object;
-
-/** @type {import('ava').TestFn<Awaited<ReturnType<makeBundleCacheContext>>>} */
+/** @type {import('ava').TestFn<Awaited<ReturnType<makeTestContext>>>} */
 const test = anyTest;
 
 const nodeRequire = createRequire(import.meta.url);
@@ -33,103 +28,153 @@ const bundleRoots = {
   postalSvc: nodeRequire.resolve('../src/postalSvc.js'),
 };
 
-test.before(async t => (t.context = await makeBundleCacheContext(t)));
+const scriptRoots = {
+  postalSvc: nodeRequire.resolve('../src/start-postalSvc.js'),
+};
 
-test('deliver payment using offer', async t => {
-  const { powers: p0, bundles } = await bootAndInstallBundles(t, bundleRoots);
-  /** @type { typeof p0 & import('../src/start-postalSvc.js').PostalSvcPowers} */
-  // @ts-expect-error bootstrap powers evolve with BLD staker governance
-  const powers = p0;
+/** @param {import('ava').ExecutionContext} t */
+const makeTestContext = async t => {
+  const bc = await makeBundleCacheContext(t);
 
-  const iKit = {
-    MNY: makeIssuerKit('MNY'),
-    Item: makeIssuerKit('Item', AssetKind.SET),
+  console.time('makeTestTools');
+  console.timeLog('makeTestTools', 'start');
+  const tools = await makeMockTools(t, bc.bundleCache);
+  console.timeEnd('makeTestTools');
+
+  return { ...tools, ...bc };
+};
+
+test.before(async t => (t.context = await makeTestContext(t)));
+
+test.serial('well-known brand (ATOM) is available', async t => {
+  const { makeQueryTool } = t.context;
+  const hub0 = makeAgoricNames(makeQueryTool());
+  const agoricNames = makeNameProxy(hub0);
+  await null;
+  const brand = {
+    ATOM: await agoricNames.brand.ATOM,
   };
-  const { MNY, Item } = iKit;
-  for (const [name, kit] of entries(iKit)) {
-    powers.issuer.produce[name].resolve(kit.issuer);
-    powers.brand.produce[name].resolve(kit.brand);
-  }
+  t.log(brand);
+  t.is(passStyleOf(brand.ATOM), 'remotable');
+});
 
+test.serial('install bundle: postalSvc / send', async t => {
+  const { installBundles } = t.context;
+  console.time('installBundles');
+  console.timeLog('installBundles', Object.keys(bundleRoots).length, 'todo');
+  const bundles = await installBundles(bundleRoots, (...args) =>
+    console.timeLog('installBundles', ...args),
+  );
+  console.timeEnd('installBundles');
+
+  const id = getBundleId(bundles.postalSvc);
+  const shortId = id.slice(0, 8);
+  t.log('postalSvc', shortId);
+  t.is(id.length, 3 + 128, 'bundleID length');
+  t.regex(id, /^b1-.../);
+
+  Object.assign(t.context.shared, { bundles });
+});
+
+test.serial('deploy contract with core eval: postalSvc / send', async t => {
+  const { runCoreEval } = t.context;
+  const { bundles } = t.context.shared;
   const bundleID = getBundleId(bundles.postalSvc);
-  await startPostalSvc(powers, {
-    options: { postalSvc: { bundleID, issuerNames: ['MNY', 'Item'] } },
+
+  const name = 'send';
+  const result = await runCoreEval({
+    name,
+    behavior: startPostalSvc,
+    entryFile: scriptRoots.postalSvc,
+    config: {
+      options: { postalSvc: { bundleID, issuerNames: ['ATOM', 'Item'] } },
+    },
   });
 
-  const { zoe, namesByAddressAdmin, chainStorage } = powers.consume;
+  t.log(result.voting_end_time, '#', result.proposal_id, name);
+  t.like(result, {
+    content: {
+      '@type': '/agoric.swingset.CoreEvalProposal',
+    },
+    status: 'PROPOSAL_STATUS_PASSED',
+  });
+});
 
-  const smartWalletIssuers = {
-    Invitation: await E(zoe).getInvitationIssuer(),
-    IST: await E(zoe).getFeeIssuer(),
-    MNY: MNY.issuer,
-    Item: Item.issuer,
-  };
+test.serial('agoricNames.instances has contract: postalSvc', async t => {
+  const { makeQueryTool } = t.context;
+  const hub0 = makeAgoricNames(makeQueryTool());
+  const agoricNames = makeNameProxy(hub0);
+  await null;
+  const instance = await agoricNames.instance.postalSvc;
+  t.log(instance);
+  t.is(passStyleOf(instance), 'remotable');
+});
 
-  const walletFactory = mockWalletFactory(
-    { zoe, namesByAddressAdmin, chainStorage },
-    smartWalletIssuers,
-  );
+test.serial('deliver payment using offer', async t => {
+  const { provisionSmartWallet, makeQueryTool } = t.context;
+  const qt = makeQueryTool();
+  const hub0 = makeAgoricNames(qt);
+  /** @type {import('./market-actors.js').WellKnown} */
+  const agoricNames = makeNameProxy(hub0);
 
-  const wellKnown = {
-    installation: {},
-    // TODO: have pete check installation before making an offer?
-    // hm. don't think walletFactory supports that.
-    instance: powers.instance.consume,
-    issuer: {},
-    brand: powers.brand.consume,
-    assetKind: new Map(
-      /** @type {[Brand, AssetKind][]} */ ([
-        [MNY.brand, AssetKind.NAT],
-        [Item.brand, AssetKind.SET],
-      ]),
-    ),
-  };
+  await null;
   const { make: amt } = AmountMath;
   const shared = {
-    rxAddr: 'agoric1receiverRose',
+    rxAddr: 'agoric1aap7m84dt0rwhhfw49d4kv2gqetzl56vn8aaxj',
     toSend: {
-      Pmt: amt(MNY.brand, 3n),
-      Inventory: amt(Item.brand, harden(['map'])),
+      Pmt: amt(await agoricNames.brand.ATOM, 3n),
+      // TODO non-fungible: Inventory: amt(Item.brand, harden(['map'])),
     },
   };
 
   const wallet = {
-    pete: await walletFactory.makeSmartWallet('agoric1payerPete'),
-    rose: await walletFactory.makeSmartWallet(shared.rxAddr),
+    pete: await provisionSmartWallet(
+      'agoric1xe269y3fhye8nrlduf826wgn499y6wmnv32tw5',
+      { ATOM: 10n, BLD: 75n },
+    ),
+    rose: await provisionSmartWallet(shared.rxAddr, {
+      BLD: 20n,
+      // TODO non-fungibles: Item: amt(Item.brand, harden(['potion', 'map'])),
+    }),
   };
-  await E(wallet.pete.deposit).receive(
-    MNY.mint.mintPayment(amt(MNY.brand, 10n)),
-  );
-  await E(wallet.pete.deposit).receive(
-    Item.mint.mintPayment(amt(Item.brand, harden(['potion', 'map']))),
-  );
+  const pqt = makeQueryTool();
+  for (const kind of ['instance', 'brand']) {
+    const entries = await E(E(hub0).lookup(kind)).entries();
+    pqt.fromCapData(qt.toCapData(entries));
+  }
 
   await Promise.all([
-    payerPete(t, { wallet: wallet.pete }, wellKnown, shared),
-    receiverRose(t, { wallet: wallet.rose }, wellKnown, shared),
+    payerPete(t, { wallet: wallet.pete, queryTool: pqt }, shared),
+    receiverRose(t, { wallet: wallet.rose }, shared),
   ]);
 });
 
+test.todo('E2E: send using publicFacet using contract');
+
 test('send invitation* from contract using publicFacet of postalSvc', async t => {
-  const { powers: p0, bundles } = await bootAndInstallBundles(t, bundleRoots);
-  /** @type { typeof p0 & import('../src/start-postalSvc.js').PostalSvcPowers} */
-  // @ts-expect-error bootstrap powers evolve with BLD staker governance
-  const powers = p0;
+  const { powers, bundles } = await bootAndInstallBundles(t, bundleRoots);
 
   const bundleID = getBundleId(bundles.postalSvc);
-  await startPostalSvc(powers, { options: { postalSvc: { bundleID } } });
+  await startPostalSvc(powers, {
+    options: { postalSvc: { bundleID, issuerNames: ['IST', 'Invitation'] } },
+  });
 
-  const { zoe, namesByAddressAdmin, chainStorage } = powers.consume;
+  const { zoe, namesByAddressAdmin } = powers.consume;
   const smartWalletIssuers = {
     Invitation: await E(zoe).getInvitationIssuer(),
     IST: await E(zoe).getFeeIssuer(),
   };
 
+  // TODO: use CapData across vats
+  // const boardMarshaller = await E(board).getPublishingMarshaller();
   const walletFactory = mockWalletFactory(
-    { zoe, namesByAddressAdmin, chainStorage },
+    { zoe, namesByAddressAdmin },
     smartWalletIssuers,
   );
-  const instance = await powers.instance.consume.postalSvc;
+  /** @type {import('../src/start-postalSvc.js').PostalSvcPowers} */
+  // @ts-expect-error cast
+  const postalSpace = powers;
+  const instance = await postalSpace.instance.consume.postalSvc;
 
   const shared = {
     rxAddr: 'agoric1receiverRex',
