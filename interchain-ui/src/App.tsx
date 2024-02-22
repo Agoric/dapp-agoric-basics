@@ -1,4 +1,3 @@
-import './App.css';
 import { Mint } from './components/Mint';
 import { Inventory } from './components/Inventory';
 import { ContractProvider } from './providers/Contract';
@@ -22,7 +21,7 @@ function App() {
       }}
     >
       <ContractProvider>
-        <div className="parent" >
+        <div className="flex place-content-center">
           <Mint />
           <hr />
           <Inventory />
