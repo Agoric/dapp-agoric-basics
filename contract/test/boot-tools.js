@@ -1,17 +1,41 @@
 // @ts-check
-import { E } from '@endo/far';
-import { makeNodeBundleCache } from '@endo/bundle-source/cache.js';
+import { E, Far } from '@endo/far';
 import { makeNameHubKit, makePromiseSpace } from '@agoric/vats';
 import { makeFakeBoard } from '@agoric/vats/tools/board-utils.js';
 import { makeWellKnownSpaces } from '@agoric/vats/src/core/utils.js';
 import { makeFakeVatAdmin } from '@agoric/zoe/tools/fakeVatAdmin.js';
 import { makeZoeKitForTest } from '@agoric/zoe/tools/setup-zoe.js';
 import buildManualTimer from '@agoric/zoe/tools/manualTimer.js';
+import { AmountMath, AssetKind, makeIssuerKit } from '@agoric/ertp';
+
+// eslint-disable-next-line import/no-extraneous-dependencies
 import { makeMockChainStorageRoot } from '@agoric/internal/src/storage-test-utils.js';
 
-export const getBundleId = b => `b1-${b.endoZipBase64Sha512}`;
+import { mockWalletFactory } from './wallet-tools.js';
+import { getBundleId } from './bundle-tools.js';
 
-export const makeBootstrapPowers = async (
+const { entries } = Object;
+
+/**
+ * In agoric-sdk, the BootstrapPowers.consume['chainStorage'] type includes undefined because
+ * of some historical testing practices. It's tedious and unnecessary
+ * to check for undefined, so here we override the type to say that it's
+ * never undefined.
+ *
+ * @typedef {PromiseSpaceOf<{ chainStorage: StorageNode }>} NonNullChainStorage
+ */
+
+/**
+ * Make powers (zoe, timer and name services, etc.) sufficient to test
+ * deploying and using contracts. priceAuthority is a dummy.
+ *
+ * Also return vatAdminState for installing bundles
+ * and mock chainStorage with support for getBody().
+ *
+ * @param {(...args: unknown[]) => void} log
+ * @param {string[]} [spaceNames]
+ */
+const mockBootstrapPowers = async (
   log,
   spaceNames = ['installation', 'instance', 'issuer', 'brand'],
 ) => {
@@ -38,17 +62,6 @@ export const makeBootstrapPowers = async (
   const chainStorage = makeMockChainStorageRoot();
   const board = makeFakeBoard();
 
-  const roMarshaller = await E(board).getReadonlyMarshaller();
-  // XXX HACK: mixes on-chain / offchain
-  const boardAux = async obj => {
-    const id = await E(board).getId(obj);
-    const auxData = chainStorage.getBody(
-      `mockChainStorageRoot.boardAux.${id}`,
-      roMarshaller,
-    );
-    return auxData;
-  };
-
   produce.zoe.resolve(zoe);
   produce.feeMintAccess.resolve(feeMintAccess);
   produce.agoricNamesAdmin.resolve(agoricNamesAdmin);
@@ -58,47 +71,158 @@ export const makeBootstrapPowers = async (
   produce.chainTimerService.resolve(chainTimerService);
   produce.chainStorage.resolve(chainStorage);
   produce.board.resolve(board);
-  produce.priceAuthority.resolve(board); // XXX
   spaces.brand.produce.timer.resolve(timerBrand);
   spaces.brand.produce.IST.resolve(feeBrand);
   spaces.brand.produce.Invitation.resolve(invitationBrand);
   spaces.issuer.produce.IST.resolve(feeIssuer);
   spaces.issuer.produce.Invitation.resolve(invitationIssuer);
+  produce.priceAuthority.resolve(Far('NullPriceAuthority', {}));
 
   /**
-   * @type {BootstrapPowers & {
-   *   consume: { chainStorage: Promise<StorageNode> },
-   *   brand: { consume: Record<string, Promise<Brand>> }
-   * }}}
+   * @type {BootstrapPowers & NonNullChainStorage}
    */
   // @ts-expect-error mock
   const powers = { produce, consume, ...spaces };
 
-  return { powers, vatAdminState, boardAux };
+  return { powers, vatAdminState, chainStorage };
 };
 
-export const makeBundleCacheContext = async (_t, dest = 'bundles/') => {
-  const bundleCache = await makeNodeBundleCache(dest, {}, s => import(s));
-
-  const shared = {};
-  return { bundleCache, shared };
-};
-
-export const bootAndInstallBundles = async (t, bundleRoots) => {
-  t.log('bootstrap');
-  const powersKit = await makeBootstrapPowers(t.log);
-  const { vatAdminState } = powersKit;
-
-  const { bundleCache } = t.context;
-  /** @type {Record<string, *>} */
+/**
+ * @param {import('ava').ExecutionContext} t
+ * @param {BundleCache} bundleCache
+ * @param {Record<string, string>} bundleRoots
+ * @param {InstallBundle} installBundle
+ *
+ * @typedef {(id: string, bundle: CachedBundle, name: string) => Promise<void>} InstallBundle
+ * @typedef {Awaited<ReturnType<import('@endo/bundle-source/cache.js').makeNodeBundleCache>>} BundleCache
+ * @typedef {{ moduleFormat: 'endoZipBase64', endoZipBase64Sha512: string }} CachedBundle
+ */
+export const installBundles = async (
+  t,
+  bundleCache,
+  bundleRoots,
+  installBundle,
+) => {
+  /** @type {Record<string, CachedBundle>} */
   const bundles = {};
+  await null;
   for (const [name, rootModulePath] of Object.entries(bundleRoots)) {
     const bundle = await bundleCache.load(rootModulePath, name);
     const bundleID = getBundleId(bundle);
     t.log('publish bundle', name, bundleID.slice(0, 8));
-    vatAdminState.installBundle(bundleID, bundle);
+    await installBundle(bundleID, bundle, name);
     bundles[name] = bundle;
   }
   harden(bundles);
+  return bundles;
+};
+
+export const bootAndInstallBundles = async (t, bundleRoots) => {
+  t.log('bootstrap');
+  const powersKit = await mockBootstrapPowers(t.log);
+  const { vatAdminState } = powersKit;
+
+  const bundles = await installBundles(
+    t,
+    t.context.bundleCache,
+    bundleRoots,
+    (bundleID, bundle, _name) => vatAdminState.installBundle(bundleID, bundle),
+  );
   return { ...powersKit, bundles };
+};
+
+const proposalResultDefault = {
+  proposal_id: 0,
+  content: {
+    '@type': '/agoric.swingset.CoreEvalProposal',
+  },
+  status: 'PROPOSAL_STATUS_PASSED',
+  voting_end_time: '2020-01-01T01:00:00.0Z',
+};
+
+/**
+ * @param {import('ava').ExecutionContext } t
+ * @param {BundleCache} bundleCache
+ */
+export const makeMockTools = async (t, bundleCache) => {
+  t.log('bootstrap');
+  const { powers, vatAdminState } = await mockBootstrapPowers(t.log);
+
+  const installBundle = async (bundleID, bundle, _name) =>
+    vatAdminState.installBundle(bundleID, bundle);
+
+  const iKit = {
+    MNY: makeIssuerKit('MNY'),
+    Item: makeIssuerKit('Item', AssetKind.SET),
+    ATOM: makeIssuerKit('ATOM', AssetKind.NAT, { decimalPlaces: 6 }),
+  };
+  const { MNY, Item, ATOM } = iKit;
+  for (const [name, kit] of entries(iKit)) {
+    powers.issuer.produce[name].resolve(kit.issuer);
+    powers.brand.produce[name].resolve(kit.brand);
+  }
+
+  const { agoricNames, board, zoe, namesByAddressAdmin } = powers.consume;
+
+  const smartWalletIssuers = {
+    Invitation: await E(zoe).getInvitationIssuer(),
+    IST: await E(zoe).getFeeIssuer(),
+    MNY: MNY.issuer,
+    Item: Item.issuer,
+    ATOM: ATOM.issuer,
+  };
+
+  const boardMarshaller = await E(board).getPublishingMarshaller();
+  const walletFactory = mockWalletFactory(
+    { namesByAddressAdmin, zoe },
+    smartWalletIssuers,
+  );
+
+  let pid = 0;
+  const runCoreEval = async ({ behavior, config }) => {
+    if (!behavior) throw Error('TODO: run core eval without live behavior');
+    await behavior(powers, config);
+    pid += 1;
+    return { ...proposalResultDefault, proposal_id: pid };
+  };
+
+  // XXX marshal context is not fresh. hm.
+  const makeQueryTool = () => {
+    return Far('QT', {
+      toCapData: x => boardMarshaller.toCapData(x), // XXX remote???
+      fromCapData: d => boardMarshaller.fromCapData(d),
+      queryData: async path => {
+        const parts = path.split('.');
+        if (parts.shift() !== 'published') throw Error(`not found: ${path}`);
+        if (parts.shift() !== 'agoricNames') throw Error(`not found: ${path}`);
+        if (parts.length !== 1) throw Error(`not found: ${path}`);
+        const hub = E(agoricNames).lookup(parts[0]);
+        const kvs = await E(hub).entries();
+        boardMarshaller.toCapData(kvs); // remember object identities
+        return kvs;
+      },
+    });
+  };
+
+  return {
+    makeQueryTool,
+    installBundles: bundleRoots =>
+      installBundles(t, bundleCache, bundleRoots, installBundle),
+    runCoreEval,
+    provisionSmartWallet: async (addr, balances) => {
+      const it = await walletFactory.makeSmartWallet(addr);
+      for (const [name, qty] of entries(balances)) {
+        if (!(name in iKit)) {
+          console.warn('no mint', name, qty);
+          continue;
+        }
+        const { mint, brand } = iKit[name];
+        const { decimalPlaces } = brand.getDisplayInfo();
+        const value = qty * BigInt(10 ** decimalPlaces);
+        const pmt = mint.mintPayment(AmountMath.make(brand, value));
+        await it.deposit.receive(pmt);
+      }
+      return it;
+    },
+  };
 };
