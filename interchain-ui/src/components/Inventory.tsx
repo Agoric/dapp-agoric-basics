@@ -5,7 +5,7 @@ import type { CopyBag } from '../types';
 
 const Inventory = () => {
   const istPurse = usePurse('IST');
-  const itemsPurse = usePurse('Tickets');
+  const ticketsPurse = usePurse('Tickets');
   const { walletConnection } = useAgoric();
 
   return (
@@ -28,10 +28,10 @@ const Inventory = () => {
               )}
             </div>
             <div>
-              <b>Items: </b>
-              {itemsPurse ? (
+              <b>Tickets: </b>
+              {ticketsPurse ? (
                 <ul style={{ marginTop: 0, textAlign: 'left' }}>
-                  {(itemsPurse.currentAmount.value as CopyBag).payload.map(
+                  {(ticketsPurse.currentAmount.value as CopyBag).payload.map(
                     ([name, number]) => (
                       <li key={name}>
                         {String(number)} {name}
