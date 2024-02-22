@@ -14,7 +14,7 @@ import {
   getBundleId,
   makeBundleCacheContext,
 } from './boot-tools.js';
-import { allValues, mapValues, mockWalletFactory } from './wallet-tools.js';
+import { mockWalletFactory } from './wallet-tools.js';
 import {
   payerPete,
   receiverRex,
@@ -22,7 +22,7 @@ import {
   senderContract,
 } from './market-actors.js';
 
-const { entries, fromEntries, keys } = Object;
+const { entries } = Object;
 
 /** @type {import('ava').TestFn<Awaited<ReturnType<makeBundleCacheContext>>>} */
 const test = anyTest;
@@ -46,10 +46,10 @@ test('deliver payment using offer', async t => {
     Item: makeIssuerKit('Item', AssetKind.SET),
   };
   const { MNY, Item } = iKit;
-  entries(iKit).forEach(([name, kit]) => {
+  for (const [name, kit] of entries(iKit)) {
     powers.issuer.produce[name].resolve(kit.issuer);
     powers.brand.produce[name].resolve(kit.brand);
-  });
+  }
 
   const bundleID = getBundleId(bundles.postalSvc);
   await startPostalSvc(powers, {
