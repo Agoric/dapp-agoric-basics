@@ -5,7 +5,7 @@ import type { CopyBag } from '../types';
 
 const Inventory = () => {
   const istPurse = usePurse('IST');
-  const ticketsPurse = usePurse('Tickets');
+  const ticketsPurse = usePurse('Ticket');
   const { walletConnection } = useAgoric();
 
   return (
