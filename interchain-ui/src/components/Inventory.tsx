@@ -14,7 +14,7 @@ const Inventory = () => {
       <div>
         <ConnectWalletButton className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700" />
         {walletConnection && (
-          <div style={{ textAlign: 'left' }}>
+          <div>
             <div>
               <b>IST: </b>
               {istPurse ? (
@@ -30,7 +30,7 @@ const Inventory = () => {
             <div>
               <b>Tickets: </b>
               {ticketsPurse ? (
-                <ul style={{ marginTop: 0, textAlign: 'left' }}>
+                <ul>
                   {(ticketsPurse.currentAmount.value as CopyBag).payload.map(
                     ([name, number]) => (
                       <li key={name}>
