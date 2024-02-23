@@ -78,7 +78,7 @@ const MintConcertTicket = ({
           priceDisplayAmount={price}
           limited={3}
           tokenName="IST"
-          imgSrc="src/assets/react.svg"
+          imgSrc={"src/assets/" + kind.toLowerCase() + "Row.jpg"}
           pricePerToken={price}
           onMint={() => {
             console.log('filterme onMint tickets=', tickets);
