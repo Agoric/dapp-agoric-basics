@@ -21,9 +21,9 @@ function App() {
       }}
     >
       <ContractProvider>
-        <div className="flex place-content-center">
+        <div className="flex auto-rows-max place-content-center">
           <Mint />
-          <hr />
+          <div className="m-8 h-[1200px] w-0.5 bg-slate-200"></div>
           <Inventory />
         </div>
       </ContractProvider>
