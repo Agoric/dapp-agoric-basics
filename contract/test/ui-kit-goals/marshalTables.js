@@ -2,9 +2,8 @@ import { Far, makeMarshal } from '@endo/marshal';
 
 /**
  * @template Val
- * @param {(val: Val, size: number) => unknown} makeSlot
- * @param {(slot: unknown, iface: string | undefined) => Val} makeVal
- * @returns
+ * @param {(val: Val, size: number) => string} makeSlot
+ * @param {(slot: string, iface: string | undefined) => Val} makeVal
  */
 const makeTranslationTable = (makeSlot, makeVal) => {
   /** @type {Map<Val, unknown>} */
@@ -12,7 +11,7 @@ const makeTranslationTable = (makeSlot, makeVal) => {
   /** @type {Map<unknown, Val>} */
   const slotToVal = new Map();
 
-  /** @type {(val: Val) => unknown} */
+  /** @type {(val: Val) => string} */
   const convertValToSlot = val => {
     if (valToSlot.has(val)) return valToSlot.get(val);
     const slot = makeSlot(val, valToSlot.size);
@@ -21,7 +20,7 @@ const makeTranslationTable = (makeSlot, makeVal) => {
     return slot;
   };
 
-  /** @type {(slot: unknown, iface: string | undefined) => Val} */
+  /** @type {(slot: string | null, iface: string | undefined) => Val} */
   const convertSlotToVal = (slot, iface) => {
     if (slot === null) return makeVal(slot, iface);
     if (slotToVal.has(slot)) return slotToVal.get(slot);
@@ -34,14 +33,19 @@ const makeTranslationTable = (makeSlot, makeVal) => {
   return harden({ convertValToSlot, convertSlotToVal });
 };
 
-/** @type {(slot: unknown, iface: string | undefined) => any} */
+/** @type {(slot: string, iface: string | undefined) => any} */
 const synthesizeRemotable = (slot, iface) =>
   Far(`${(iface ?? '').replace(/^Alleged: /, '')}#${slot}`, {});
 
-export const makeClientMarshaller = () => {
-  const { convertValToSlot, convertSlotToVal } = makeTranslationTable(val => {
+/** @param {(v: unknown) => string} [valToSlot] */
+export const makeClientMarshaller = valToSlot => {
+  const noNewSlots = val => {
     throw new Error(`unknown value: ${val}`);
-  }, synthesizeRemotable);
+  };
+  const { convertValToSlot, convertSlotToVal } = makeTranslationTable(
+    valToSlot || noNewSlots,
+    synthesizeRemotable,
+  );
 
   return makeMarshal(convertValToSlot, convertSlotToVal, {
     serializeBodyFormat: 'smallcaps',
