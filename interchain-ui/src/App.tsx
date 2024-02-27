@@ -22,11 +22,13 @@ function App() {
     >
       <ContractProvider>
         <div>
-          <div className="flex">
-            <div className="h-12 px-4 py-2 text-center text-lg text-gray-900 ">
-              dApp Agoric Basics
+          <div className="daisyui-navbar bg-neutral text-neutral-content">
+            <div className="flex-1">
+              <button className="daisyui-btn daisyui-btn-ghost text-xl">
+                dApp Agoric Basics
+              </button>
             </div>
-            <div className="absolute right-0 top-0 px-2 py-1">
+            <div className="flex-none">
               <ConnectWalletButton className="daisyui-btn daisyui-btn-outline daisyui-btn-secondary" />
             </div>
           </div>
