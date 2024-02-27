@@ -41,6 +41,13 @@ function App() {
               <ConnectWalletButton className="daisyui-btn daisyui-btn-outline daisyui-btn-secondary" />
             </div>
           </div>
+          {/* tabs */}
+          <div role="tablist" className="daisyui-tabs daisyui-tabs-boxed">
+            <a role="tab" className="daisyui-tab daisyui-tab-active">Mint</a>
+            <a role="tab" className="daisyui-tab">Swap</a>
+            <a role="tab" className="daisyui-tab">Pay</a>
+            <a role="tab" className="daisyui-tab">Vote</a>
+          </div>
           {/* main app UI */}
           <div className="flex w-full flex-col lg:flex-row">
             <div className="card grid h-full flex-grow place-items-center rounded-box bg-base-300">
