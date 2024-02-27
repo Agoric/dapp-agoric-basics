@@ -12,7 +12,6 @@
   "dependencies": {
     "@agoric/ui-components": "^0.3.9-u13.0",
     "@agoric/web-components": "^0.15.0",
-    "@interchain-ui/react": "^1.21.19",
     "buffer": "^6.0.3",
     "chain-registry": "^1.28.1",
     "cosmos-kit": "^2.9.0",
