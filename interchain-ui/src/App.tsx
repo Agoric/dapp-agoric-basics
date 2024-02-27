@@ -22,6 +22,7 @@ function App() {
     >
       <ContractProvider>
         <div>
+          {/* navbar */}
           <div className="daisyui-navbar bg-neutral text-neutral-content">
             <div className="flex-1">
               <button className="daisyui-btn daisyui-btn-ghost text-xl">
@@ -32,10 +33,15 @@ function App() {
               <ConnectWalletButton className="daisyui-btn daisyui-btn-outline daisyui-btn-secondary" />
             </div>
           </div>
-          <div className="flex auto-rows-max place-content-center">
-            <Mint />
-            <div className="m-8 h-[1350px] w-0.5 bg-slate-200"></div>
-            <Inventory />
+          {/* main app UI */}
+          <div className="flex w-full flex-col lg:flex-row">
+            <div className="card grid h-full flex-grow place-items-center rounded-box bg-base-300">
+              <Mint />
+            </div>
+            <div className="daisyui-divider lg:daisyui-divider-horizontal"></div>
+            <div className="card grid h-full flex-grow place-items-center rounded-box bg-base-300">
+              <Inventory />
+            </div>
           </div>
         </div>
       </ContractProvider>
