@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Box, NftMint } from '@interchain-ui/react';
-import { ThemeProvider, useTheme } from '@interchain-ui/react';
+import { Range } from 'react-daisyui';
 import { AmountMath } from '@agoric/ertp';
 import { makeCopyBag } from '@endo/patterns';
 import { AgoricWalletConnection, useAgoric } from '@agoric/react-components';
@@ -64,63 +64,77 @@ const MintConcertTicket = ({
 
   return (
     <div>
-      <Box>
-        <NftMint
-          tag="NOW LIVE"
-          title="Mint"
-          name={kind + ' Row'}
-          description={kind + ' row concert ticket'}
-          defaultAmount={tickets}
-          quantity={3}
-          royalties={0}
-          minted={0}
-          available={available}
-          priceDisplayAmount={price}
-          limited={3}
-          tokenName="IST"
-          imgSrc={"src/assets/" + kind.toLowerCase() + "Row.jpg"}
-          pricePerToken={price}
-          onMint={() => {
-            console.log('filterme onMint tickets=', tickets);
-            if (tickets === 0) {
-              alert('no need to mint 0 ticket');
-              return;
-            }
-            if (walletConnection) {
-              makeOffer(
-                walletConnection,
-                kind,
-                BigInt(tickets),
-                BigInt(tickets * price),
-              );
-            } else {
-              alert('Please connect your wallet first');
-              return;
-            }
-          }}
-          onChange={(value: number) => {
-            setTickets(value);
-            console.log('filterme onChange tickets=', tickets);
-          }}
-        />
-      </Box>
+      {/* new */}
+      <div className="daisyui-card bg-base-100 shadow-xl lg:daisyui-card-side">
+        <figure>
+          <img
+            src={'src/assets/' + kind.toLowerCase() + 'Row.jpg'}
+            alt={kind + ' Row'}
+          />
+        </figure>
+        <div className="daisyui-card-body">
+          <h2 className="daisyui-card-title">{kind} Row</h2>
+          <p>{kind} row concert ticket</p>
+          <Range defaultValue={1} min={1} max={3} size="lg" />
+          <div className="daisyui-card-actions justify-end">
+            <button className="daisyui-btn daisyui-btn-primary">Mint</button>
+          </div>
+        </div>
+      </div>
+      {/* old */}
+      <div>
+        <Box>
+          <NftMint
+            tag="NOW LIVE"
+            title="Mint"
+            name={kind + ' Row'}
+            description={kind + ' row concert ticket'}
+            defaultAmount={tickets}
+            quantity={3}
+            royalties={0}
+            minted={0}
+            available={available}
+            priceDisplayAmount={price}
+            limited={3}
+            tokenName="IST"
+            imgSrc={'src/assets/' + kind.toLowerCase() + 'Row.jpg'}
+            pricePerToken={price}
+            onMint={() => {
+              console.log('filterme onMint tickets=', tickets);
+              if (tickets === 0) {
+                alert('no need to mint 0 ticket');
+                return;
+              }
+              if (walletConnection) {
+                makeOffer(
+                  walletConnection,
+                  kind,
+                  BigInt(tickets),
+                  BigInt(tickets * price),
+                );
+              } else {
+                alert('Please connect your wallet first');
+                return;
+              }
+            }}
+            onChange={(value: number) => {
+              setTickets(value);
+              console.log('filterme onChange tickets=', tickets);
+            }}
+          />
+        </Box>
+      </div>
     </div>
   );
 };
 
 const Mint = () => {
-  const { themeClass } = useTheme();
-
   return (
-    <>
-      <ThemeProvider>
-        <div className={themeClass}>
-          <MintConcertTicket kind="Front" available={3} price={3} />
-          <MintConcertTicket kind="Middle" available={3} price={2} />
-          <MintConcertTicket kind="Last" available={3} price={1} />
-        </div>
-      </ThemeProvider>
-    </>
+    <div>
+      <MintConcertTicket kind="Front" available={3} price={3} />
+      <MintConcertTicket kind="Middle" available={3} price={2} />
+      <MintConcertTicket kind="Last" available={3} price={1} />
+    </div>
   );
 };
 
