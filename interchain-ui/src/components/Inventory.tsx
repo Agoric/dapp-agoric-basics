@@ -12,7 +12,7 @@ const Inventory = () => {
     <div className="m-16 align-middle">
       <h3 className="text-center">My Wallet</h3>
       <div>
-        <ConnectWalletButton className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700" />
+        <ConnectWalletButton className="daisyui-btn daisyui-btn-outline daisyui-btn-primary" />
         {walletConnection && (
           <div>
             <div>

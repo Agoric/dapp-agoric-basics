@@ -27,7 +27,7 @@ function App() {
               dApp Agoric Basics
             </div>
             <div className="absolute right-0 top-0 px-2 py-1">
-              <ConnectWalletButton className="rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700" />
+              <ConnectWalletButton className="daisyui-btn daisyui-btn-outline daisyui-btn-secondary" />
             </div>
           </div>
           <div className="flex auto-rows-max place-content-center">
