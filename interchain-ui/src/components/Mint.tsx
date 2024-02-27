@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Box, NftMint } from '@interchain-ui/react';
 import { Range } from 'react-daisyui';
 import { AmountMath } from '@agoric/ertp';
 import { makeCopyBag } from '@endo/patterns';
@@ -59,70 +58,73 @@ const MintConcertTicket = ({
   price: number;
   available: number;
 }) => {
-  const [tickets, setTickets] = useState(0);
+  const [tickets, setTickets] = useState(1);
   const { walletConnection } = useAgoric();
 
   return (
     <div>
-      {/* new */}
+      {/* Mint card */}
       <div className="daisyui-card bg-base-100 shadow-xl lg:daisyui-card-side">
+        {/* card image */}
         <figure>
           <img
             src={'src/assets/' + kind.toLowerCase() + 'Row.jpg'}
             alt={kind + ' Row'}
           />
         </figure>
+        {/* card body */}
         <div className="daisyui-card-body">
+          {/* card title */}
           <h2 className="daisyui-card-title">{kind} Row</h2>
+          {/* card description */}
           <p>{kind} row concert ticket</p>
-          <Range defaultValue={1} min={1} max={3} size="lg" />
-          <div className="daisyui-card-actions justify-end">
-            <button className="daisyui-btn daisyui-btn-primary">Mint</button>
+          {/* ticket value selector */}
+          <Range
+            defaultValue={tickets}
+            min={1}
+            max={available}
+            onChange={evt => setTickets(Number(evt.target.value))}
+          />
+          {/* card action */}
+          <div className="daisyui-card-actions flex">
+            {/* ticket price */}
+            <div className="daisyui-stats shadow">
+              <div className="daisyui-stat">
+                <div className="daisyui-stat-figure text-primary">
+                  <img src="src/assets/IST.png" />
+                </div>
+                <div className="daisyui-stat-title">Total Price</div>
+                <div className="daisyui-stat-value text-secondary">
+                  {tickets * price} IST
+                </div>
+                <div className="daisyui-stat-desc">{tickets} tickets</div>
+              </div>
+            </div>
+            {/* divider */}
+            <div className="daisyui-divider lg:daisyui-divider-horizontal"></div>
+            {/* mint button */}
+            <div className="">
+              <button
+                className="daisyui-btn daisyui-btn-primary"
+                onClick={() => {
+                  if (walletConnection) {
+                    makeOffer(
+                      walletConnection,
+                      kind,
+                      BigInt(tickets),
+                      BigInt(tickets * price),
+                    );
+                  } else {
+                    alert('Please connect your wallet first');
+                    return;
+                  }
+                }}
+              >
+                Mint
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-      {/* old */}
-      <div>
-        <Box>
-          <NftMint
-            tag="NOW LIVE"
-            title="Mint"
-            name={kind + ' Row'}
-            description={kind + ' row concert ticket'}
-            defaultAmount={tickets}
-            quantity={3}
-            royalties={0}
-            minted={0}
-            available={available}
-            priceDisplayAmount={price}
-            limited={3}
-            tokenName="IST"
-            imgSrc={'src/assets/' + kind.toLowerCase() + 'Row.jpg'}
-            pricePerToken={price}
-            onMint={() => {
-              console.log('filterme onMint tickets=', tickets);
-              if (tickets === 0) {
-                alert('no need to mint 0 ticket');
-                return;
-              }
-              if (walletConnection) {
-                makeOffer(
-                  walletConnection,
-                  kind,
-                  BigInt(tickets),
-                  BigInt(tickets * price),
-                );
-              } else {
-                alert('Please connect your wallet first');
-                return;
-              }
-            }}
-            onChange={(value: number) => {
-              setTickets(value);
-              console.log('filterme onChange tickets=', tickets);
-            }}
-          />
-        </Box>
       </div>
     </div>
   );
@@ -132,7 +134,9 @@ const Mint = () => {
   return (
     <div>
       <MintConcertTicket kind="Front" available={3} price={3} />
+      <div className="daisyui-divider"></div>
       <MintConcertTicket kind="Middle" available={3} price={2} />
+      <div className="daisyui-divider"></div>
       <MintConcertTicket kind="Last" available={3} price={1} />
     </div>
   );
