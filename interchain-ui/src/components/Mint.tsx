@@ -4,7 +4,6 @@ import { AmountMath } from '@agoric/ertp';
 import { makeCopyBag } from '@endo/patterns';
 import { AgoricWalletConnection, useAgoric } from '@agoric/react-components';
 import { useContractStore } from '../store/contract';
-import '@interchain-ui/react/styles';
 
 const IST_UNIT = 1_000_000n;
 
