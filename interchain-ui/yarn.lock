@@ -8409,6 +8409,11 @@ react-aria@^3.29.1:
     "@react-aria/visually-hidden" "^3.8.10"
     "@react-types/shared" "^3.22.1"
 
+react-daisyui@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/react-daisyui/-/react-daisyui-5.0.0.tgz#9ce2fe8dd540f6b12650fc0d2e7953c1026789b3"
+  integrity sha512-j1cugAxALmIbihycGBh7P9H3UXrfsvqu84qM6O55l7nOKST43IjUkZjmNav/7s0ZaUpa9Y+52mFchUb2zvon1A==
+
 react-dom@^18.2.0:
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-18.2.0.tgz#22aaf38708db2674ed9ada224ca4aa708d821e3d"
