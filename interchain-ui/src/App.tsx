@@ -42,28 +42,73 @@ function App() {
             </div>
           </div>
           {/* tabs */}
-          <div role="tablist" className="daisyui-tabs-boxed daisyui-tabs">
-            <a role="tab" className="daisyui-tab daisyui-tab-active">
-              Mint
-            </a>
-            <a role="tab" className="daisyui-tab">
-              Swap
-            </a>
-            <a role="tab" className="daisyui-tab">
-              Pay
-            </a>
-            <a role="tab" className="daisyui-tab">
-              Vote
-            </a>
-          </div>
-          {/* main app UI */}
-          <div className="flex w-full flex-row">
-            <div className="card grid h-full flex-grow place-items-center rounded-box bg-base-300">
-              <Mint />
-            </div>
-            <div className="daisyui-divider lg:daisyui-divider-horizontal"></div>
-            <div className="card grid h-full flex-grow place-items-center self-center rounded-box bg-base-300">
-              <Inventory />
+          <div className="my-4 flex w-full flex-row justify-center">
+            <div
+              role="tablist"
+              className="daisyui-tabs daisyui-tabs-lifted daisyui-tabs-lg"
+            >
+              {/* Mint tab */}
+              <input
+                type="radio"
+                name="Mint"
+                role="tab"
+                className="daisyui-tab"
+                aria-label="Mint"
+                checked
+              />
+              <div
+                role="tabpanel"
+                className="daisyui-tab-content rounded-box border-base-300 bg-base-100 p-6"
+              >
+                {/* Mint UI */}
+                <div className="flex w-full flex-row justify-center">
+                  <div className="flex w-11/12 flex-row">
+                    <div className="card grid h-full flex-grow place-items-center rounded-box">
+                      <Mint />
+                    </div>
+                    <div className="daisyui-divider lg:daisyui-divider-horizontal"></div>
+                    <div className="card grid h-full flex-grow place-items-center rounded-box">
+                      <Inventory />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* Swap tab */}
+              <input
+                type="radio"
+                name="Swap"
+                role="tab"
+                className="daisyui-tab"
+                aria-label="Swap"
+              />
+              <div
+                role="tabpanel"
+                className="daisyui-tab-content rounded-box border-base-300 bg-base-100 p-6"
+              ></div>
+              {/* Pay tab */}
+              <input
+                type="radio"
+                name="Pay"
+                role="tab"
+                className="daisyui-tab"
+                aria-label="Pay"
+              />
+              <div
+                role="tabpanel"
+                className="daisyui-tab-content rounded-box border-base-300 bg-base-100 p-6"
+              ></div>
+              {/* Vote tab */}
+              <input
+                type="radio"
+                name="Vote"
+                role="tab"
+                className="daisyui-tab"
+                aria-label="Vote"
+              />
+              <div
+                role="tabpanel"
+                className="daisyui-tab-content rounded-box border-base-300 bg-base-100 p-6"
+              ></div>
             </div>
           </div>
         </div>
