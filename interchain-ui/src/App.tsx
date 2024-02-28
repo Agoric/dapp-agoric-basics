@@ -21,10 +21,8 @@ function App() {
       }}
     >
       <ContractProvider>
-        <div>
-          <Navbar />
-          <Tabs />
-        </div>
+        <Navbar />
+        <Tabs />
       </ContractProvider>
     </AgoricProvider>
   );
