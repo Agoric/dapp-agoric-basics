@@ -3,7 +3,7 @@ import { Range } from 'react-daisyui';
 import { AmountMath } from '@agoric/ertp';
 import { makeCopyBag } from '@endo/patterns';
 import { AgoricWalletConnection, useAgoric } from '@agoric/react-components';
-import { useContractStore } from '../store/contract';
+import { useContractStore } from '../../store/contract';
 
 const IST_UNIT = 1_000_000n;
 
@@ -48,7 +48,7 @@ const makeOffer = (
   );
 };
 
-const MintConcertTicket = ({
+const MintRow = ({
   kind,
   price,
   available,
@@ -125,16 +125,16 @@ const MintConcertTicket = ({
   );
 };
 
-const Mint = () => {
+const MintTickets = () => {
   return (
     <div>
-      <MintConcertTicket kind="Front" available={3} price={3} />
+      <MintRow kind="Front" available={3} price={3} />
       <div className="daisyui-divider"></div>
-      <MintConcertTicket kind="Middle" available={3} price={2} />
+      <MintRow kind="Middle" available={3} price={2} />
       <div className="daisyui-divider"></div>
-      <MintConcertTicket kind="Last" available={3} price={1} />
+      <MintRow kind="Last" available={3} price={1} />
     </div>
   );
 };
 
-export { Mint };
+export { MintTickets };
