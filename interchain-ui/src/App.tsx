@@ -4,8 +4,16 @@ import { ContractProvider } from './providers/Contract';
 import { AgoricProvider, ConnectWalletButton } from '@agoric/react-components';
 import { wallets } from 'cosmos-kit';
 import '@agoric/react-components/dist/style.css';
+import { TabWrapper } from './components/TabWrapper';
+import { useState } from 'react';
 
 function App() {
+  const [activeTab, setActiveTab] = useState('Mint');
+
+  const handleTabClick = (tab: string) => {
+    setActiveTab(tab);
+  };
+
   return (
     <AgoricProvider
       wallets={wallets.extension}
@@ -47,18 +55,10 @@ function App() {
               role="tablist"
               className="daisyui-tabs daisyui-tabs-lifted daisyui-tabs-lg"
             >
-              {/* Mint tab */}
-              <input
-                type="radio"
-                name="Mint"
-                role="tab"
-                className="daisyui-tab"
-                aria-label="Mint"
-                checked
-              />
-              <div
-                role="tabpanel"
-                className="daisyui-tab-content rounded-box border-base-300 bg-base-100 p-6"
+              <TabWrapper
+                tab="Mint"
+                activeTab={activeTab}
+                handleTabClick={handleTabClick}
               >
                 {/* Mint UI */}
                 <div className="flex w-full flex-row justify-center">
@@ -72,43 +72,28 @@ function App() {
                     </div>
                   </div>
                 </div>
-              </div>
-              {/* Swap tab */}
-              <input
-                type="radio"
-                name="Swap"
-                role="tab"
-                className="daisyui-tab"
-                aria-label="Swap"
-              />
-              <div
-                role="tabpanel"
-                className="daisyui-tab-content rounded-box border-base-300 bg-base-100 p-6"
-              ></div>
-              {/* Pay tab */}
-              <input
-                type="radio"
-                name="Pay"
-                role="tab"
-                className="daisyui-tab"
-                aria-label="Pay"
-              />
-              <div
-                role="tabpanel"
-                className="daisyui-tab-content rounded-box border-base-300 bg-base-100 p-6"
-              ></div>
-              {/* Vote tab */}
-              <input
-                type="radio"
-                name="Vote"
-                role="tab"
-                className="daisyui-tab"
-                aria-label="Vote"
-              />
-              <div
-                role="tabpanel"
-                className="daisyui-tab-content rounded-box border-base-300 bg-base-100 p-6"
-              ></div>
+              </TabWrapper>
+              <TabWrapper
+                tab="Swap"
+                activeTab={activeTab}
+                handleTabClick={handleTabClick}
+              >
+                <div>TBD</div>
+              </TabWrapper>
+              <TabWrapper
+                tab="Pay"
+                activeTab={activeTab}
+                handleTabClick={handleTabClick}
+              >
+                <div>TBD</div>
+              </TabWrapper>
+              <TabWrapper
+                tab="Vote"
+                activeTab={activeTab}
+                handleTabClick={handleTabClick}
+              >
+                <div>TBD</div>
+              </TabWrapper>
             </div>
           </div>
         </div>
