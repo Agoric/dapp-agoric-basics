@@ -57,12 +57,12 @@ function App() {
             </a>
           </div>
           {/* main app UI */}
-          <div className="flex w-full flex-row items-center">
+          <div className="flex w-full flex-row">
             <div className="card grid h-full flex-grow place-items-center rounded-box bg-base-300">
               <Mint />
             </div>
             <div className="daisyui-divider lg:daisyui-divider-horizontal"></div>
-            <div className="card grid h-full flex-grow place-items-center rounded-box bg-base-300">
+            <div className="card grid h-full flex-grow place-items-center self-center rounded-box bg-base-300">
               <Inventory />
             </div>
           </div>

@@ -85,7 +85,7 @@ const MintConcertTicket = ({
             onChange={evt => setTickets(Number(evt.target.value))}
           />
           {/* card action */}
-          <div className="daisyui-card-actions flex items-center">
+          <div className="daisyui-card-actions flex">
             {/* ticket price */}
             <div className="daisyui-stats shadow">
               <div className="daisyui-stat">
@@ -103,7 +103,7 @@ const MintConcertTicket = ({
             <div className="daisyui-divider lg:daisyui-divider-horizontal"></div>
             {/* mint button */}
             <button
-              className="daisyui-btn daisyui-btn-primary"
+              className="daisyui-btn daisyui-btn-primary self-center"
               onClick={() => {
                 if (walletConnection) {
                   makeOffer(
