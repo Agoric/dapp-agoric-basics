@@ -68,19 +68,40 @@ print-key: /root/.agoric/user1.key
 	@agd keys show user1 -a --keyring-backend="test"
 	@echo
 
-SCRIPT=start-sell-concert-tickets.js
-PERMIT=start-sell-concert-tickets-permit.json
-start-contract: $(SCRIPT) $(PERMIT) install-bundles
-	scripts/propose-start-contract.sh
+start-contract: start-contract-mint start-contract-swap start-contract-pay
 
-install-bundles: bundles/bundle-list
-	./scripts/install-bundles.sh
+start-contract-mint:
+	yarn node scripts/deploy-contract.js \
+		--install src/sell-concert-tickets.contract.js \
+		--eval src/platform-goals/board-aux.core.js \
+		--eval src/sell-concert-tickets.proposal.js
 
-build-proposal: bundles/bundle-list
+start-contract-swap:
+	yarn node scripts/deploy-contract.js \
+		--install src/swaparoo.contract.js \
+		--eval src/swaparoo.proposal.js
 
-bundles/bundle-list $(SCRIPT) $(PERMIT):
-	./scripts/build-proposal.sh
+start-contract-pay:
+	yarn node scripts/deploy-contract.js \
+		--install src/postal-service.contract.js \
+		--eval src/postal-service.proposal.js
 
+# bundle-X.json.installed show that bundle-X.json was installed
+# see also e2e-tools.js
+%.json.installed: %.json
+	@echo '{"up-to-date": false}'
+
+# X.js.done shows that X.js core eval ran
+%.js.done: %.js
+	@echo '{"up-to-date": false}'
+
+# Dependencies to re-run core eval when source changes
+# NOTE: manually updated
+bundles/deploy-send.js: src/start-postalSvc.js
+	@echo '{"up-to-date": false}'
+
+bundles/deploy-swaparoo.js: src/swaparoo.proposal.js
+	@echo '{"up-to-date": false}'
 
 clean:
-	@rm -rf $(SCRIPT) $(PERMIT) bundles/
+	@rm -rf bundles/
