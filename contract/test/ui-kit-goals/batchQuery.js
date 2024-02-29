@@ -16,6 +16,7 @@ export const keyToPath = key => {
   assert(kind === 'children' || kind === 'data');
   /** @type {[kind: 'children' | 'data', item: string]} */
   const out = [kind, rest.join('.')];
+  return out;
 };
 
 /**
