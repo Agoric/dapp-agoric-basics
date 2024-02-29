@@ -1,50 +1,31 @@
 // @ts-check
 import { E } from '@endo/far';
-import { makeMarshal } from '@endo/marshal';
 import { AmountMath } from '@agoric/ertp/src/amountMath.js';
 
 console.warn('start-contract-proposal.js module evaluating');
 
 const { Fail } = assert;
 
-// vstorage paths under published.*
-const BOARD_AUX = 'boardAux';
-
-const marshalData = makeMarshal(_val => Fail`data only`);
-
-const IST_UNIT = 1_000_000n;
-const CENT = IST_UNIT / 100n;
+const contractName = 'swaparoo';
 
 /**
- * Make a storage node for auxilliary data for a value on the board.
- *
- * @param {ERef<StorageNode>} chainStorage
- * @param {string} boardId
+ * @typedef {{
+ *   installation: PromiseSpaceOf<{ swaparoo: Installation }>;
+ *   instance: PromiseSpaceOf<{ swaparoo: Instance }>;
+ * }} SwaparooSpace
  */
-const makeBoardAuxNode = async (chainStorage, boardId) => {
-  const boardAux = E(chainStorage).makeChildNode(BOARD_AUX);
-  return E(boardAux).makeChildNode(boardId);
-};
-
-const publishBrandInfo = async (chainStorage, board, brand) => {
-  const [id, displayInfo] = await Promise.all([
-    E(board).getId(brand),
-    E(brand).getDisplayInfo(),
-  ]);
-  const node = makeBoardAuxNode(chainStorage, id);
-  const aux = marshalData.toCapData(harden({ displayInfo }));
-  await E(node).setValue(JSON.stringify(aux));
-};
-
-const contractName = 'swaparoo';
 
 /**
  * Core eval script to install contract
  *
  * @param {BootstrapPowers} powers
+ * @param {*} config
  */
 export const installContract = async (powers, config) => {
   console.log('installContract() ...', contractName);
+  /** @type { BootstrapPowers & SwaparooSpace} */
+  // @ts-expect-error cast
+  const swapPowers = powers;
   const { bundleID = Fail`missing bundleID` } =
     config.options?.[contractName] || {};
   const {
@@ -52,7 +33,7 @@ export const installContract = async (powers, config) => {
     installation: {
       produce: { [contractName]: produceInstallation },
     },
-  } = powers;
+  } = swapPowers;
 
   const installation = await E(zoe).installBundleID(bundleID);
   produceInstallation.reset();
@@ -67,29 +48,25 @@ export const installContract = async (powers, config) => {
  */
 export const startContract = async permittedPowers => {
   console.error('startContract()...');
+  /** @type { BootstrapPowers & SwaparooSpace} */
+  // @ts-expect-error bootstrap powers evolve with BLD staker governance
+  const swapPowers = permittedPowers;
   const {
     consume: { startUpgradable, namesByAddressAdmin: namesByAddressAdminP },
     brand: {
       consume: { IST: istBrandP },
     },
-    // issuer: {
-    //   // @ts-expect-error dynamic extension to promise space
-    //   produce: { Place: producePlaceIssuer },
-    // },
     installation: {
       consume: { [contractName]: installationP },
     },
     instance: {
       produce: { [contractName]: produceInstance },
     },
-  } = permittedPowers;
+  } = swapPowers;
 
   const istBrand = await istBrandP;
-  const ist = {
-    brand: istBrand,
-  };
   // NOTE: TODO all terms for the contract go here
-  let oneIST = AmountMath.make(istBrand, 1n);
+  const oneIST = AmountMath.make(istBrand, 1n);
   const namesByAddressAdmin = await namesByAddressAdminP;
   const terms = { feeAmount: oneIST, namesByAddressAdmin };
 
