@@ -7,13 +7,17 @@ import { makePromiseSpace, makeNameHubKit } from '@agoric/vats';
 import { makeWellKnownSpaces } from '@agoric/vats/src/core/utils.js';
 import { makeFakeVatAdmin } from '@agoric/zoe/tools/fakeVatAdmin.js';
 import { makeZoeKitForTest } from '@agoric/zoe/tools/setup-zoe.js';
-import { makeFakeStorageKit } from '@agoric/internal/src/storage-test-utils.js';
 import { AmountMath, makeIssuerKit } from '@agoric/ertp';
+
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { makeFakeStorageKit } from '@agoric/internal/src/storage-test-utils.js';
+
 import {
   installContract,
   startContract,
 } from '../src/start-contract-proposal.js';
 import { makeStableFaucet } from './mintStable.js';
+import { seatLike } from './wallet-tools.js';
 
 /** @type {import('ava').TestFn<Awaited<ReturnType<makeTestContext>>>} */
 const test = anyTest;
@@ -25,7 +29,7 @@ const assets = {
 };
 const contractName = 'swaparoo';
 
-const makeTestContext = async t => {
+const makeTestContext = async _t => {
   const bundleCache = await makeNodeBundleCache('bundles/', {}, s => import(s));
 
   return { bundleCache, shared: {} };
@@ -46,7 +50,7 @@ const mockBootstrap = async log => {
   const feeIssuer = await E(zoe).getFeeIssuer();
   const feeBrand = await E(feeIssuer).getBrand();
 
-  const { rootNode: chainStorage, data } = makeFakeStorageKit('published');
+  const { rootNode: chainStorage } = makeFakeStorageKit('published');
 
   const { nameAdmin: agoricNamesAdmin } = makeNameHubKit();
   const spaces = await makeWellKnownSpaces(agoricNamesAdmin, log, [
@@ -85,6 +89,8 @@ const mockBootstrap = async log => {
   spaces.issuer.produce.BLD.resolve(bldIssuerKit.issuer);
   spaces.brand.produce.BLD.resolve(bldIssuerKit.brand);
 
+  /** @type {BootstrapPowers} */
+  // @ts-expect-error mock / cast
   const powers = { produce, consume, ...spaces };
 
   return { powers, vatAdminState };
@@ -143,6 +149,7 @@ const startAlice = async (
     },
   };
 
+  /** @type {import('@agoric/smart-wallet/src/offers.js').OfferSpec} */
   const offerSpec = {
     id: 'alice-swap-1',
     invitationSpec: {
@@ -185,12 +192,13 @@ const startJack = async (
     },
   };
 
+  /** @type {import('@agoric/smart-wallet/src/offers.js').OfferSpec} */
   const offerSpec = {
     id: 'jack-123',
     invitationSpec: {
       source: 'purse',
       instance,
-      // description is required???
+      description: 'matchOffer',
     },
     proposal,
   };
@@ -203,7 +211,7 @@ const { entries, fromEntries } = Object;
 /** @type { <T extends Record<string, ERef<any>>>(obj: T) => Promise<{ [K in keyof T]: Awaited<T[K]>}> } */
 const allValues = async obj => {
   const es = await Promise.all(
-    entries(obj).map(async ([k, v]) => [k, await v]),
+    entries(obj).map(async ([k, vP]) => Promise.resolve(vP).then(v => [k, v])),
   );
   return fromEntries(es);
 };
@@ -213,13 +221,18 @@ const mapValues = (obj, f) =>
   fromEntries(entries(obj).map(([p, v]) => [p, f(v)]));
 
 /**
+ * @deprecated use wallet-tools instead
+ *
  * @param {{
  *   zoe: ERef<ZoeService>;
  *   chainStorage: ERef<StorageNode>;
  *   namesByAddressAdmin: ERef<import('@agoric/vats').NameAdmin>;
  * }} powers
  *
- * @typedef {import('@agoric/smart-wallet').OfferSpec} OfferSpec
+ * @param {IssuerKeywordRecord} issuerKeywordRecord
+ *
+ * @typedef {import('@agoric/smart-wallet/src/offers.js').OfferSpec} OfferSpec
+ * @typedef {import('@agoric/smart-wallet/src/smartWallet.js').UpdateRecord} UpdateRecord
  *
  * @typedef {Awaited<ReturnType<Awaited<ReturnType<typeof mockWalletFactory>['makeSmartWallet']>>>} MockWallet
  */
@@ -282,23 +295,28 @@ const mockWalletFactory = (
       //   const { instance, description } = invitationSpec;
       const invitationAmount = await E(invitationPurse).getCurrentAmount();
       console.log(
-        '@@TODO: check invitation amount against instance',
+        'TODO: check invitation amount against instance',
         invitationAmount,
+        invitationSpec,
       );
       return E(invitationPurse).withdraw(invitationAmount);
     };
 
-    /** @param {OfferSpec} offerSpec */
+    const sourceImpl = {
+      contract: getContractInvitation,
+      purse: getPurseInvitation,
+    };
+    /**
+     * @param {OfferSpec} offerSpec
+     * @returns {AsyncGenerator<UpdateRecord>}
+     */
     async function* executeOffer(offerSpec) {
       const { invitationSpec, proposal, offerArgs } = offerSpec;
       const { source } = invitationSpec;
-      const invitation = await (source === 'contract'
-        ? getContractInvitation(invitationSpec)
-        : source === 'purse'
-          ? getPurseInvitation(invitationSpec)
-          : Fail`unsupported source: ${source}`);
+      const impl = sourceImpl[source] || Fail`unsupported source: ${source}`;
+      const invitation = await impl(invitationSpec);
       const pmts = await allValues(
-        mapValues(proposal.give, async amt => {
+        mapValues(proposal.give || {}, async amt => {
           const { brand } = amt;
           if (!purseByBrand.has(brand))
             throw Error(`brand not known/supported: ${brand}`);
@@ -308,16 +326,16 @@ const mockWalletFactory = (
       );
       const seat = await E(zoe).offer(invitation, proposal, pmts, offerArgs);
       //   console.log(address, offerSpec.id, 'got seat');
-      yield { updated: 'OfferStatus', status: offerSpec };
+      yield { updated: 'offerStatus', status: offerSpec };
       const result = await E(seat).getOfferResult();
       //   console.log(address, offerSpec.id, 'got result', result);
-      yield { updated: 'OfferStatus', status: { ...offerSpec, result } };
+      yield { updated: 'offerStatus', status: { ...offerSpec, result } };
       const [payouts, numWantsSatisfied] = await Promise.all([
         E(seat).getPayouts(),
         E(seat).numWantsSatisfied(),
       ]);
       yield {
-        updated: 'OfferStatus',
+        updated: 'offerStatus',
         status: { ...offerSpec, result, numWantsSatisfied },
       };
       const amts = await allValues(
@@ -327,7 +345,7 @@ const mockWalletFactory = (
       );
       //   console.log(address, offerSpec.id, 'got payouts', amts);
       yield {
-        updated: 'OfferStatus',
+        updated: 'offerStatus',
         status: { ...offerSpec, result, numWantsSatisfied, payouts: amts },
       };
     }
@@ -401,44 +419,28 @@ test.serial('basic swap', async t => {
   await E(wallet.alice.deposit).receive(
     await mintBrandedPayment(fiveBeans.value),
   );
-  const aliceUpdates = await startAlice(
-    wellKnown,
-    wallet.alice,
-    fiveBeans,
-    cowAmount,
-    addr.jack,
+  const aliceSeat = seatLike(
+    await startAlice(wellKnown, wallet.alice, fiveBeans, cowAmount, addr.jack),
   );
 
-  const seated = await aliceUpdates.next();
-  const aliceResult = await aliceUpdates.next();
-  t.is(aliceResult.value.status.result, 'invitation sent');
+  const aliceResult = await E(aliceSeat).getOfferResult();
+  t.is(aliceResult, 'invitation sent');
 
   await E(wallet.jack.deposit).receive(await mintBrandedPayment(ONE_IST));
   await E(wallet.jack.deposit).receive(
     await E(E.get(bldIssuerKit).mint).mintPayment(cowAmount),
   );
-  const jackUpdates = await startJack(
-    wellKnown,
-    wallet.jack,
-    fiveBeans,
-    cowAmount,
+  const jackSeat = seatLike(
+    await startJack(wellKnown, wallet.jack, fiveBeans, cowAmount),
   );
 
-  const getPayouts = async updates => {
-    for await (const update of updates) {
-      if (update.updated === 'OfferStatus' && 'payouts' in update.status) {
-        return update.status.payouts;
-      }
-    }
-  };
-
-  const jackPayouts = await getPayouts(jackUpdates);
+  const jackPayouts = await jackSeat.getPayoutAmounts();
   t.log('jack got', jackPayouts);
-  const actualBeansAmount = jackPayouts['MagicBeans'];
+  const actualBeansAmount = jackPayouts.MagicBeans;
   t.deepEqual(actualBeansAmount, fiveBeans);
 
-  const alicePayouts = await getPayouts(aliceUpdates);
+  const alicePayouts = await aliceSeat.getPayoutAmounts();
   t.log('alice got', alicePayouts);
-  const actualCowAmount = alicePayouts['Cow'];
+  const actualCowAmount = alicePayouts.Cow;
   t.deepEqual(actualCowAmount, cowAmount);
 });
