@@ -1,5 +1,4 @@
 /** @file swap assets */
-/* eslint @typescript-eslint/no-floating-promises: "warn" */
 // @ts-check
 
 import { M, matches, mustMatch } from '@endo/patterns';
@@ -7,14 +6,9 @@ import { E, Far } from '@endo/far';
 import '@agoric/zoe/exported.js';
 import { atomicRearrange } from '@agoric/zoe/src/contractSupport/atomicTransfer.js';
 import '@agoric/zoe/src/contracts/exported.js';
-import { AmountShape } from '@agoric/ertp/src/typeGuards.js';
 import { makeCollectFeesInvitation } from './collectFees.js';
 
-import { makeTracer } from './debug.js';
-
 const { quote: q } = assert;
-
-const trace = makeTracer('Swaparoo', true);
 
 const makeNatAmountShape = (brand, min) =>
   harden({ brand, value: min ? M.gte(min) : M.nat() });
@@ -49,7 +43,6 @@ const IssuerShape = M.remotable('Issuer');
  * ref https://github.com/Agoric/agoric-sdk/issues/8408#issuecomment-1741445458
  *
  * @param {ERef<import('@agoric/vats').NameAdmin>} namesByAddressAdmin
- * @param namesByAddressAdminP
  */
 const fixHub = async namesByAddressAdmin => {
   /** @type {import('@agoric/vats').NameHub} */
@@ -71,7 +64,7 @@ const fixHub = async namesByAddressAdmin => {
 };
 
 /**
- * @param {ZCF<{feeAmount: Amount<'nat'>, namesByAddressAdmin: NamesByAddressAdmin}>} zcf
+ * @param {ZCF<{feeAmount: Amount<'nat'>, namesByAddressAdmin: import('@agoric/vats').NamesByAddressAdmin}>} zcf
  */
 export const start = async zcf => {
   // set up fee handling
@@ -83,13 +76,13 @@ export const start = async zcf => {
   const feeShape = makeNatAmountShape(feeBrand, feeAmount.value);
   const depositFacetFromAddr = fixHub(namesByAddressAdmin);
 
-  /** @type {OfferHandler} */
-  const makeSecondInvitation = async (
-    firstSeat,
-    { addr: secondPartyAddress },
-  ) => {
-    mustMatch(secondPartyAddress, M.string());
-    const { want, give } = firstSeat.getProposal();
+  /**
+   * @param { ZCFSeat } firstSeat
+   * @param {{ addr: string }} offerArgs
+   */
+  const makeSecondInvitation = async (firstSeat, offerArgs ) => {
+    mustMatch(offerArgs, harden({ addr: M.string() }));
+    const { addr: secondPartyAddress } = offerArgs;
 
     const makeSecondProposalShape = want => {
       const givePattern = Object.fromEntries(
@@ -100,6 +93,8 @@ export const start = async zcf => {
         give: M.splitRecord(givePattern),
       });
     };
+
+    const { want, give } = firstSeat.getProposal();
 
     /** @type {OfferHandler} */
     const secondSeatOfferHandler = secondSeat => {
@@ -140,11 +135,11 @@ export const start = async zcf => {
    */
   const makeFirstInvitation = issuers => {
     mustMatch(issuers, M.arrayOf(IssuerShape));
-    issuers.forEach(i => {
+    for (const i of issuers) {
       if (!Object.values(zcf.getTerms().issuers).includes(i)) {
-        return zcf.saveIssuer(i, `Issuer${issuerNumber++}`);
+        zcf.saveIssuer(i, `Issuer${issuerNumber += 1}`);
       }
-    });
+    };
     const proposalShape = M.splitRecord({
       give: M.splitRecord({ Fee: feeShape }),
     });
