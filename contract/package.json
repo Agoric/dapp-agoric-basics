@@ -14,6 +14,7 @@
     "build": "agoric run scripts/build-contract-deployer.js",
     "test": "ava --verbose",
     "lint": "eslint '**/*.js'",
+    "lint:types": "tsc -p jsconfig.json",
     "lint:fix": "eslint --fix '**/*.js'"
   },
   "devDependencies": {
@@ -77,6 +78,7 @@
       "sourceType": "module",
       "ecmaVersion": 2021
     },
+    "ignorePatterns": "bundles/**.js",
     "extends": [
       "@agoric"
     ]
