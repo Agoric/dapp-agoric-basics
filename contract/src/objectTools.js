@@ -1,10 +1,12 @@
 // @ts-check
+import { E } from '@endo/far';
+
 const { entries, fromEntries } = Object;
 
 /** @type { <T extends Record<string, ERef<any>>>(obj: T) => Promise<{ [K in keyof T]: Awaited<T[K]>}> } */
 export const allValues = async obj => {
   const es = await Promise.all(
-    entries(obj).map(async ([k, v]) => [k, await v]),
+    entries(obj).map(([k, vp]) => E.when(vp, v => [k, v])),
   );
   return fromEntries(es);
 };
