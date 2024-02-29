@@ -117,5 +117,19 @@ bundles/bundle-list $(SCRIPT) $(PERMIT):
 	./scripts/build-proposal.sh
 
 
+# bundle-X.json.installed show that bundle-X.json was installed
+# see also e2e-tools.js
+%.json.installed: %.json
+	@echo 1
+
+# X.js.done shows that X.js core eval ran
+%.js.done: %.js
+	@echo 1
+
+# Dependencies to re-run core eval when source changes
+# NOTE: manually updated
+bundles/deploy-send.js: src/start-postalSvc.js
+	@echo 1
+
 clean:
 	@rm -rf $(SCRIPT) $(PERMIT) bundles/
