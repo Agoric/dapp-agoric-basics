@@ -901,42 +901,6 @@
   resolved "https://registry.yarnpkg.com/@agoric/xsnap-lockdown/-/xsnap-lockdown-0.14.1-u13.0.tgz#0bc11a4d19d02a77cd9158dda3877c2ddc1ef8d4"
   integrity sha512-CUd4u1vyqSJfxj2+krNMBmDXlR7yN87RJsmB03ISPs8GuhjIrbdgkU+UfoKIJFLYco2ZSX7vR9j8l6azyVan1Q==
 
-"@agoric/xsnap@^0.14.2":
-  version "0.14.2"
-  resolved "https://registry.yarnpkg.com/@agoric/xsnap/-/xsnap-0.14.2.tgz#0685b1c85af986edc3e5f226fd4e96c44df32bf0"
-  integrity sha512-bA4IZJixw8uCcDBqA9KUKEnxjB65pdkWb5xL0a4XM//QvIzYmB6EGJ80U+pbMOrjGtomUqo0Oxdc5X/PhAniSg==
-  dependencies:
-    "@agoric/assert" "^0.6.0"
-    "@agoric/internal" "^0.3.2"
-    "@agoric/xsnap-lockdown" "^0.14.0"
-    "@endo/bundle-source" "^2.5.1"
-    "@endo/eventual-send" "^0.17.2"
-    "@endo/init" "^0.5.56"
-    "@endo/netstring" "^0.3.26"
-    "@endo/promise-kit" "^0.2.56"
-    "@endo/stream" "^0.3.25"
-    "@endo/stream-node" "^0.2.26"
-    glob "^7.1.6"
-    tmp "^0.2.1"
-
-"@agoric/xsnap@^0.14.3-u12.0", "@agoric/xsnap@^0.14.3-u13.0":
-  version "0.14.3-u13.0"
-  resolved "https://registry.yarnpkg.com/@agoric/xsnap/-/xsnap-0.14.3-u13.0.tgz#fbff403c3df5d4f349d67bed62edb9cc39b20304"
-  integrity sha512-E9NP2Q4cPHesIeZNPnMmA+eWFZcDqNBue0VP0GiI4qUbHjz8uJS7YV/thZjDxJvnfXgT4wmIx8v11pkMp/+EKw==
-  dependencies:
-    "@agoric/assert" "^0.6.1-u11wf.0"
-    "@agoric/internal" "^0.4.0-u13.0"
-    "@agoric/xsnap-lockdown" "^0.14.1-u13.0"
-    "@endo/bundle-source" "2.5.2-upstream-rollup"
-    "@endo/eventual-send" "0.17.2"
-    "@endo/init" "0.5.56"
-    "@endo/netstring" "0.3.26"
-    "@endo/promise-kit" "0.2.56"
-    "@endo/stream" "0.3.25"
-    "@endo/stream-node" "0.2.26"
-    glob "^7.1.6"
-    tmp "^0.2.1"
-
 "@agoric/zoe@^0.26.2":
   version "0.26.2"
   resolved "https://registry.yarnpkg.com/@agoric/zoe/-/zoe-0.26.2.tgz#c6cd260171a4c0307e160b93ae9f6ce29a675d70"
