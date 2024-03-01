@@ -62,29 +62,36 @@ const publishBrandInfo = async (chainStorage, board, brand) => {
  * Core eval script to start contract
  *
  * @param {BootstrapPowers} permittedPowers
+ *
+ * @typedef {{
+ *   installation: PromiseSpaceOf<{ sellConcertTickets: Installation}>;
+ *   instance: PromiseSpaceOf<{ sellConcertTickets: Instance}>;
+ *   brand: PromiseSpaceOf<{ Ticket: Brand }>;
+ *   issuer: PromiseSpaceOf<{ Ticket: Issuer }>;
+ * }} SellTicketsSpace
  */
 export const startSellConcertTicketsContract = async permittedPowers => {
   console.error('startSellConcertTicketsContract()...');
+  /** @type {BootstrapPowers & SellTicketsSpace} */
+  // @ts-expect-error cast
+  const sellPowers = permittedPowers;
   const {
     consume: { board, chainStorage, startUpgradable, zoe },
     brand: {
       consume: { IST: istBrandP },
-      // @ts-expect-error dynamic extension to promise space
       produce: { Ticket: produceTicketBrand },
     },
     issuer: {
       consume: { IST: istIssuerP },
-      // @ts-expect-error dynamic extension to promise space
       produce: { Ticket: produceTicketIssuer },
     },
     installation: {
       consume: { sellConcertTickets: sellConcertTicketsInstallationP },
     },
     instance: {
-      // @ts-expect-error dynamic extension to promise space
       produce: { sellConcertTickets: produceInstance },
     },
-  } = permittedPowers;
+  } = sellPowers;
 
   const istIssuer = await istIssuerP;
   const istBrand = await istBrandP;
