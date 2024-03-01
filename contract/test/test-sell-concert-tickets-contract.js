@@ -101,7 +101,7 @@ test('Start the contract', async t => {
  *
  * @param {import('ava').ExecutionContext} t
  * @param {ZoeService} zoe
- * @param {ERef<import('@agoric/zoe/src/zoeService/utils').Instance<AssetContractFn>} instance
+ * @param {ERef<import('@agoric/zoe/src/zoeService/utils').Instance<AssetContractFn>>} instance
  * @param {Purse} purse
  * @param {[string, NatValue][]} choices
  * @param {boolean} expectSuccessfulTrade
@@ -269,7 +269,12 @@ test('use the code that will go on chain to start the contract', async t => {
       },
       instance: { produce: { sellConcertTickets: sync.instance } },
     };
-    return powers;
+
+    /** @type {BootstrapPowers} */
+    // @ts-expect-error mock
+    const typedPowers = powers;
+
+    return typedPowers;
   };
 
   const powers = await mockBootstrap();
