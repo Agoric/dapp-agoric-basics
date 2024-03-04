@@ -2,103 +2,33 @@
 import { test as anyTest } from '@agoric/zoe/tools/prepare-test-env-ava.js';
 import { createRequire } from 'node:module';
 import { E, Far } from '@endo/far';
-import { makeNodeBundleCache } from '@endo/bundle-source/cache.js';
-import { makePromiseSpace, makeNameHubKit } from '@agoric/vats';
-import { makeWellKnownSpaces } from '@agoric/vats/src/core/utils.js';
-import { makeFakeVatAdmin } from '@agoric/zoe/tools/fakeVatAdmin.js';
-import { makeZoeKitForTest } from '@agoric/zoe/tools/setup-zoe.js';
-import { AmountMath, makeIssuerKit } from '@agoric/ertp';
+import { AmountMath } from '@agoric/ertp';
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { makeFakeStorageKit } from '@agoric/internal/src/storage-test-utils.js';
-
+import { mockBootstrapPowers } from './boot-tools.js';
 import {
   installContract,
   startContract,
 } from '../src/start-contract-proposal.js';
 import { makeStableFaucet } from './mintStable.js';
 import { seatLike } from './wallet-tools.js';
+import { makeBundleCacheContext } from './bundle-tools.js';
+import { allValues, mapValues } from '../src/objectTools.js';
 
-/** @type {import('ava').TestFn<Awaited<ReturnType<makeTestContext>>>} */
+/** @type {import('ava').TestFn<Awaited<ReturnType<makeBundleCacheContext>>>} */
 const test = anyTest;
 
-const myRequire = createRequire(import.meta.url);
+const nodeRequire = createRequire(import.meta.url);
 
-const assets = {
-  swaparoo: myRequire.resolve('../src/swaparoo.js'),
-};
 const contractName = 'swaparoo';
-
-const makeTestContext = async _t => {
-  const bundleCache = await makeNodeBundleCache('bundles/', {}, s => import(s));
-
-  return { bundleCache, shared: {} };
+const assets = {
+  [contractName]: nodeRequire.resolve(`../src/${contractName}.js`),
 };
 
-test.before(async t => (t.context = await makeTestContext(t)));
-
-/**
- * Mock enough powers for startSwaparoo permit.
- * Plus access to load bundles, peek at vstorage, and mint IST and BLD.
- *
- * @param {(...args: unknown[]) => void} log
- */
-const mockBootstrap = async log => {
-  const { produce, consume } = makePromiseSpace();
-  const { admin, vatAdminState } = makeFakeVatAdmin();
-  const { zoeService: zoe, feeMintAccess } = makeZoeKitForTest(admin);
-  const feeIssuer = await E(zoe).getFeeIssuer();
-  const feeBrand = await E(feeIssuer).getBrand();
-
-  const { rootNode: chainStorage } = makeFakeStorageKit('published');
-
-  const { nameAdmin: agoricNamesAdmin } = makeNameHubKit();
-  const spaces = await makeWellKnownSpaces(agoricNamesAdmin, log, [
-    'installation',
-    'instance',
-    'issuer',
-    'brand',
-  ]);
-
-  const { nameAdmin: namesByAddressAdmin } = makeNameHubKit();
-
-  const startUpgradable = ({
-    installation,
-    issuerKeywordRecord,
-    terms,
-    privateArgs,
-    label,
-  }) =>
-    E(zoe).startInstance(
-      installation,
-      issuerKeywordRecord,
-      terms,
-      privateArgs,
-      label,
-    );
-
-  const bldIssuerKit = makeIssuerKit('BLD', 'nat', { decimalPlaces: 6 });
-  produce.bldIssuerKit.resolve(bldIssuerKit);
-  produce.zoe.resolve(zoe);
-  produce.startUpgradable.resolve(startUpgradable);
-  produce.feeMintAccess.resolve(feeMintAccess);
-  produce.chainStorage.resolve(chainStorage);
-  produce.namesByAddressAdmin.resolve(namesByAddressAdmin);
-  spaces.issuer.produce.IST.resolve(feeIssuer);
-  spaces.brand.produce.IST.resolve(feeBrand);
-  spaces.issuer.produce.BLD.resolve(bldIssuerKit.issuer);
-  spaces.brand.produce.BLD.resolve(bldIssuerKit.brand);
-
-  /** @type {BootstrapPowers} */
-  // @ts-expect-error mock / cast
-  const powers = { produce, consume, ...spaces };
-
-  return { powers, vatAdminState };
-};
+test.before(async t => (t.context = await makeBundleCacheContext(t)));
 
 test.serial('bootstrap and start contract', async t => {
   t.log('bootstrap');
-  const { powers, vatAdminState } = await mockBootstrap(console.log);
+  const { powers, vatAdminState } = await mockBootstrapPowers(t.log);
 
   const { bundleCache } = t.context;
   const bundle = await bundleCache.load(assets.swaparoo, contractName);
@@ -205,20 +135,6 @@ const startJack = async (
 
   return E(wallet.offers).executeOffer(offerSpec);
 };
-
-const { entries, fromEntries } = Object;
-
-/** @type { <T extends Record<string, ERef<any>>>(obj: T) => Promise<{ [K in keyof T]: Awaited<T[K]>}> } */
-const allValues = async obj => {
-  const es = await Promise.all(
-    entries(obj).map(async ([k, vP]) => Promise.resolve(vP).then(v => [k, v])),
-  );
-  return fromEntries(es);
-};
-
-/** @type { <V, U, T extends Record<string, V>>(obj: T, f: (v: V) => U) => Record<string, U>} */
-const mapValues = (obj, f) =>
-  fromEntries(entries(obj).map(([p, v]) => [p, f(v)]));
 
 /**
  * @deprecated use wallet-tools instead
