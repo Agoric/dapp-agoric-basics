@@ -35,7 +35,7 @@ const { entries } = Object;
  * @param {(...args: unknown[]) => void} log
  * @param {string[]} [spaceNames]
  */
-const mockBootstrapPowers = async (
+export const mockBootstrapPowers = async (
   log,
   spaceNames = ['installation', 'instance', 'issuer', 'brand'],
 ) => {
@@ -62,6 +62,24 @@ const mockBootstrapPowers = async (
   const chainStorage = makeMockChainStorageRoot();
   const board = makeFakeBoard();
 
+  const startUpgradable = ({
+    installation,
+    issuerKeywordRecord,
+    terms,
+    privateArgs,
+    label,
+  }) =>
+    E(zoe).startInstance(
+      installation,
+      issuerKeywordRecord,
+      terms,
+      privateArgs,
+      label,
+    );
+
+  const bldIssuerKit = makeIssuerKit('BLD', 'nat', { decimalPlaces: 6 });
+  produce.bldIssuerKit.resolve(bldIssuerKit);
+  produce.startUpgradable.resolve(startUpgradable);
   produce.zoe.resolve(zoe);
   produce.feeMintAccess.resolve(feeMintAccess);
   produce.agoricNamesAdmin.resolve(agoricNamesAdmin);
@@ -72,8 +90,10 @@ const mockBootstrapPowers = async (
   produce.chainStorage.resolve(chainStorage);
   produce.board.resolve(board);
   spaces.brand.produce.timer.resolve(timerBrand);
+  spaces.brand.produce.BLD.resolve(bldIssuerKit.brand);
   spaces.brand.produce.IST.resolve(feeBrand);
   spaces.brand.produce.Invitation.resolve(invitationBrand);
+  spaces.issuer.produce.BLD.resolve(bldIssuerKit.issuer);
   spaces.issuer.produce.IST.resolve(feeIssuer);
   spaces.issuer.produce.Invitation.resolve(invitationIssuer);
   produce.priceAuthority.resolve(Far('NullPriceAuthority', {}));
