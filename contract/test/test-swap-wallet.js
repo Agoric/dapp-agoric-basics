@@ -22,7 +22,7 @@ const nodeRequire = createRequire(import.meta.url);
 
 const contractName = 'swaparoo';
 const assets = {
-  [contractName]: nodeRequire.resolve(`../src/${contractName}.js`),
+  [contractName]: nodeRequire.resolve(`../src/${contractName}.contract.js`),
 };
 
 test.before(async t => (t.context = await makeBundleCacheContext(t)));
