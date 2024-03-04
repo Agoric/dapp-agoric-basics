@@ -1,7 +1,7 @@
 // @ts-check
 import { test as anyTest } from '@agoric/zoe/tools/prepare-test-env-ava.js';
 import { createRequire } from 'node:module';
-import { E, Far } from '@endo/far';
+import { E } from '@endo/far';
 import { AmountMath } from '@agoric/ertp';
 
 import { mockBootstrapPowers } from './boot-tools.js';
@@ -10,9 +10,10 @@ import {
   startContract,
 } from '../src/start-contract-proposal.js';
 import { makeStableFaucet } from './mintStable.js';
-import { seatLike } from './wallet-tools.js';
+import { mockWalletFactory, seatLike } from './wallet-tools.js';
 import { makeBundleCacheContext } from './bundle-tools.js';
-import { allValues, mapValues } from '../src/objectTools.js';
+
+/** @typedef {import('./wallet-tools.js').MockWallet} MockWallet */
 
 /** @type {import('ava').TestFn<Awaited<ReturnType<makeBundleCacheContext>>>} */
 const test = anyTest;
@@ -134,142 +135,6 @@ const startJack = async (
   };
 
   return E(wallet.offers).executeOffer(offerSpec);
-};
-
-/**
- * @deprecated use wallet-tools instead
- *
- * @param {{
- *   zoe: ERef<ZoeService>;
- *   chainStorage: ERef<StorageNode>;
- *   namesByAddressAdmin: ERef<import('@agoric/vats').NameAdmin>;
- * }} powers
- *
- * @param {IssuerKeywordRecord} issuerKeywordRecord
- *
- * @typedef {import('@agoric/smart-wallet/src/offers.js').OfferSpec} OfferSpec
- * @typedef {import('@agoric/smart-wallet/src/smartWallet.js').UpdateRecord} UpdateRecord
- *
- * @typedef {Awaited<ReturnType<Awaited<ReturnType<typeof mockWalletFactory>['makeSmartWallet']>>>} MockWallet
- */
-const mockWalletFactory = (
-  { zoe, namesByAddressAdmin },
-  issuerKeywordRecord,
-) => {
-  const DEPOSIT_FACET_KEY = 'depositFacet';
-
-  const { Fail } = assert;
-
-  //   const walletsNode = E(chainStorage).makeChildNode('wallet');
-
-  // TODO: provideSmartWallet
-  /** @param {string} address */
-  const makeSmartWallet = async address => {
-    const { nameAdmin: addressAdmin } = await E(
-      namesByAddressAdmin,
-    ).provideChild(address, [DEPOSIT_FACET_KEY]);
-
-    const purseByBrand = new Map();
-    await allValues(
-      mapValues(issuerKeywordRecord, async issuer => {
-        const purse = await E(issuer).makeEmptyPurse();
-        const brand = await E(issuer).getBrand();
-        purseByBrand.set(brand, purse);
-      }),
-    );
-    const invitationBrand = await E(E(zoe).getInvitationIssuer()).getBrand();
-    purseByBrand.has(invitationBrand) ||
-      Fail`no invitation issuer / purse / brand`;
-    const invitationPurse = purseByBrand.get(invitationBrand);
-
-    const depositFacet = Far('DepositFacet', {
-      /** @param {Payment} pmt */
-      receive: async pmt => {
-        const pBrand = await E(pmt).getAllegedBrand();
-        if (!purseByBrand.has(pBrand))
-          throw Error(`brand not known/supported: ${pBrand}`);
-        const purse = purseByBrand.get(pBrand);
-        return E(purse).deposit(pmt);
-      },
-    });
-    await E(addressAdmin).default(DEPOSIT_FACET_KEY, depositFacet);
-
-    // const updatesNode = E(walletsNode).makeChildNode(address);
-    // const currentNode = E(updatesNode).makeChildNode('current');
-
-    const getContractInvitation = invitationSpec => {
-      const {
-        instance,
-        publicInvitationMaker,
-        invitationArgs = [],
-      } = invitationSpec;
-      const pf = E(zoe).getPublicFacet(instance);
-      return E(pf)[publicInvitationMaker](...invitationArgs);
-    };
-
-    const getPurseInvitation = async invitationSpec => {
-      //   const { instance, description } = invitationSpec;
-      const invitationAmount = await E(invitationPurse).getCurrentAmount();
-      console.log(
-        'TODO: check invitation amount against instance',
-        invitationAmount,
-        invitationSpec,
-      );
-      return E(invitationPurse).withdraw(invitationAmount);
-    };
-
-    const sourceImpl = {
-      contract: getContractInvitation,
-      purse: getPurseInvitation,
-    };
-    /**
-     * @param {OfferSpec} offerSpec
-     * @returns {AsyncGenerator<UpdateRecord>}
-     */
-    async function* executeOffer(offerSpec) {
-      const { invitationSpec, proposal, offerArgs } = offerSpec;
-      const { source } = invitationSpec;
-      const impl = sourceImpl[source] || Fail`unsupported source: ${source}`;
-      const invitation = await impl(invitationSpec);
-      const pmts = await allValues(
-        mapValues(proposal.give || {}, async amt => {
-          const { brand } = amt;
-          if (!purseByBrand.has(brand))
-            throw Error(`brand not known/supported: ${brand}`);
-          const purse = purseByBrand.get(brand);
-          return E(purse).withdraw(amt);
-        }),
-      );
-      const seat = await E(zoe).offer(invitation, proposal, pmts, offerArgs);
-      //   console.log(address, offerSpec.id, 'got seat');
-      yield { updated: 'offerStatus', status: offerSpec };
-      const result = await E(seat).getOfferResult();
-      //   console.log(address, offerSpec.id, 'got result', result);
-      yield { updated: 'offerStatus', status: { ...offerSpec, result } };
-      const [payouts, numWantsSatisfied] = await Promise.all([
-        E(seat).getPayouts(),
-        E(seat).numWantsSatisfied(),
-      ]);
-      yield {
-        updated: 'offerStatus',
-        status: { ...offerSpec, result, numWantsSatisfied },
-      };
-      const amts = await allValues(
-        mapValues(payouts, pmtP =>
-          Promise.resolve(pmtP).then(pmt => depositFacet.receive(pmt)),
-        ),
-      );
-      //   console.log(address, offerSpec.id, 'got payouts', amts);
-      yield {
-        updated: 'offerStatus',
-        status: { ...offerSpec, result, numWantsSatisfied, payouts: amts },
-      };
-    }
-
-    return { deposit: depositFacet, offers: Far('Offers', { executeOffer }) };
-  };
-
-  return harden({ makeSmartWallet });
 };
 
 test.serial('basic swap', async t => {
