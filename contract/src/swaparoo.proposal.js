@@ -2,7 +2,7 @@
 import { E } from '@endo/far';
 import { AmountMath } from '@agoric/ertp/src/amountMath.js';
 
-console.warn('start-contract-proposal.js module evaluating');
+console.warn('swaparoo.proposal.js module evaluating');
 
 const { Fail } = assert;
 

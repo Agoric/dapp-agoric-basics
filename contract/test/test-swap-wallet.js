@@ -5,10 +5,7 @@ import { E } from '@endo/far';
 import { AmountMath } from '@agoric/ertp';
 
 import { mockBootstrapPowers } from './boot-tools.js';
-import {
-  installContract,
-  startContract,
-} from '../src/start-contract-proposal.js';
+import { installContract, startContract } from '../src/swaparoo.proposal.js';
 import { makeStableFaucet } from './mintStable.js';
 import { mockWalletFactory, seatLike } from './wallet-tools.js';
 import { getBundleId, makeBundleCacheContext } from './bundle-tools.js';
