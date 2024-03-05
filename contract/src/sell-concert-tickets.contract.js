@@ -84,6 +84,10 @@ export const bagPrice = (bag, inventory) => {
  * }
  * @typedef {{[key: string]: {tradePrice: Amount, maxTickets: NatValue}}} Inventory
  */
+const InventoryShape = M.recordOf(M.string(), {
+  tradePrice: AmountShape,
+  maxTickets: M.nat(),
+});
 
 /**
  * In addition to the standard `issuers` and `brands` terms,
@@ -94,15 +98,9 @@ export const bagPrice = (bag, inventory) => {
  * }} SellConcertTicketsTerms
  */
 
-export const meta = {
-  customTermsShape: M.recordOf(
-    M.string(),
-    // M.splitRecord({ tradePrice: AmountShape, maxTickets: M.nat() }),
-    // getting an error of
-    // customTerms: inventory: [1]: {} - Must have missing properties ["tradePrice","maxTickets"]
-    M.any(),
-  ),
-};
+export const meta = harden({
+  customTermsShape: { inventory: InventoryShape },
+});
 // compatibility with an earlier contract metadata API
 export const customTermsShape = meta.customTermsShape;
 
