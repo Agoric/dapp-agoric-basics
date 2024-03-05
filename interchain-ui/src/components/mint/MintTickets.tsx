@@ -1,14 +1,17 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { Range } from 'react-daisyui';
 import { AmountMath } from '@agoric/ertp';
 import { makeCopyBag } from '@endo/patterns';
 import { AgoricWalletConnection, useAgoric } from '@agoric/react-components';
 import { useContractStore } from '../../store/contract';
+import { NotificationContext } from '../../context/NotificationContext';
+import { DynamicToastChild } from '../Tabs';
 
 const IST_UNIT = 1_000_000n;
 
 const makeOffer = (
   wallet: AgoricWalletConnection,
+  addNotification: (arg0: DynamicToastChild) => void,
   ticketKind: string,
   ticketValue: bigint,
   giveValue: bigint,
@@ -35,14 +38,25 @@ const makeOffer = (
     { give, want },
     undefined,
     (update: { status: string; data?: unknown }) => {
+      // debug logging
+      console.log(update);
       if (update.status === 'error') {
-        alert(`Offer error: ${update.data}`);
+        addNotification({
+          text: `Offer error: ${update.data}`,
+          status: 'error',
+        });
       }
       if (update.status === 'accepted') {
-        alert('Offer accepted');
+        addNotification({
+          text: 'Offer accepted',
+          status: 'success',
+        });
       }
       if (update.status === 'refunded') {
-        alert('Offer rejected');
+        addNotification({
+          text: 'Offer refunded',
+          status: 'warning',
+        });
       }
     },
   );
@@ -59,6 +73,7 @@ const MintRow = ({
 }) => {
   const [tickets, setTickets] = useState(1);
   const { walletConnection } = useAgoric();
+  const { addNotification } = useContext(NotificationContext);
 
   return (
     <div>
@@ -106,12 +121,16 @@ const MintRow = ({
                 if (walletConnection) {
                   makeOffer(
                     walletConnection,
+                    addNotification!,
                     kind,
                     BigInt(tickets),
                     BigInt(tickets * price),
                   );
                 } else {
-                  alert('Please connect your wallet first');
+                  addNotification!({
+                    text: 'error: please connect your wallet or check your connection to RPC endpoints',
+                    status: 'error',
+                  });
                   return;
                 }
               }}
