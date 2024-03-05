@@ -4,9 +4,15 @@
 import '@endo/init';
 import fsp from 'node:fs/promises';
 import { execFile, execFileSync } from 'node:child_process';
+import { basename } from 'node:path';
 
 import { makeNodeBundleCache } from '@endo/bundle-source/cache.js';
 import { makeE2ETools } from '../tools/e2e-tools.js';
+import { getBundleId } from '../tools/bundle-tools.js';
+
+const Usage = `
+deploy-contract CONTRACT.js
+`;
 
 /**
  * @template T
@@ -42,28 +48,44 @@ const getopts = (args, style = {}) => {
 
 const main = async (bundleDir = 'bundles') => {
   const { argv, env } = process;
+  const [entry] = argv.slice(2);
+  if (!entry) throw Error(Usage);
   const { writeFile } = fsp;
 
-  const opts = getopts(argv.slice(2));
-  const bundleCache = makeNodeBundleCache(bundleDir, {}, s => import(s));
+  const progress = (...args) => console.warn(...args); // stderr
+
+  const bundleCache = await makeNodeBundleCache(bundleDir, {}, s => import(s));
 
   const t = {
     log: console.log,
     is: (actual, expected, message) => assert.equal(actual, expected, message),
   };
 
+  /** @type {import('../tools/agd-lib.js').ExecSync} */
+  const dockerExec = (file, args, opts = { encoding: 'utf-8' }) => {
+    const workdir = '/workspace/contract';
+    const execArgs = ['compose', 'exec', '--workdir', workdir, 'agd'];
+    opts.verbose &&
+      console.log('docker compose exec', JSON.stringify([file, ...args]));
+    return execFileSync('docker', [...execArgs, file, ...args], opts);
+  };
+
+  const opts = getopts(argv.slice(2));
+
   const tools = makeE2ETools(t, bundleCache, {
     execFile,
-    execFileSync,
+    execFileSync: dockerExec,
     fetch,
     setTimeout,
     writeFile,
     bundleDir,
   });
 
-  const qt = tools.makeQueryTool();
-  const brand = await qt.queryData('published.agoricNames.brand');
-  console.log(brand);
+  const name = basename(entry)
+    .replace(/\.js$/, '')
+    .replace(/\.contract$/, '');
+
+  const bundles = await tools.installBundles({ [name]: entry }, progress);
 };
 
 main().catch(err => console.error(err));
