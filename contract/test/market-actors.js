@@ -48,7 +48,8 @@ export const payerPete = async (
   const instance = await agoricNames.instance.postalSvc;
 
   t.log('Pete offers to send to', rxAddr, 'via contract', instance);
-  const updates = await E(wallet.offers).executeOffer({
+  /** @type {import('@agoric/smart-wallet/src/offers.js').OfferSpec} */
+  const sendOffer = {
     id: 'peteSend1',
     invitationSpec: {
       source: 'contract',
@@ -57,7 +58,9 @@ export const payerPete = async (
       invitationArgs: [rxAddr],
     },
     proposal: { give: toSend },
-  });
+  };
+  t.snapshot(sendOffer, 'client sends offer');
+  const updates = await E(wallet.offers).executeOffer(sendOffer);
 
   const seat = seatLike(updates);
   const payouts = await E(seat).getPayoutAmounts();

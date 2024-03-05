@@ -17,7 +17,10 @@ import {
   receiverRose,
   senderContract,
 } from './market-actors.js';
-import { makeAgoricNames, makeNameProxy } from './ui-kit-goals/queryKit.js';
+import {
+  makeNameProxy,
+  makeAgoricNames,
+} from './ui-kit-goals/name-service-client.js';
 
 /** @type {import('ava').TestFn<Awaited<ReturnType<makeTestContext>>>} */
 const test = anyTest;
