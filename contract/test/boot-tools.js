@@ -12,7 +12,7 @@ import { AmountMath, AssetKind, makeIssuerKit } from '@agoric/ertp';
 import { makeMockChainStorageRoot } from '@agoric/internal/src/storage-test-utils.js';
 
 import { mockWalletFactory } from './wallet-tools.js';
-import { getBundleId } from './bundle-tools.js';
+import { getBundleId } from '../tools/bundle-tools.js';
 
 const { entries } = Object;
 
