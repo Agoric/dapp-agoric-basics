@@ -6,7 +6,7 @@ import { seatLike } from './wallet-tools.js';
 import {
   makeNameProxy,
   makeAgoricNames,
-} from './ui-kit-goals/name-service-client.js';
+} from '../tools/ui-kit-goals/name-service-client.js';
 
 const { entries, fromEntries, keys } = Object;
 
@@ -29,7 +29,7 @@ const { entries, fromEntries, keys } = Object;
  * @param {import('ava').ExecutionContext} t
  * @param {{
  *   wallet: import('./wallet-tools.js').MockWallet;
- *   queryTool: Pick<import('./ui-kit-goals/queryKit.js').QueryTool, 'queryData'>;
+ *   queryTool: Pick<import('../tools/ui-kit-goals/queryKit.js').QueryTool, 'queryData'>;
  * }} mine
  * @param {{
  *   rxAddr: string,
