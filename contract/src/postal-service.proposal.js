@@ -1,6 +1,8 @@
 /**
  * @file core eval script* to start the postalService contract.
  *
+ * * see rollup.config.mjs to make a script from this file.
+ *
  * The `permit` export specifies the corresponding permit.
  */
 // @ts-check
