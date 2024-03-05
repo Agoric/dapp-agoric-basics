@@ -47,6 +47,7 @@ export const startPostalService = async (powers, config) => {
     },
   } = postalPowers;
   const {
+    // separate line for bundling
     bundleID = Fail`no bundleID`,
     issuerNames = ['IST', 'Invitation', 'BLD', 'ATOM'],
   } = config?.options?.postalService ?? {};
