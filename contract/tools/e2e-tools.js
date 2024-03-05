@@ -90,7 +90,7 @@ const makeBlockTool = ({ rpc, delay }) => {
  * @param {string} fullPath
  * @param {object} opts
  * @param {string} opts.id
- * @param {import('./agd-lib').Agd} opts.agd
+ * @param {import('./agd-lib.js').Agd} opts.agd
  * @param {import('./ui-kit-goals/queryKit.js').QueryTool['follow']} opts.follow
  * @param {(ms: number) => Promise<void>} opts.delay
  * @param {typeof console.log} [opts.progress]
@@ -129,7 +129,7 @@ const installBundle = async (fullPath, opts) => {
  * @param {string} address
  * @param {Record<string, number | bigint>} balances
  * @param {{
- *   agd: import('./agd-lib').Agd;
+ *   agd: import('./agd-lib.js').Agd;
  *   blockTool: BlockTool;
  *   lcd: import('./ui-kit-goals/makeHttpClient.js').LCD;
  *   delay: (ms: number) => Promise<void>;
@@ -137,7 +137,7 @@ const installBundle = async (fullPath, opts) => {
  *   whale?: string;
  *   progress?: typeof console.log;
  * }} opts
- * @returns {Promise<import('./wallet-tools.js').MockWallet>}
+ * @returns {Promise<import('../test/wallet-tools.js').MockWallet>}
  */
 export const provisionSmartWallet = async (
   address,
@@ -227,14 +227,14 @@ export const provisionSmartWallet = async (
     }
   }
 
-  /** @type {import('./wallet-tools.js').MockWallet['offers']} */
+  /** @type {import('../test/wallet-tools.js').MockWallet['offers']} */
   const offers = Far('Offers', {
     executeOffer,
     /** @param {string|number} offerId */
     tryExit: offerId => sendAction({ method: 'tryExitOffer', offerId }),
   });
 
-  /** @type {import('./wallet-tools.js').MockWallet['deposit']} */
+  /** @type {import('../test/wallet-tools.js').MockWallet['deposit']} */
   const deposit = Far('DepositFacet', {
     receive: async payment => {
       const brand = await E(payment).getAllegedBrand();
@@ -295,7 +295,7 @@ export const provisionSmartWallet = async (
     }
   }
 
-  /** @type {import('./wallet-tools.js').MockWallet['peek']} */
+  /** @type {import('../test/wallet-tools.js').MockWallet['peek']} */
   const peek = Far('Peek', { purseUpdates });
 
   return { offers, deposit, peek };
@@ -303,7 +303,7 @@ export const provisionSmartWallet = async (
 
 /**
  * @param {{
- *   agd: import('./agd-lib').Agd;
+ *   agd: import('./agd-lib.js').Agd;
  *   blockTool: BlockTool;
  *   validator?: string;
  *   chainId?: string
@@ -352,14 +352,14 @@ const voteLatestProposalAndWait = async ({
 };
 
 /**
- * @param {import('ava').ExecutionContext} t
+ * @param {Pick<import('ava').ExecutionContext, 'log' | 'is'>} t
  * @param {{
  *   evals: {permit: string, code: string}[]
  *   title: string,
  *   description: string,
  * }} info
  * @param {{
- *   agd: import('./agd-lib').Agd;
+ *   agd: import('./agd-lib.js').Agd;
  *   blockTool: BlockTool;
  *   proposer?: string;
  *   deposit?: string;
@@ -411,8 +411,8 @@ const runCoreEval = async (
 };
 
 /**
- * @param {import('ava').ExecutionContext } t
- * @param {import('./mintStable.js').BundleCache} bundleCache
+ * @param {Pick<import('ava').ExecutionContext, 'log' | 'is'>} t
+ * @param {import('../test/mintStable.js').BundleCache} bundleCache
  * @param {object} io
  * @param {import('./agd-lib.js').ExecSync} io.execFileSync
  * @param {typeof import('child_process').execFile} io.execFile
@@ -466,7 +466,7 @@ export const makeE2ETools = (
    */
   const installBundles = async (bundleRoots, progress) => {
     await null;
-    /** @type {Record<string, import('./boot-tools.js').CachedBundle>} */
+    /** @type {Record<string, import('../test/boot-tools.js').CachedBundle>} */
     const bundles = {};
     for (const [name, rootModPath] of Object.entries(bundleRoots)) {
       const bundle = await bundleCache.load(rootModPath, name);
