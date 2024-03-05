@@ -73,6 +73,10 @@ export const payerPete = async (
 };
 
 /**
+ * Rose expects to receive `shared.toSend` amounts.
+ * She expects initial balances to be empty;
+ * and relies on `wellKnown.assetKind` to make an empty amount from a brand.
+ *
  * @param {import('ava').ExecutionContext} t
  * @param {{ wallet: import('./wallet-tools.js').MockWallet, }} mine
  * @param {{ toSend: AmountKeywordRecord }} shared
@@ -110,6 +114,9 @@ export const receiverRose = async (t, { wallet }, { toSend }) => {
 };
 
 /**
+ * Rex expects to receive `shared.toSend` amounts.
+ * Rex doesn't check his initial balances
+ *
  * @param {import('ava').ExecutionContext} t
  * @param {{ wallet: import('./wallet-tools.js').MockWallet, }} mine
  * @param {{ toSend: AmountKeywordRecord }} shared
