@@ -10,8 +10,6 @@
 import { E } from '@endo/far';
 import { fixHub } from './fixHub.js';
 
-const trace = (...args) => console.log('start-postalService', ...args);
-
 const { Fail } = assert;
 
 /**
@@ -71,7 +69,7 @@ export const startPostalService = async (powers, config) => {
   });
   produceInstance.resolve(instance);
 
-  trace('postalService started');
+  console.log('postalService started');
 };
 
 export const manifest = /** @type {const} */ ({
