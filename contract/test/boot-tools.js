@@ -108,20 +108,20 @@ export const mockBootstrapPowers = async (
 };
 
 /**
- * @param {import('ava').ExecutionContext} t
  * @param {BundleCache} bundleCache
  * @param {Record<string, string>} bundleRoots
  * @param {InstallBundle} installBundle
+ * @param {(...args: unknown[]) => void} log
  *
  * @typedef {(id: string, bundle: CachedBundle, name: string) => Promise<void>} InstallBundle
  * @typedef {Awaited<ReturnType<import('@endo/bundle-source/cache.js').makeNodeBundleCache>>} BundleCache
  * @typedef {{ moduleFormat: 'endoZipBase64', endoZipBase64Sha512: string }} CachedBundle
  */
 export const installBundles = async (
-  t,
   bundleCache,
   bundleRoots,
   installBundle,
+  log = console.log,
 ) => {
   /** @type {Record<string, CachedBundle>} */
   const bundles = {};
@@ -129,7 +129,7 @@ export const installBundles = async (
   for (const [name, rootModulePath] of Object.entries(bundleRoots)) {
     const bundle = await bundleCache.load(rootModulePath, name);
     const bundleID = getBundleId(bundle);
-    t.log('publish bundle', name, bundleID.slice(0, 8));
+    log('publish bundle', name, bundleID.slice(0, 8));
     await installBundle(bundleID, bundle, name);
     bundles[name] = bundle;
   }
@@ -143,10 +143,10 @@ export const bootAndInstallBundles = async (t, bundleRoots) => {
   const { vatAdminState } = powersKit;
 
   const bundles = await installBundles(
-    t,
     t.context.bundleCache,
     bundleRoots,
     (bundleID, bundle, _name) => vatAdminState.installBundle(bundleID, bundle),
+    t.log,
   );
   return { ...powersKit, bundles };
 };
@@ -199,7 +199,12 @@ export const makeMockTools = async (t, bundleCache) => {
   );
 
   let pid = 0;
-  const runCoreEval = async ({ behavior, config }) => {
+  const runCoreEval = async ({
+    behavior,
+    config,
+    entryFile: _e,
+    name: _todo,
+  }) => {
     if (!behavior) throw Error('TODO: run core eval without live behavior');
     await behavior(powers, config);
     pid += 1;
@@ -226,8 +231,8 @@ export const makeMockTools = async (t, bundleCache) => {
 
   return {
     makeQueryTool,
-    installBundles: bundleRoots =>
-      installBundles(t, bundleCache, bundleRoots, installBundle),
+    installBundles: (bundleRoots, log) =>
+      installBundles(bundleCache, bundleRoots, installBundle, log),
     runCoreEval,
     provisionSmartWallet: async (addr, balances) => {
       const it = await walletFactory.makeSmartWallet(addr);
