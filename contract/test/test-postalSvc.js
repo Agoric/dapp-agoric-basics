@@ -1,15 +1,20 @@
 // @ts-check
+/* global setTimeout, fetch */
 // XXX what's the state-of-the-art in ava setup?
 // eslint-disable-next-line import/order
 import { test as anyTest } from './prepare-test-env-ava.js';
 
 import { createRequire } from 'module';
+import { env as ambientEnv } from 'node:process';
+import * as ambientChildProcess from 'node:child_process';
+import * as ambientFsp from 'node:fs/promises';
 
 import { E, passStyleOf } from '@endo/far';
 import { AmountMath } from '@agoric/ertp/src/amountMath.js';
 import { startPostalService } from '../src/postal-service.proposal.js';
 import { bootAndInstallBundles, makeMockTools } from './boot-tools.js';
 import { makeBundleCacheContext, getBundleId } from './bundle-tools.js';
+import { makeE2ETools } from './e2e-tools.js';
 import { mockWalletFactory } from './wallet-tools.js';
 import {
   payerPete,
@@ -39,9 +44,34 @@ const scriptRoots = {
 const makeTestContext = async t => {
   const bc = await makeBundleCacheContext(t);
 
+  const { E2E } = ambientEnv;
+  const { execFileSync, execFile } = ambientChildProcess;
+  const { writeFile } = ambientFsp;
+
+  /** @type {import('./agd-lib.js').ExecSync} */
+  const dockerExec = (file, args, opts = { encoding: 'utf-8' }) => {
+    const workdir = '/workspace/contract';
+    const execArgs = ['compose', 'exec', '--workdir', workdir, 'agd'];
+    opts.verbose &&
+      console.log('docker compose exec', JSON.stringify([file, ...args]));
+    return execFileSync('docker', [...execArgs, file, ...args], opts);
+  };
+
   console.time('makeTestTools');
   console.timeLog('makeTestTools', 'start');
-  const tools = await makeMockTools(t, bc.bundleCache);
+  // installBundles,
+  // runCoreEval,
+  // provisionSmartWallet,
+  // runPackageScript???
+  const tools = await (E2E
+    ? makeE2ETools(t, bc.bundleCache, {
+        execFileSync: dockerExec,
+        execFile,
+        fetch,
+        setTimeout,
+        writeFile,
+      })
+    : makeMockTools(t, bc.bundleCache));
   console.timeEnd('makeTestTools');
 
   return { ...tools, ...bc };
