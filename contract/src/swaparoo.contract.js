@@ -57,7 +57,7 @@ export const start = async zcf => {
    * @param { ZCFSeat } firstSeat
    * @param {{ addr: string }} offerArgs
    */
-  const makeSecondInvitation = async (firstSeat, offerArgs ) => {
+  const makeSecondInvitation = async (firstSeat, offerArgs) => {
     mustMatch(offerArgs, harden({ addr: M.string() }));
     const { addr: secondPartyAddress } = offerArgs;
 
@@ -114,9 +114,9 @@ export const start = async zcf => {
     mustMatch(issuers, M.arrayOf(IssuerShape));
     for (const i of issuers) {
       if (!Object.values(zcf.getTerms().issuers).includes(i)) {
-        zcf.saveIssuer(i, `Issuer${issuerNumber += 1}`);
+        zcf.saveIssuer(i, `Issuer${(issuerNumber += 1)}`);
       }
-    };
+    }
     const proposalShape = M.splitRecord({
       give: M.splitRecord({ Fee: feeShape }),
     });
