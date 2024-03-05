@@ -1,6 +1,7 @@
+// @ts-check
 import { E, Far } from '@endo/far';
 
-/** @param {Pick<QueryTool, 'queryData'>} qt */
+/** @param {{ queryData: (path: string) => any }} qt */
 export const makeAgoricNames = async qt => {
   assert(qt);
   const nameHubCache = new Map();
