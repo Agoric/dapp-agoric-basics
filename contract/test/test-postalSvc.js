@@ -113,6 +113,8 @@ test.serial('agoricNames.instances has contract: postalService', async t => {
   t.is(passStyleOf(instance), 'remotable');
 });
 
+test.todo('deliver payment using offer with non-fungible');
+
 test.serial('deliver payment using offer', async t => {
   const { provisionSmartWallet, makeQueryTool } = t.context;
   const qt = makeQueryTool();
@@ -126,7 +128,6 @@ test.serial('deliver payment using offer', async t => {
     rxAddr: 'agoric1aap7m84dt0rwhhfw49d4kv2gqetzl56vn8aaxj',
     toSend: {
       Pmt: amt(await agoricNames.brand.ATOM, 3n),
-      // TODO non-fungible: Inventory: amt(Item.brand, harden(['map'])),
     },
   };
 
@@ -137,7 +138,6 @@ test.serial('deliver payment using offer', async t => {
     ),
     rose: await provisionSmartWallet(shared.rxAddr, {
       BLD: 20n,
-      // TODO non-fungibles: Item: amt(Item.brand, harden(['potion', 'map'])),
     }),
   };
   const pqt = makeQueryTool();
