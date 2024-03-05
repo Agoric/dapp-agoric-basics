@@ -13,8 +13,8 @@ import { E, passStyleOf } from '@endo/far';
 import { AmountMath } from '@agoric/ertp/src/amountMath.js';
 import { startPostalService } from '../src/postal-service.proposal.js';
 import { bootAndInstallBundles, makeMockTools } from './boot-tools.js';
-import { makeBundleCacheContext, getBundleId } from './bundle-tools.js';
-import { makeE2ETools } from './e2e-tools.js';
+import { makeBundleCacheContext, getBundleId } from '../tools/bundle-tools.js';
+import { makeE2ETools } from '../tools/e2e-tools.js';
 import { mockWalletFactory } from './wallet-tools.js';
 import {
   payerPete,
@@ -25,7 +25,7 @@ import {
 import {
   makeNameProxy,
   makeAgoricNames,
-} from './ui-kit-goals/name-service-client.js';
+} from '../tools/ui-kit-goals/name-service-client.js';
 
 /** @type {import('ava').TestFn<Awaited<ReturnType<makeTestContext>>>} */
 const test = anyTest;
@@ -48,7 +48,7 @@ const makeTestContext = async t => {
   const { execFileSync, execFile } = ambientChildProcess;
   const { writeFile } = ambientFsp;
 
-  /** @type {import('./agd-lib.js').ExecSync} */
+  /** @type {import('../tools/agd-lib.js').ExecSync} */
   const dockerExec = (file, args, opts = { encoding: 'utf-8' }) => {
     const workdir = '/workspace/contract';
     const execArgs = ['compose', 'exec', '--workdir', workdir, 'agd'];
