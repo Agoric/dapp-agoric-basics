@@ -7,7 +7,7 @@ import { createRequire } from 'module';
 
 import { E, passStyleOf } from '@endo/far';
 import { AmountMath } from '@agoric/ertp/src/amountMath.js';
-import { startPostalService } from '../src/start-postalSvc.js';
+import { startPostalService } from '../src/postal-service.proposal.js';
 import { bootAndInstallBundles, makeMockTools } from './boot-tools.js';
 import { makeBundleCacheContext, getBundleId } from './bundle-tools.js';
 import { mockWalletFactory } from './wallet-tools.js';
@@ -28,11 +28,11 @@ const test = anyTest;
 const nodeRequire = createRequire(import.meta.url);
 
 const bundleRoots = {
-  postalSvc: nodeRequire.resolve('../src/postalSvc.js'),
+  postalService: nodeRequire.resolve('../src/postal-service.contract.js'),
 };
 
 const scriptRoots = {
-  postalSvc: nodeRequire.resolve('../src/start-postalSvc.js'),
+  postalService: nodeRequire.resolve('../src/postal-service.proposal.js'),
 };
 
 /** @param {import('ava').ExecutionContext} t */
@@ -176,7 +176,7 @@ test('send invitation* from contract using publicFacet of postalService', async 
     { zoe, namesByAddressAdmin },
     smartWalletIssuers,
   );
-  /** @type {import('../src/start-postalSvc.js').PostalServicePowers} */
+  /** @type {import('../src/postal-service.proposal.js').PostalServicePowers} */
   // @ts-expect-error cast
   const postalSpace = powers;
   const instance = await postalSpace.instance.consume.postalService;
