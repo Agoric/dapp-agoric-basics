@@ -7,6 +7,7 @@ import '@agoric/zoe/exported.js';
 import { atomicRearrange } from '@agoric/zoe/src/contractSupport/atomicTransfer.js';
 import '@agoric/zoe/src/contracts/exported.js';
 import { makeCollectFeesInvitation } from './collectFees.js';
+import { fixHub } from './fixHub.js';
 
 const { quote: q } = assert;
 
@@ -38,30 +39,6 @@ export const swapWithFee = (zcf, firstSeat, secondSeat, feeSeat, feeAmount) => {
 
 let issuerNumber = 1;
 const IssuerShape = M.remotable('Issuer');
-
-/**
- * ref https://github.com/Agoric/agoric-sdk/issues/8408#issuecomment-1741445458
- *
- * @param {ERef<import('@agoric/vats').NameAdmin>} namesByAddressAdmin
- */
-const fixHub = async namesByAddressAdmin => {
-  /** @type {import('@agoric/vats').NameHub} */
-  // @ts-expect-error mock. no has, keys, ...
-  const hub = Far('Hub work-around', {
-    lookup: async (addr, key, ...rest) => {
-      if (!(addr && key && rest.length === 0)) {
-        throw Error('unsupported');
-      }
-      await E(namesByAddressAdmin).reserve(addr);
-      const addressAdmin = await E(namesByAddressAdmin).lookupAdmin(addr);
-      assert(addressAdmin, 'no admin???');
-      await E(addressAdmin).reserve(key);
-      const addressHub = E(addressAdmin).readonly();
-      return E(addressHub).lookup(key);
-    },
-  });
-  return hub;
-};
 
 /**
  * @param {ZCF<{feeAmount: Amount<'nat'>, namesByAddressAdmin: import('@agoric/vats').NamesByAddressAdmin}>} zcf
