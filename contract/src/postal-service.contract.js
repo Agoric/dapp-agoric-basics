@@ -14,7 +14,7 @@ const { keys, values } = Object;
 export const start = zcf => {
   const { namesByAddress, issuers } = zcf.getTerms();
   mustMatch(namesByAddress, M.remotable('namesByAddress'));
-  console.log('postalSvc issuers', Object.keys(issuers));
+  console.log('postal-service issuers', Object.keys(issuers));
 
   /**
    * @param {string} addr

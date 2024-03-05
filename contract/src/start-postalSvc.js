@@ -1,5 +1,5 @@
 /**
- * @file core eval script* to start the postalSvc contract.
+ * @file core eval script* to start the postalService contract.
  *
  * The `permit` export specifies the corresponding permit.
  */
@@ -8,52 +8,52 @@
 import { E } from '@endo/far';
 import { fixHub } from './fixHub.js';
 
-const trace = (...args) => console.log('start-postalSvc', ...args);
+const trace = (...args) => console.log('start-postalService', ...args);
 
 const { Fail } = assert;
 
 /**
- * @typedef { typeof import('../src/postalSvc.js').start } PostalSvcFn
+ * @typedef { typeof import('./postal-service.contract.js').start } PostalServiceFn
  *
  * @typedef {{
- *   produce: { postalSvcKit: Producer<unknown> },
+ *   produce: { postalServiceKit: Producer<unknown> },
  *   installation: {
- *     consume: { postalSvc: Promise<Installation<PostalSvcFn>> },
- *     produce: { postalSvc: Producer<Installation<PostalSvcFn>> },
+ *     consume: { postalService: Promise<Installation<PostalServiceFn>> },
+ *     produce: { postalService: Producer<Installation<PostalServiceFn>> },
  *   }
  *   instance: {
- *     consume: { postalSvc: Promise<StartedInstanceKit<PostalSvcFn>['instance']> },
- *     produce: { postalSvc: Producer<StartedInstanceKit<PostalSvcFn>['instance']> },
+ *     consume: { postalService: Promise<StartedInstanceKit<PostalServiceFn>['instance']> },
+ *     produce: { postalService: Producer<StartedInstanceKit<PostalServiceFn>['instance']> },
  *   }
- * }} PostalSvcPowers
+ * }} PostalServicePowers
  */
 
 /**
  * @param {BootstrapPowers} powers
- * @param {{ options?: { postalSvc: {
+ * @param {{ options?: { postalService: {
  *   bundleID: string;
  *   issuerNames?: string[];
  * }}}} [config]
  */
-export const startPostalSvc = async (powers, config) => {
-  /** @type { BootstrapPowers & PostalSvcPowers} */
+export const startPostalService = async (powers, config) => {
+  /** @type { BootstrapPowers & PostalServicePowers} */
   // @ts-expect-error bootstrap powers evolve with BLD staker governance
   const postalPowers = powers;
   const {
     consume: { zoe, namesByAddressAdmin, agoricNames },
     installation: {
-      produce: { postalSvc: produceInstallation },
+      produce: { postalService: produceInstallation },
     },
     instance: {
-      produce: { postalSvc: produceInstance },
+      produce: { postalService: produceInstance },
     },
   } = postalPowers;
   const {
     bundleID = Fail`no bundleID`,
     issuerNames = ['IST', 'Invitation', 'BLD', 'ATOM'],
-  } = config?.options?.postalSvc ?? {};
+  } = config?.options?.postalService ?? {};
 
-  /** @type {Installation<PostalSvcFn>} */
+  /** @type {Installation<PostalServiceFn>} */
   const installation = await E(zoe).installBundleID(bundleID);
   produceInstallation.resolve(installation);
 
@@ -68,11 +68,11 @@ export const startPostalSvc = async (powers, config) => {
   });
   produceInstance.resolve(instance);
 
-  trace('postalSvc started');
+  trace('postalService started');
 };
 
 export const manifest = /** @type {const} */ ({
-  [startPostalSvc.name]: {
+  [startPostalService.name]: {
     consume: {
       agoricNames: true,
       namesByAddress: true,
@@ -80,14 +80,14 @@ export const manifest = /** @type {const} */ ({
       zoe: true,
     },
     installation: {
-      produce: { postalSvc: true },
+      produce: { postalService: true },
     },
     instance: {
-      produce: { postalSvc: true },
+      produce: { postalService: true },
     },
   },
 });
 
 export const permit = Object.values(manifest)[0];
 
-export const main = startPostalSvc;
+export const main = startPostalService;

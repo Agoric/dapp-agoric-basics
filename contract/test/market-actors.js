@@ -45,7 +45,7 @@ export const payerPete = async (
   /** @type {WellKnown} */
   const agoricNames = makeNameProxy(hub);
 
-  const instance = await agoricNames.instance.postalSvc;
+  const instance = await agoricNames.instance.postalService;
 
   t.log('Pete offers to send to', rxAddr, 'via contract', instance);
   /** @type {import('@agoric/smart-wallet/src/offers.js').OfferSpec} */
@@ -145,11 +145,11 @@ export const receiverRex = async (t, { wallet }, { toSend }) => {
 
 export const senderContract = async (
   t,
-  { zoe, terms: { postalSvc: instance, destAddr: addr1 } },
+  { zoe, terms: { postalService: instance, destAddr: addr1 } },
 ) => {
   const iIssuer = await E(zoe).getInvitationIssuer();
   const iBrand = await E(iIssuer).getBrand();
-  const postalSvc = E(zoe).getPublicFacet(instance);
+  const postalService = E(zoe).getPublicFacet(instance);
   const purse = await E(iIssuer).makeEmptyPurse();
 
   const noInvitations = AmountMath.make(iBrand, harden([]));
@@ -157,13 +157,13 @@ export const senderContract = async (
 
   t.log(
     'senderContract: E(',
-    getInterfaceOf(await postalSvc),
+    getInterfaceOf(await postalService),
     ').sendTo(',
     addr1,
     ',',
     noInvitations,
     ')',
   );
-  const sent = await E(postalSvc).sendTo(addr1, pmt1);
+  const sent = await E(postalService).sendTo(addr1, pmt1);
   t.deepEqual(sent, noInvitations);
 };
