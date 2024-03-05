@@ -72,6 +72,21 @@ export const payerPete = async (
   }
 };
 
+const trackDeposits = async (t, initial, purseUpdates, toSend) =>
+  allValues(
+    fromEntries(
+      entries(initial).map(([name, _update]) => {
+        const amtP = purseUpdates[name].next().then(u => {
+          const expected = AmountMath.add(initial[name], toSend[name]);
+          t.log('updated balance', name, u.value);
+          t.deepEqual(u.value, expected);
+          return u.value;
+        });
+        return [name, amtP];
+      }),
+    ),
+  );
+
 /**
  * Rose expects to receive `shared.toSend` amounts.
  * She expects initial balances to be empty;
@@ -96,19 +111,7 @@ export const receiverRose = async (t, { wallet }, { toSend }) => {
   t.log('Rose initial', initial);
   t.deepEqual(keys(initial), keys(toSend));
 
-  const done = await allValues(
-    fromEntries(
-      entries(initial).map(([name, _update]) => {
-        const amtP = purseNotifier[name].next().then(u => {
-          const expected = AmountMath.add(initial[name], toSend[name]);
-          t.log('Rose updated balance', name, u.value);
-          t.deepEqual(u.value, expected);
-          return u.value;
-        });
-        return [name, amtP];
-      }),
-    ),
-  );
+  const done = await trackDeposits(t, initial, purseNotifier, toSend);
   t.log('Rose got balance updates', keys(done));
   t.deepEqual(keys(done), keys(toSend));
 };
@@ -126,22 +129,16 @@ export const receiverRex = async (t, { wallet }, { toSend }) => {
     mapValues(toSend, amt => E(wallet.peek).purseUpdates(amt.brand)),
   );
 
-  const initial = await allValues(mapValues(purseUpdates, pn => E(pn).next()));
-
-  const done = await allValues(
-    fromEntries(
-      keys(initial).map(name => {
-        const amtP = E(purseUpdates[name])
-          .next()
-          .then(u => {
-            t.log('Rex rxd', u.value);
-            t.deepEqual(u.value, toSend[name]);
-            return u.value;
-          });
-        return [name, amtP];
-      }),
+  const initial = await allValues(
+    mapValues(purseUpdates, up =>
+      E(up)
+        .next()
+        .then(u => u.value),
     ),
   );
+
+  const done = await trackDeposits(t, initial, purseUpdates, toSend);
+
   t.log('Rex got balance updates', keys(done));
   t.deepEqual(keys(done), keys(toSend));
 };
