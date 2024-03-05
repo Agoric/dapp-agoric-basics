@@ -48,6 +48,7 @@ test.serial('bootstrap and start contract', async t => {
 });
 
 /**
+ * @param {import('ava').ExecutionContext} t
  * @param {*} wellKnown
  * @param {MockWallet} wallet
  * @param {Amount} beansAmount
@@ -56,6 +57,7 @@ test.serial('bootstrap and start contract', async t => {
  * @param {boolean} [alicePays]
  */
 const startAlice = async (
+  t,
   wellKnown,
   wallet,
   beansAmount,
@@ -89,12 +91,14 @@ const startAlice = async (
     proposal,
     offerArgs: { addr: depositAddress },
   };
+  t.snapshot(offerSpec, 'alice makes offer');
 
   const updates = E(wallet.offers).executeOffer(offerSpec);
   return updates;
 };
 
 /**
+ * @param {import('ava').ExecutionContext} t
  * @param {*} wellKnown
  * @param {MockWallet} wallet
  * @param {Amount} beansAmount
@@ -102,6 +106,7 @@ const startAlice = async (
  * @param {boolean} [jackPays]
  */
 const startJack = async (
+  t,
   wellKnown,
   wallet,
   beansAmount,
@@ -130,6 +135,7 @@ const startJack = async (
     },
     proposal,
   };
+  t.snapshot(offerSpec, 'jack makes offer');
 
   return E(wallet.offers).executeOffer(offerSpec);
 };
@@ -198,7 +204,14 @@ test.serial('basic swap', async t => {
     await mintBrandedPayment(fiveBeans.value),
   );
   const aliceSeat = seatLike(
-    await startAlice(wellKnown, wallet.alice, fiveBeans, cowAmount, addr.jack),
+    await startAlice(
+      t,
+      wellKnown,
+      wallet.alice,
+      fiveBeans,
+      cowAmount,
+      addr.jack,
+    ),
   );
 
   const aliceResult = await E(aliceSeat).getOfferResult();
@@ -209,7 +222,7 @@ test.serial('basic swap', async t => {
     await E(E.get(bldIssuerKit).mint).mintPayment(cowAmount),
   );
   const jackSeat = seatLike(
-    await startJack(wellKnown, wallet.jack, fiveBeans, cowAmount),
+    await startJack(t, wellKnown, wallet.jack, fiveBeans, cowAmount),
   );
 
   const jackPayouts = await jackSeat.getPayoutAmounts();
