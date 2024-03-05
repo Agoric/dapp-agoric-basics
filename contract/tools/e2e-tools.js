@@ -419,6 +419,8 @@ const runCoreEval = async (
  * @param {typeof window.fetch} io.fetch
  * @param {typeof window.setTimeout} io.setTimeout
  * @param {string} [io.bundleDir]
+ * @param {string} [io.rpcAddress]
+ * @param {string} [io.apiAddress]
  * @param {typeof import('fs/promises').writeFile} io.writeFile
  * @param {(...parts: string[]) => string} [io.join]
  */
@@ -432,12 +434,14 @@ export const makeE2ETools = (
     setTimeout,
     writeFile,
     bundleDir = 'bundles',
+    rpcAddress = 'http://localhost:26657',
+    apiAddress = 'http://localhost:1317',
     join = (...parts) => parts.join('/'),
   },
 ) => {
   const agd = makeAgd({ execFileSync }).withOpts({ keyringBackend: 'test' });
-  const rpc = makeHttpClient('http://localhost:26657', fetch);
-  const lcd = makeAPI('http://localhost:1317', { fetch });
+  const rpc = makeHttpClient(rpcAddress, fetch);
+  const lcd = makeAPI(apiAddress, { fetch });
   const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 
   const explainDelay = (ms, info) => {
