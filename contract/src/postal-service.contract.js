@@ -44,7 +44,7 @@ export const start = zcf => {
       // XXX partial failure? return payments?
       await Promise.all(
         values(payouts).map(pmtP =>
-          Promise.resolve(pmtP).then(pmt => E(depositFacet).receive(pmt)),
+          E.when(pmtP, pmt => E(depositFacet).receive(pmt)),
         ),
       );
       seat.exit();
