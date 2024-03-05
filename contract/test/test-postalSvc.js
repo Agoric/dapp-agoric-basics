@@ -7,7 +7,7 @@ import { createRequire } from 'module';
 
 import { E, passStyleOf } from '@endo/far';
 import { AmountMath } from '@agoric/ertp/src/amountMath.js';
-import { startPostalSvc } from '../src/start-postalSvc.js';
+import { startPostalService } from '../src/start-postalSvc.js';
 import { bootAndInstallBundles, makeMockTools } from './boot-tools.js';
 import { makeBundleCacheContext, getBundleId } from './bundle-tools.js';
 import { mockWalletFactory } from './wallet-tools.js';
@@ -61,7 +61,7 @@ test.serial('well-known brand (ATOM) is available', async t => {
   t.is(passStyleOf(brand.ATOM), 'remotable');
 });
 
-test.serial('install bundle: postalSvc / send', async t => {
+test.serial('install bundle: postalService / send', async t => {
   const { installBundles } = t.context;
   console.time('installBundles');
   console.timeLog('installBundles', Object.keys(bundleRoots).length, 'todo');
@@ -70,27 +70,27 @@ test.serial('install bundle: postalSvc / send', async t => {
   );
   console.timeEnd('installBundles');
 
-  const id = getBundleId(bundles.postalSvc);
+  const id = getBundleId(bundles.postalService);
   const shortId = id.slice(0, 8);
-  t.log('postalSvc', shortId);
+  t.log('postalService', shortId);
   t.is(id.length, 3 + 128, 'bundleID length');
   t.regex(id, /^b1-.../);
 
   Object.assign(t.context.shared, { bundles });
 });
 
-test.serial('deploy contract with core eval: postalSvc / send', async t => {
+test.serial('deploy contract with core eval: postalService / send', async t => {
   const { runCoreEval } = t.context;
   const { bundles } = t.context.shared;
-  const bundleID = getBundleId(bundles.postalSvc);
+  const bundleID = getBundleId(bundles.postalService);
 
   const name = 'send';
   const result = await runCoreEval({
     name,
-    behavior: startPostalSvc,
-    entryFile: scriptRoots.postalSvc,
+    behavior: startPostalService,
+    entryFile: scriptRoots.postalService,
     config: {
-      options: { postalSvc: { bundleID, issuerNames: ['ATOM', 'Item'] } },
+      options: { postalService: { bundleID, issuerNames: ['ATOM', 'Item'] } },
     },
   });
 
@@ -103,12 +103,12 @@ test.serial('deploy contract with core eval: postalSvc / send', async t => {
   });
 });
 
-test.serial('agoricNames.instances has contract: postalSvc', async t => {
+test.serial('agoricNames.instances has contract: postalService', async t => {
   const { makeQueryTool } = t.context;
   const hub0 = makeAgoricNames(makeQueryTool());
   const agoricNames = makeNameProxy(hub0);
   await null;
-  const instance = await agoricNames.instance.postalSvc;
+  const instance = await agoricNames.instance.postalService;
   t.log(instance);
   t.is(passStyleOf(instance), 'remotable');
 });
@@ -154,12 +154,14 @@ test.serial('deliver payment using offer', async t => {
 
 test.todo('E2E: send using publicFacet using contract');
 
-test('send invitation* from contract using publicFacet of postalSvc', async t => {
+test('send invitation* from contract using publicFacet of postalService', async t => {
   const { powers, bundles } = await bootAndInstallBundles(t, bundleRoots);
 
-  const bundleID = getBundleId(bundles.postalSvc);
-  await startPostalSvc(powers, {
-    options: { postalSvc: { bundleID, issuerNames: ['IST', 'Invitation'] } },
+  const bundleID = getBundleId(bundles.postalService);
+  await startPostalService(powers, {
+    options: {
+      postalService: { bundleID, issuerNames: ['IST', 'Invitation'] },
+    },
   });
 
   const { zoe, namesByAddressAdmin } = powers.consume;
@@ -174,10 +176,10 @@ test('send invitation* from contract using publicFacet of postalSvc', async t =>
     { zoe, namesByAddressAdmin },
     smartWalletIssuers,
   );
-  /** @type {import('../src/start-postalSvc.js').PostalSvcPowers} */
+  /** @type {import('../src/start-postalSvc.js').PostalServicePowers} */
   // @ts-expect-error cast
   const postalSpace = powers;
-  const instance = await postalSpace.instance.consume.postalSvc;
+  const instance = await postalSpace.instance.consume.postalService;
 
   const shared = {
     rxAddr: 'agoric1receiverRex',
@@ -190,7 +192,7 @@ test('send invitation* from contract using publicFacet of postalSvc', async t =>
   };
 
   const wallet = await walletFactory.makeSmartWallet(shared.rxAddr);
-  const terms = { postalSvc: instance, destAddr: shared.rxAddr };
+  const terms = { postalService: instance, destAddr: shared.rxAddr };
   await Promise.all([
     senderContract(t, { zoe, terms }),
     receiverRex(t, { wallet }, shared),
