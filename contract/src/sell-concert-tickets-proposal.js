@@ -1,6 +1,6 @@
 // @ts-check
 import { E } from '@endo/far';
-import { AmountMath } from '@agoric/ertp/src/amountMath.js';
+// import { AmountMath } from '@agoric/ertp/src/amountMath.js';
 import {
   installContract,
   startContract,
@@ -12,6 +12,11 @@ console.warn('start proposal module evaluating');
 
 const contractName = 'sellConcertTickets';
 const IST_UNIT = 1_000_000n;
+
+// avoid bundling from other packages
+const AmountMath = {
+  make: (brand, value) => harden({ brand, value }),
+};
 
 export const makeInventory = (brand, baseUnit) => {
   return {
