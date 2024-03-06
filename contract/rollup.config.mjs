@@ -22,7 +22,7 @@ import { permit } from './src/postal-service.proposal.js';
 const config = {
   output: {
     globals: coreEvalGlobals,
-    file: 'bundles/deploy-send.js',
+    file: 'bundles/deploy-postal-service.js',
     format: 'es',
     footer: 'main',
   },
@@ -34,7 +34,7 @@ const config = {
       cache: 'bundles',
     }),
     moduleToScript(),
-    emitPermit({ permit, file: 'deploy-send-permit.json' }),
+    emitPermit({ permit, file: 'deploy-postal-service-permit.json' }),
   ],
 };
 export default config;
