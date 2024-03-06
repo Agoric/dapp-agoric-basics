@@ -8,10 +8,9 @@ import { basename } from 'node:path';
 
 import { makeNodeBundleCache } from '@endo/bundle-source/cache.js';
 import { makeE2ETools } from '../tools/e2e-tools.js';
-import { getBundleId } from '../tools/bundle-tools.js';
 
 const Usage = `
-deploy-contract CONTRACT.js
+deploy-contract CONTRACT.js [--core CORE_EVAL.js]
 `;
 
 /**
@@ -25,31 +24,32 @@ const NonNullish = x => {
 };
 
 /**
- * @param {string[]} args
+ * @param {string[]} argv
  * @param {{ [k: string]: boolean | undefined }} [style]
  */
-const getopts = (args, style = {}) => {
+const getopts = (argv, style = {}) => {
   /** @type {{ [k: string]: string}} */
   const flags = {};
-  while (args.length > 0) {
-    const arg = NonNullish(args.shift());
+  const args = [];
+  while (argv.length > 0) {
+    const arg = NonNullish(argv.shift());
     if (arg.startsWith('--')) {
       const name = arg.slice('--'.length);
       if (style[name] === true) {
         flags[name] = '';
         continue;
       }
-      if (args.length <= 0) throw RangeError(`no value for ${arg}`);
-      flags[name] = NonNullish(args.shift());
+      if (argv.length <= 0) throw RangeError(`no value for ${arg}`);
+      flags[name] = NonNullish(argv.shift());
+    } else {
+      args.push(arg);
     }
   }
-  return harden(flags);
+  return harden({ flags, args });
 };
 
 const main = async (bundleDir = 'bundles') => {
   const { argv, env } = process;
-  const [entry] = argv.slice(2);
-  if (!entry) throw Error(Usage);
   const { writeFile } = fsp;
 
   const progress = (...args) => console.warn(...args); // stderr
@@ -70,8 +70,6 @@ const main = async (bundleDir = 'bundles') => {
     return execFileSync('docker', [...execArgs, file, ...args], opts);
   };
 
-  const opts = getopts(argv.slice(2));
-
   const tools = makeE2ETools(t, bundleCache, {
     execFile,
     execFileSync: dockerExec,
@@ -81,11 +79,25 @@ const main = async (bundleDir = 'bundles') => {
     bundleDir,
   });
 
-  const name = basename(entry)
-    .replace(/\.js$/, '')
-    .replace(/\.contract$/, '');
+  const { flags, args } = getopts(argv.slice(2));
+  const [entry] = args;
+  if (!entry) throw Error(Usage);
 
-  const bundles = await tools.installBundles({ [name]: entry }, progress);
+  const name =
+    flags.name ||
+    basename(entry)
+      .replace(/\.js$/, '')
+      .replace(/\.contract$/, '');
+
+  await tools.installBundles({ [name]: entry }, progress);
+
+  if (flags.core) {
+    const result = await tools.runCoreEval({
+      name,
+      entryFile: flags.core,
+    });
+    progress(result);
+  }
 };
 
 main().catch(err => console.error(err));
