@@ -9,8 +9,21 @@ import { basename } from 'node:path';
 import { makeNodeBundleCache } from '@endo/bundle-source/cache.js';
 import { makeE2ETools } from '../tools/e2e-tools.js';
 
+const opt0 = {
+  service: 'agd',
+  workdir: '/workspace/contract',
+};
+
 const Usage = `
-deploy-contract CONTRACT.js [--core CORE_EVAL.js]
+deploy-contract [options] CONTRACT.js
+
+Options:
+  --help               print usage
+  --name               name root for bundle, core eval (default: CONTRACT)
+  --core CORE_EVAL.js  core eval entry module (cf rollup.config.mjs)
+  --service SVC        docker compose service to run agd (default: ${opt0.service})
+                       use . to run agd outside docker.
+  --workdir DIR        workdir for docker service (default: ${opt0.workdir})
 `;
 
 /**
@@ -48,6 +61,19 @@ const getopts = (argv, style = {}) => {
   return harden({ flags, args });
 };
 
+const mockExecutionContext = () => {
+  const withSkip = o =>
+    Object.assign(o, {
+      skip: (...xs) => {},
+    });
+  return {
+    log: withSkip((...args) => console.log(...args)),
+    is: withSkip((actual, expected, message) =>
+      assert.equal(actual, expected, message),
+    ),
+  };
+};
+
 const main = async (bundleDir = 'bundles') => {
   const { argv, env } = process;
   const { writeFile } = fsp;
@@ -56,30 +82,33 @@ const main = async (bundleDir = 'bundles') => {
 
   const bundleCache = await makeNodeBundleCache(bundleDir, {}, s => import(s));
 
-  const t = {
-    log: console.log,
-    is: (actual, expected, message) => assert.equal(actual, expected, message),
-  };
+  const { flags: given, args } = getopts(argv.slice(2));
+  /** @type {typeof given} */
+  const flags = { ...opt0, ...given };
+  if (given.help) {
+    progress(Usage);
+    return;
+  }
+  const { workdir, service } = flags;
 
   /** @type {import('../tools/agd-lib.js').ExecSync} */
-  const dockerExec = (file, args, opts = { encoding: 'utf-8' }) => {
-    const workdir = '/workspace/contract';
-    const execArgs = ['compose', 'exec', '--workdir', workdir, 'agd'];
+  const dockerExec = (file, dargs, opts = { encoding: 'utf-8' }) => {
+    const execArgs = ['compose', 'exec', '--workdir', workdir, service];
     opts.verbose &&
-      console.log('docker compose exec', JSON.stringify([file, ...args]));
-    return execFileSync('docker', [...execArgs, file, ...args], opts);
+      console.log('docker compose exec', JSON.stringify([file, ...dargs]));
+    return execFileSync('docker', [...execArgs, file, ...dargs], opts);
   };
 
+  const t = mockExecutionContext();
   const tools = makeE2ETools(t, bundleCache, {
     execFile,
-    execFileSync: dockerExec,
+    execFileSync: service === '.' ? execFileSync : dockerExec,
     fetch,
     setTimeout,
     writeFile,
     bundleDir,
   });
 
-  const { flags, args } = getopts(argv.slice(2));
   const [entry] = args;
   if (!entry) throw Error(Usage);
 
