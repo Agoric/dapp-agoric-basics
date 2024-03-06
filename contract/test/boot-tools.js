@@ -7,6 +7,8 @@ import { makeFakeVatAdmin } from '@agoric/zoe/tools/fakeVatAdmin.js';
 import { makeZoeKitForTest } from '@agoric/zoe/tools/setup-zoe.js';
 import buildManualTimer from '@agoric/zoe/tools/manualTimer.js';
 import { AmountMath, AssetKind, makeIssuerKit } from '@agoric/ertp';
+import { makeScalarMapStore } from '@agoric/store';
+import { makeDurableZone } from '@agoric/zone/durable.js';
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { makeMockChainStorageRoot } from '@agoric/internal/src/storage-test-utils.js';
@@ -39,6 +41,8 @@ export const mockBootstrapPowers = async (
   log,
   spaceNames = ['installation', 'instance', 'issuer', 'brand'],
 ) => {
+  const baggage = makeScalarMapStore('testing');
+  const zone = makeDurableZone(baggage);
   const { produce, consume } = makePromiseSpace();
 
   const { admin, vatAdminState } = makeFakeVatAdmin();
@@ -102,7 +106,7 @@ export const mockBootstrapPowers = async (
    * @type {BootstrapPowers & NonNullChainStorage}
    */
   // @ts-expect-error mock
-  const powers = { produce, consume, ...spaces };
+  const powers = { produce, consume, ...spaces, zone };
 
   return { powers, vatAdminState, chainStorage };
 };
