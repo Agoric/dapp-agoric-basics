@@ -69,3 +69,4 @@ export const start = zcf => {
   });
   return { publicFacet };
 };
+/** @typedef { typeof start } PostalServiceFn */
