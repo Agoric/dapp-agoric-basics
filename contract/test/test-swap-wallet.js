@@ -8,7 +8,7 @@ import { mockBootstrapPowers } from './boot-tools.js';
 import { installContract, startContract } from '../src/swaparoo.proposal.js';
 import { makeStableFaucet } from './mintStable.js';
 import { mockWalletFactory, seatLike } from './wallet-tools.js';
-import { makeBundleCacheContext } from './bundle-tools.js';
+import { makeBundleCacheContext } from '../tools/bundle-tools.js';
 
 /** @typedef {import('./wallet-tools.js').MockWallet} MockWallet */
 
