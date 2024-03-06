@@ -127,3 +127,5 @@ export const permit = harden({
   issuer: { consume: { IST: true }, produce: { Ticket: true } },
   brand: { consume: { IST: true }, produce: { Ticket: true } },
 });
+
+export const main = startSellConcertTicketsContract;
