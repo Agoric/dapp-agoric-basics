@@ -135,7 +135,9 @@ const alice = async (
 
   const seat = E(zoe).offer(toTrade, proposal, { Price: pmt });
   const resultP = E(seat).getOfferResult();
-  await (expectSuccessfulTrade ? t.notThrowsAsync(resultP) : t.throwsAsync(resultP));
+  await (expectSuccessfulTrade
+    ? t.notThrowsAsync(resultP)
+    : t.throwsAsync(resultP));
   if (!expectSuccessfulTrade) {
     return;
   }
