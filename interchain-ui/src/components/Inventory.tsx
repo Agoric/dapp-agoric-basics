@@ -1,5 +1,6 @@
+import { AmountMath } from '@agoric/ertp';
 import { ConnectWalletButton, useAgoric } from '@agoric/react-components';
-import { stringifyAmountValue } from '@agoric/ui-components';
+import { stringifyAmountValue } from '@agoric/web-components';
 import { usePurse } from '../hooks/usePurse';
 import type { CopyBag } from '../types';
 
@@ -21,7 +22,10 @@ const Inventory = () => {
                   <b>IST: </b>
                   {istPurse ? (
                     stringifyAmountValue(
-                      istPurse.currentAmount,
+                      AmountMath.make(
+                        istPurse?.currentAmount.brand,
+                        istPurse?.currentAmount.value,
+                      ),
                       istPurse.displayInfo.assetKind,
                       istPurse.displayInfo.decimalPlaces,
                     )
