@@ -1,14 +1,12 @@
 // @ts-check
-import { E } from '@endo/far';
 // import { AmountMath } from '@agoric/ertp/src/amountMath.js';
+import { allValues } from './objectTools.js';
 import {
   installContract,
   startContract,
 } from './platform-goals/start-contract.js';
 
 const { Fail } = assert;
-
-console.warn('start proposal module evaluating');
 
 const contractName = 'sellConcertTickets';
 const IST_UNIT = 1_000_000n;
@@ -56,59 +54,35 @@ export const startSellConcertTicketsContract = async (
   permittedPowers,
   config,
 ) => {
-  console.error('startSellConcertTicketsContract()...');
-  /** @type {BootstrapPowers & SellTicketsSpace & import('./platform-goals/boardAux').BoardAuxPowers} */
-  // @ts-expect-error cast
-  const sellPowers = permittedPowers;
-  const {
-    consume: { brandAuxPublisher, zoe },
-    brand: {
-      consume: { IST: istBrandP },
-      produce: { Ticket: produceTicketBrand },
-    },
-    issuer: {
-      consume: { IST: istIssuerP },
-      produce: { Ticket: produceTicketIssuer },
-    },
-  } = sellPowers;
+  console.log('core eval for', contractName);
   const {
     // separate line for bundling
     bundleID = Fail`no bundleID`,
   } = config?.options?.[contractName] ?? {};
-
-  const istIssuer = await istIssuerP;
-  const istBrand = await istBrandP;
-
-  const terms = makeTerms(istBrand, 1n * IST_UNIT);
 
   const installation = await installContract(permittedPowers, {
     name: contractName,
     bundleID,
   });
 
-  const { instance } = await startContract(permittedPowers, {
+  const ist = await allValues({
+    brand: permittedPowers.brand.consume.IST,
+    issuer: permittedPowers.issuer.consume.IST,
+  });
+
+  const terms = makeTerms(ist.brand, 1n * IST_UNIT);
+
+  await startContract(permittedPowers, {
     name: contractName,
     startArgs: {
       installation,
-      issuerKeywordRecord: { Price: istIssuer },
+      issuerKeywordRecord: { Price: ist.issuer },
       terms,
     },
+    issuerNames: ['Ticket'],
   });
 
-  const {
-    brands: { Ticket: brand },
-    issuers: { Ticket: issuer },
-  } = await E(zoe).getTerms(instance);
-
-  console.log('CoreEval script: share via agoricNames:', brand);
-
-  produceTicketBrand.reset();
-  produceTicketIssuer.reset();
-  produceTicketBrand.resolve(brand);
-  produceTicketIssuer.resolve(issuer);
-
-  await E(brandAuxPublisher).publishBrandInfo(brand);
-  console.log('sellConcertTickets (re)started');
+  console.log(contractName, '(re)started');
 };
 
 /** @type { import("@agoric/vats/src/core/lib-boot").BootstrapManifestPermit } */
