@@ -206,10 +206,10 @@ test('send invitation* from contract using publicFacet of postalService', async 
     { zoe, namesByAddressAdmin },
     smartWalletIssuers,
   );
-  /** @type {import('../src/postal-service.proposal.js').PostalServicePowers} */
-  // @ts-expect-error cast
-  const postalSpace = powers;
-  const instance = await postalSpace.instance.consume.postalService;
+
+  /** @type {StartedInstanceKit<import('../src/postal-service.contract').PostalServiceFn>['instance']} */
+  // @ts-expect-error not (yet?) in BootstrapPowers
+  const instance = await powers.instance.consume.postalService;
 
   const shared = {
     rxAddr: 'agoric1receiverRex',
