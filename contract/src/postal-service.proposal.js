@@ -9,24 +9,15 @@
 
 import { E } from '@endo/far';
 import { fixHub } from './fixHub.js';
+import {
+  installContract,
+  startContract,
+} from './platform-goals/start-contract.js';
+import { allValues } from './objectTools.js';
 
 const { Fail } = assert;
 
-/**
- * @typedef { typeof import('./postal-service.contract.js').start } PostalServiceFn
- *
- * @typedef {{
- *   produce: { postalServiceKit: Producer<unknown> },
- *   installation: {
- *     consume: { postalService: Promise<Installation<PostalServiceFn>> },
- *     produce: { postalService: Producer<Installation<PostalServiceFn>> },
- *   }
- *   instance: {
- *     consume: { postalService: Promise<StartedInstanceKit<PostalServiceFn>['instance']> },
- *     produce: { postalService: Producer<StartedInstanceKit<PostalServiceFn>['instance']> },
- *   }
- * }} PostalServicePowers
- */
+const contractName = 'postalService';
 
 /**
  * @param {BootstrapPowers} powers
@@ -36,40 +27,33 @@ const { Fail } = assert;
  * }}}} [config]
  */
 export const startPostalService = async (powers, config) => {
-  /** @type { BootstrapPowers & PostalServicePowers} */
-  // @ts-expect-error bootstrap powers evolve with BLD staker governance
-  const postalPowers = powers;
   const {
-    consume: { zoe, namesByAddressAdmin, agoricNames },
-    installation: {
-      produce: { postalService: produceInstallation },
-    },
-    instance: {
-      produce: { postalService: produceInstance },
-    },
-  } = postalPowers;
+    consume: { namesByAddressAdmin, agoricNames },
+  } = powers;
   const {
     // separate line for bundling
     bundleID = Fail`no bundleID`,
     issuerNames = ['IST', 'Invitation', 'BLD', 'ATOM'],
-  } = config?.options?.postalService ?? {};
+  } = config?.options?.[contractName] ?? {};
 
-  /** @type {Installation<PostalServiceFn>} */
-  const installation = await E(zoe).installBundleID(bundleID);
-  produceInstallation.resolve(installation);
+  const installation = await installContract(powers, {
+    name: contractName,
+    bundleID,
+  });
 
   const namesByAddress = await fixHub(namesByAddressAdmin);
+  const terms = harden({ namesByAddress });
 
-  // XXX ATOM isn't available via consume.issuer.ATOM. Odd.
-  const issuers = Object.fromEntries(
-    issuerNames.map(n => [n, E(agoricNames).lookup('issuer', n)]),
+  const issuerKeywordRecord = await allValues(
+    Object.fromEntries(
+      issuerNames.map(n => [n, E(agoricNames).lookup('issuer', n)]),
+    ),
   );
-  const { instance } = await E(zoe).startInstance(installation, issuers, {
-    namesByAddress,
-  });
-  produceInstance.resolve(instance);
 
-  console.log('postalService started');
+  await startContract(powers, {
+    name: contractName,
+    startArgs: { installation, issuerKeywordRecord, terms },
+  });
 };
 
 export const manifest = /** @type {const} */ ({
