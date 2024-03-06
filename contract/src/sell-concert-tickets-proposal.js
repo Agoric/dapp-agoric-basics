@@ -1,17 +1,16 @@
 // @ts-check
 import { E } from '@endo/far';
-import { makeMarshal } from '@endo/marshal';
 import { AmountMath } from '@agoric/ertp/src/amountMath.js';
-
-console.warn('start proposal module evaluating');
+import {
+  installContract,
+  startContract,
+} from './platform-goals/start-contract.js';
 
 const { Fail } = assert;
 
-// vstorage paths under published.*
-const BOARD_AUX = 'boardAux';
+console.warn('start proposal module evaluating');
 
-const marshalData = makeMarshal(_val => Fail`data only`);
-
+const contractName = 'sellConcertTickets';
 const IST_UNIT = 1_000_000n;
 
 export const makeInventory = (brand, baseUnit) => {
@@ -38,45 +37,26 @@ export const makeTerms = (brand, baseUnit) => {
 };
 
 /**
- * Make a storage node for auxilliary data for a value on the board.
- *
- * @param {ERef<StorageNode>} chainStorage
- * @param {string} boardId
- */
-const makeBoardAuxNode = async (chainStorage, boardId) => {
-  const boardAux = E(chainStorage).makeChildNode(BOARD_AUX);
-  return E(boardAux).makeChildNode(boardId);
-};
-
-const publishBrandInfo = async (chainStorage, board, brand) => {
-  const [id, displayInfo] = await Promise.all([
-    E(board).getId(brand),
-    E(brand).getDisplayInfo(),
-  ]);
-  const node = makeBoardAuxNode(chainStorage, id);
-  const aux = marshalData.toCapData(harden({ displayInfo }));
-  await E(node).setValue(JSON.stringify(aux));
-};
-
-/**
  * Core eval script to start contract
  *
- * @param {BootstrapPowers} permittedPowers
+ * @param {BootstrapPowers } permittedPowers
+ * @param {*} config
  *
  * @typedef {{
- *   installation: PromiseSpaceOf<{ sellConcertTickets: Installation}>;
- *   instance: PromiseSpaceOf<{ sellConcertTickets: Instance}>;
  *   brand: PromiseSpaceOf<{ Ticket: Brand }>;
  *   issuer: PromiseSpaceOf<{ Ticket: Issuer }>;
  * }} SellTicketsSpace
  */
-export const startSellConcertTicketsContract = async permittedPowers => {
+export const startSellConcertTicketsContract = async (
+  permittedPowers,
+  config,
+) => {
   console.error('startSellConcertTicketsContract()...');
-  /** @type {BootstrapPowers & SellTicketsSpace} */
+  /** @type {BootstrapPowers & SellTicketsSpace & import('./platform-goals/boardAux').BoardAuxPowers} */
   // @ts-expect-error cast
   const sellPowers = permittedPowers;
   const {
-    consume: { board, chainStorage, startUpgradable, zoe },
+    consume: { brandAuxPublisher, zoe },
     brand: {
       consume: { IST: istBrandP },
       produce: { Ticket: produceTicketBrand },
@@ -85,29 +65,31 @@ export const startSellConcertTicketsContract = async permittedPowers => {
       consume: { IST: istIssuerP },
       produce: { Ticket: produceTicketIssuer },
     },
-    installation: {
-      consume: { sellConcertTickets: sellConcertTicketsInstallationP },
-    },
-    instance: {
-      produce: { sellConcertTickets: produceInstance },
-    },
   } = sellPowers;
+  const {
+    // separate line for bundling
+    bundleID = Fail`no bundleID`,
+  } = config?.options?.[contractName] ?? {};
 
   const istIssuer = await istIssuerP;
   const istBrand = await istBrandP;
 
   const terms = makeTerms(istBrand, 1n * IST_UNIT);
 
-  // agoricNames gets updated each time; the promise space only once XXXXXXX
-  const installation = await sellConcertTicketsInstallationP;
-
-  const { instance } = await E(startUpgradable)({
-    installation,
-    issuerKeywordRecord: { Price: istIssuer },
-    label: 'sellConcertTickets',
-    terms,
+  const installation = await installContract(permittedPowers, {
+    name: contractName,
+    bundleID,
   });
-  console.log('CoreEval script: started contract', instance);
+
+  const { instance } = await startContract(permittedPowers, {
+    name: contractName,
+    startArgs: {
+      installation,
+      issuerKeywordRecord: { Price: istIssuer },
+      terms,
+    },
+  });
+
   const {
     brands: { Ticket: brand },
     issuers: { Ticket: issuer },
@@ -115,44 +97,28 @@ export const startSellConcertTicketsContract = async permittedPowers => {
 
   console.log('CoreEval script: share via agoricNames:', brand);
 
-  produceInstance.reset();
-  produceInstance.resolve(instance);
-
   produceTicketBrand.reset();
   produceTicketIssuer.reset();
   produceTicketBrand.resolve(brand);
   produceTicketIssuer.resolve(issuer);
 
-  await publishBrandInfo(chainStorage, board, brand);
+  await E(brandAuxPublisher).publishBrandInfo(brand);
   console.log('sellConcertTickets (re)started');
 };
 
-/** @type { import("@agoric/vats/src/core/lib-boot").BootstrapManifest } */
-const sellConcertTicketsManifest = {
-  [startSellConcertTicketsContract.name]: {
-    consume: {
-      agoricNames: true,
-      board: true, // to publish boardAux info for NFT brand
-      chainStorage: true, // to publish boardAux info for NFT brand
-      startUpgradable: true, // to start contract and save adminFacet
-      zoe: true, // to get contract terms, including issuer/brand
-    },
-    installation: { consume: { sellConcertTickets: true } },
-    issuer: { consume: { IST: true }, produce: { Ticket: true } },
-    brand: { consume: { IST: true }, produce: { Ticket: true } },
-    instance: { produce: { sellConcertTickets: true } },
+/** @type { import("@agoric/vats/src/core/lib-boot").BootstrapManifestPermit } */
+export const permit = harden({
+  consume: {
+    agoricNames: true,
+    brandAuxPublisher: true,
+    startUpgradable: true, // to start contract and save adminFacet
+    zoe: true, // to get contract terms, including issuer/brand
   },
-};
-harden(sellConcertTicketsManifest);
-
-export const getManifestForSellConcertTickets = (
-  { restoreRef },
-  { sellConcertTicketsRef },
-) => {
-  return harden({
-    manifest: sellConcertTicketsManifest,
-    installations: {
-      sellConcertTickets: restoreRef(sellConcertTicketsRef),
-    },
-  });
-};
+  installation: {
+    consume: { [contractName]: true },
+    produce: { [contractName]: true },
+  },
+  instance: { produce: { [contractName]: true } },
+  issuer: { consume: { IST: true }, produce: { Ticket: true } },
+  brand: { consume: { IST: true }, produce: { Ticket: true } },
+});
