@@ -10,7 +10,6 @@
  *   - `permit` export is emitted as JSON
  */
 // @ts-check
-import { nodeResolve } from '@rollup/plugin-node-resolve';
 import {
   coreEvalGlobals,
   moduleToScript,
@@ -19,7 +18,6 @@ import {
 } from './tools/rollup-plugin-core-eval.js';
 import { permit as postalServicePermit } from './src/postal-service.proposal.js';
 import { permit as sellPermit } from './src/sell-concert-tickets-proposal.js';
-import { permit as endo1Permit } from './src/platform-goals/endo1.core.js';
 import { permit as boardAuxPermit } from './src/platform-goals/board-aux.core.js';
 
 /**
@@ -43,7 +41,6 @@ const config1 = ({
   },
   external: ['@endo/far'],
   plugins: [
-    nodeResolve(),
     ...(contractEntry
       ? [
           configureBundleID({
@@ -60,12 +57,6 @@ const config1 = ({
 
 /** @type {import('rollup').RollupOptions[]} */
 const config = [
-  config1({
-    name: 'endo1',
-    permit: endo1Permit,
-    coreEntry: `./src/platform-goals/endo1.core.js`,
-    contractEntry: null,
-  }),
   config1({
     name: 'board-aux',
     permit: boardAuxPermit,
