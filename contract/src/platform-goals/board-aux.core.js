@@ -77,25 +77,29 @@ export const makeBoardAuxManager = (zone, marshalData, powers) => {
  * }>} BoardAuxPowers
  */
 
+// XXX works for DisplayInfo, i.e. plain JSON struff.
+const marshalData = harden({
+  toCapData: d => harden({ body: `#${JSON.stringify(d)}`, slots: [] }),
+  fromCapData: () => Fail`not implemented`,
+  serialize: () => Fail`not implemented`,
+  unserialize: () => Fail`not implemented`,
+});
+
 /**
  * @param {import('./core-types').BootstrapPowers
- *   & import('./endo1.core').Endo1Space
  *   & BoardAuxPowers
  * } powers
  */
 export const produceBoardAuxManager = async powers => {
   const { zone } = powers;
-  const { board, chainStorage, endo1 } = powers.consume;
-  const { marshal } = await endo1;
-  const { makeMarshal } = marshal;
-  const marshalData = makeMarshal(_val => Fail`data only`);
+  const { board, chainStorage } = powers.consume;
 
   const mgr = makeBoardAuxManager(zone, marshalData, { board, chainStorage });
   powers.produce.brandAuxPublisher.reset();
-  powers.produce.boardAuxTOFU.reset();
+  // TODO: powers.produce.boardAuxTOFU.reset();
   powers.produce.boardAuxAdmin.reset();
   powers.produce.brandAuxPublisher.resolve(mgr.brandAuxPublisher);
-  powers.produce.boardAuxTOFU.resolve(mgr.boardAuxTOFU);
+  // TODO: powers.produce.boardAuxTOFU.resolve(mgr.boardAuxTOFU);
   powers.produce.boardAuxAdmin.resolve(mgr.boardAuxAdmin);
 };
 
@@ -104,7 +108,7 @@ export const permit = {
   consume: { board: true, chainStorage: true, endo1: true },
   produce: {
     brandAuxPublisher: true,
-    boardAuxTOFU: true,
+    // TODO: boardAuxTOFU: true,
     boardAuxAdmin: true,
   },
 };
