@@ -79,7 +79,7 @@ export const makeBoardAuxManager = (zone, marshalData, powers) => {
 
 /**
  * @param {import('./core-types').BootstrapPowers
- *   & import('./marshal-produce').Endo1Space
+ *   & import('./endo1.core').Endo1Space
  *   & BoardAuxPowers
  * } powers
  */
@@ -109,6 +109,4 @@ export const permit = {
   },
 };
 
-export const manifest = {
-  [produceBoardAuxManager.name]: permit,
-};
+export const main = produceBoardAuxManager;
