@@ -3,21 +3,27 @@ import { test as anyTest } from '@agoric/zoe/tools/prepare-test-env-ava.js';
 import { createRequire } from 'node:module';
 import { E } from '@endo/far';
 import { AmountMath } from '@agoric/ertp';
+import { extractPowers } from '@agoric/vats/src/core/utils.js';
 
-import { extract } from '@agoric/vats/src/core/utils.js';
 import { mockBootstrapPowers } from './boot-tools.js';
 import {
   installSwapContract,
   permit,
   startSwapContract,
+  startSwaparooCharter,
 } from '../src/swaparoo.proposal.js';
 import { makeStableFaucet } from './mintStable.js';
 import { mockWalletFactory, seatLike } from './wallet-tools.js';
 import { getBundleId, makeBundleCacheContext } from '../tools/bundle-tools.js';
+import {
+  installPuppetGovernance,
+  mockElectorate,
+  assets as govAssets,
+} from './lib-gov-test/puppet-gov.js';
 
 /** @typedef {import('./wallet-tools.js').MockWallet} MockWallet */
 
-/** @type {import('ava').TestFn<Awaited<ReturnType<makeBundleCacheContext>>>} */
+/** @type {import('ava').TestFn<Awaited<ReturnType<makeTestContext>>>} */
 const test = anyTest;
 
 const nodeRequire = createRequire(import.meta.url);
@@ -27,30 +33,77 @@ const assets = {
   [contractName]: nodeRequire.resolve(`../src/${contractName}.contract.js`),
 };
 
-test.before(async t => (t.context = await makeBundleCacheContext(t)));
-
-test.serial('bootstrap and start contract', async t => {
+const makeTestContext = async t => {
+  const bc = await makeBundleCacheContext(t);
   t.log('bootstrap');
   const { powers, vatAdminState } = await mockBootstrapPowers(t.log);
 
-  const { bundleCache } = t.context;
+  const { zoe } = powers.consume;
+  for await (const [name, asset] of Object.entries({
+    econCommitteeCharter: govAssets.committeeCharter,
+  })) {
+    powers.installation.produce[name].resolve(
+      E(zoe).install(await bc.bundleCache.load(asset)),
+    );
+  }
+
+  return { ...bc, powers, vatAdminState };
+};
+
+test.before(async t => (t.context = await makeTestContext(t)));
+
+test.serial('install bundle; make zoe Installation', async t => {
+  const { bundleCache, powers, vatAdminState } = t.context;
+
   const bundle = await bundleCache.load(assets.swaparoo, contractName);
   const bundleID = getBundleId(bundle);
   t.log('publish bundle', bundleID.slice(0, 8));
   vatAdminState.installBundle(bundleID, bundle);
-
   t.log('install contract');
   const config = { options: { [contractName]: { bundleID } } };
-  const swapPowers = extract(permit, powers);
-  await installSwapContract(swapPowers, config); // `agoric run` style proposal does this for us
-  t.log('start contract');
-  await startSwapContract(swapPowers);
+  const installation = await installSwapContract(powers, config);
+  t.log(installation);
+  t.is(typeof installation, 'object');
+});
+
+test.serial('install puppet governor; mock getPoserInvitation', async t => {
+  const { bundleCache, powers } = t.context;
+  const { zoe } = powers.consume;
+  await installPuppetGovernance(zoe, powers.installation.produce, bundleCache);
+
+  powers.produce[`${contractName}CommitteeKit`].resolve(
+    mockElectorate(zoe, bundleCache),
+  );
+
+  const invitation = await E(
+    E.get(powers.consume[`${contractName}CommitteeKit`]).creatorFacet,
+  ).getPoserInvitation();
+  t.log(invitation);
+  t.is(typeof invitation, 'object');
+});
+
+test.serial('start contract', async t => {
+  t.log('install, start contract');
+  const { powers } = t.context;
+  t.log('start contract, checking permit');
+  const permittedPowers = extractPowers(permit, powers);
+
+  const config = {
+    options: {
+      [`${contractName}Committee`]: {
+        voterAddresses: {},
+      },
+    },
+  };
+
+  await Promise.all([
+    startSwaparooCharter(permittedPowers, config),
+    startSwapContract(permittedPowers),
+  ]);
 
   const instance = await powers.instance.consume[contractName];
   t.log(instance);
   t.is(typeof instance, 'object');
-
-  Object.assign(t.context.shared, { powers });
 });
 
 /**
@@ -73,9 +126,8 @@ const startAlice = async (
 ) => {
   const instance = wellKnown.instance[contractName];
 
-  // Let's presume the terms are in vstorage somewhere... say... boardAux
-  const terms = wellKnown.terms.get(instance);
-  const { feeAmount } = terms;
+  // Governed terms are in vstorage
+  const feeAmount = await wellKnown.getGovernedParam(instance, 'Fee');
 
   const proposal = {
     give: { MagicBeans: beansAmount, Fee: feeAmount },
@@ -120,8 +172,7 @@ const startJack = async (
   jackPays = false,
 ) => {
   const instance = wellKnown.instance[contractName];
-  const terms = wellKnown.terms.get(instance);
-  const { feeAmount } = terms;
+  const feeAmount = await wellKnown.getGovernedParam(instance, 'Fee');
 
   const proposal = {
     want: { MagicBeans: beansAmount },
@@ -153,15 +204,10 @@ test.serial('basic swap', async t => {
     jack: 'agoric1jack',
   };
 
-  const {
-    shared: { powers },
-    bundleCache,
-  } = t.context;
+  const { powers, bundleCache } = t.context;
 
   const { zoe, feeMintAccess, bldIssuerKit } = powers.consume;
   const instance = await powers.instance.consume[contractName];
-  // TODO: we presume terms are available... perhaps in boardAux
-  const terms = await E(zoe).getTerms(instance);
 
   // A higher fidelity test would get these from vstorage
   const wellKnown = {
@@ -177,7 +223,11 @@ test.serial('basic swap', async t => {
     instance: {
       [contractName]: instance,
     },
-    terms: new Map([[instance, terms]]),
+    getGovernedParam: async (i, n) => {
+      const pf = await E(zoe).getPublicFacet(i);
+      const params = await E(pf).getGovernedParams();
+      return params[n].value;
+    },
   };
 
   const beans = x => AmountMath.make(wellKnown.brand.IST, x);

@@ -51,7 +51,11 @@ export const mockBootstrapPowers = async (
   const { nameHub: namesByAddress, nameAdmin: namesByAddressAdmin } =
     makeNameHubKit();
 
-  const chainTimerService = buildManualTimer();
+  const noop = () => {};
+  const modernTime = BigInt(new Date(2024, 6, 1, 9).valueOf() / 1000);
+  const chainTimerService = buildManualTimer(noop, modernTime, {
+    timeStep: 60n,
+  });
   const timerBrand = await E(chainTimerService).getTimerBrand();
 
   const chainStorage = makeMockChainStorageRoot();
