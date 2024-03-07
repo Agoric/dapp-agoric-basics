@@ -55,7 +55,7 @@ export const startContract = async (
   console.log(name, 'started');
 
   if (issuerNames) {
-    /** @type {BootstrapPowers & import('./boardAux').BoardAuxPowers} */
+    /** @type {BootstrapPowers & import('./board-aux.core').BoardAuxPowers} */
     // @ts-expect-error cast
     const auxPowers = powers;
 
