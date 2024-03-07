@@ -10,6 +10,7 @@
  *   - `permit` export is emitted as JSON
  */
 // @ts-check
+import { nodeResolve } from '@rollup/plugin-node-resolve';
 import {
   coreEvalGlobals,
   moduleToScript,
@@ -18,6 +19,8 @@ import {
 } from './tools/rollup-plugin-core-eval.js';
 import { permit as postalServicePermit } from './src/postal-service.proposal.js';
 import { permit as sellPermit } from './src/sell-concert-tickets-proposal.js';
+import { permit as endo1Permit } from './src/platform-goals/endo1.core.js';
+import { permit as boardAuxPermit } from './src/platform-goals/board-aux.core.js';
 
 /**
  * @param {*} opts
@@ -26,10 +29,10 @@ import { permit as sellPermit } from './src/sell-concert-tickets-proposal.js';
 const config1 = ({
   name,
   coreEntry,
-  coreScript,
-  contractEntry,
+  contractEntry = `./src/${name}.contract.js`,
+  coreScript = `bundles/deploy-${name}.js`,
+  permitFile = `deploy-${name}-permit.json`,
   permit,
-  permitFile,
 }) => ({
   input: coreEntry,
   output: {
@@ -40,11 +43,16 @@ const config1 = ({
   },
   external: ['@endo/far'],
   plugins: [
-    configureBundleID({
-      name,
-      rootModule: contractEntry,
-      cache: 'bundles',
-    }),
+    nodeResolve(),
+    ...(contractEntry
+      ? [
+          configureBundleID({
+            name,
+            rootModule: contractEntry,
+            cache: 'bundles',
+          }),
+        ]
+      : []),
     moduleToScript(),
     emitPermit({ permit, file: permitFile }),
   ],
@@ -53,20 +61,26 @@ const config1 = ({
 /** @type {import('rollup').RollupOptions[]} */
 const config = [
   config1({
-    name: 'postalService',
-    coreEntry: './src/postal-service.proposal.js',
-    coreScript: 'bundles/deploy-postal-service.js',
-    contractEntry: './src/postal-service.contract.js',
-    permit: postalServicePermit,
-    permitFile: 'deploy-postal-service-permit.json',
+    name: 'endo1',
+    permit: endo1Permit,
+    coreEntry: `./src/platform-goals/endo1.core.js`,
+    contractEntry: null,
+  }),
+  config1({
+    name: 'board-aux',
+    permit: boardAuxPermit,
+    coreEntry: `./src/platform-goals/board-aux.core.js`,
+    contractEntry: null,
   }),
   config1({
     name: 'sell-concert-tickets',
-    coreEntry: './src/sell-concert-tickets-proposal.js',
-    coreScript: 'bundles/deploy-sell-concert-tickets.js',
-    contractEntry: './src/sell-concert-tickets.contract.js',
+    coreEntry: `./src/sell-concert-tickets-proposal.js`,
     permit: sellPermit,
-    permitFile: 'deploy-sell-concert-tickets-permit.json',
+  }),
+  config1({
+    name: 'postal-service',
+    coreEntry: `./src/postal-service.proposal.js`,
+    permit: postalServicePermit,
   }),
 ];
 export default config;
