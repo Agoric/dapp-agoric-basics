@@ -15,12 +15,13 @@ const opt0 = {
 };
 
 const Usage = `
-deploy-contract [options] CONTRACT.js
+deploy-contract [options] [--install <contract>] [--evals <proposal>...]
 
 Options:
   --help               print usage
-  --name               name root for bundle, core eval (default: CONTRACT)
-  --core CORE_EVAL.js  core eval entry module (cf rollup.config.mjs)
+  --install            entry module of contract to install
+  --evals              entry modules of core evals to run
+                       (cf rollup.config.mjs)
   --service SVC        docker compose service to run agd (default: ${opt0.service})
                        use . to run agd outside docker.
   --workdir DIR        workdir for docker service (default: ${opt0.workdir})
@@ -38,10 +39,10 @@ const NonNullish = x => {
 
 /**
  * @param {string[]} argv
- * @param {{ [k: string]: boolean | undefined }} [style]
+ * @param {{ [k: string]: boolean | [] | undefined }} [style]
  */
 const getopts = (argv, style = {}) => {
-  /** @type {{ [k: string]: string}} */
+  /** @type {{ [k: string]: string }} */
   const flags = {};
   const args = [];
   while (argv.length > 0) {
@@ -49,10 +50,15 @@ const getopts = (argv, style = {}) => {
     if (arg.startsWith('--')) {
       const name = arg.slice('--'.length);
       if (style[name] === true) {
-        flags[name] = '';
+        flags[name] = '+';
         continue;
       }
       if (argv.length <= 0) throw RangeError(`no value for ${arg}`);
+      if (Array.isArray(style[name])) {
+        flags[name] = '+';
+        args.push(...argv);
+        break;
+      }
       flags[name] = NonNullish(argv.shift());
     } else {
       args.push(arg);
@@ -75,14 +81,14 @@ const mockExecutionContext = () => {
 };
 
 const main = async (bundleDir = 'bundles') => {
-  const { argv, env } = process;
+  const { argv } = process;
   const { writeFile } = fsp;
 
   const progress = (...args) => console.warn(...args); // stderr
 
   const bundleCache = await makeNodeBundleCache(bundleDir, {}, s => import(s));
 
-  const { flags: given, args } = getopts(argv.slice(2));
+  const { flags: given, args } = getopts(argv.slice(2), { evals: [] });
   /** @type {typeof given} */
   const flags = { ...opt0, ...given };
   if (given.help) {
@@ -109,23 +115,22 @@ const main = async (bundleDir = 'bundles') => {
     bundleDir,
   });
 
-  const [entry] = args;
-  if (!entry) throw Error(Usage);
+  const stem = path => basename(path).replace(/\..*/, '');
 
-  const name =
-    flags.name ||
-    basename(entry)
-      .replace(/\.js$/, '')
-      .replace(/\.contract$/, '');
+  if (flags.install) {
+    const name = stem(flags.install);
 
-  await tools.installBundles({ [name]: entry }, progress);
+    await tools.installBundles({ [name]: flags.install }, progress);
+  }
 
-  if (flags.core) {
-    const result = await tools.runCoreEval({
-      name,
-      entryFile: flags.core,
-    });
-    progress(result);
+  if (flags.evals) {
+    for await (const entryFile of args) {
+      const result = await tools.runCoreEval({
+        name: stem(entryFile),
+        entryFile,
+      });
+      progress(result);
+    }
   }
 };
 
