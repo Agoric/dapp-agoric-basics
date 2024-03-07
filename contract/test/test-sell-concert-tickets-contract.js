@@ -7,8 +7,7 @@
 import { test as anyTest } from './prepare-test-env-ava.js';
 
 import { createRequire } from 'module';
-import { E, Far } from '@endo/far';
-import { makePromiseKit } from '@endo/promise-kit';
+import { E } from '@endo/far';
 import { makeCopyBag } from '@endo/patterns';
 import { makeNodeBundleCache } from '@endo/bundle-source/cache.js';
 import { makeZoeKitForTest } from '@agoric/zoe/tools/setup-zoe.js';
@@ -23,8 +22,8 @@ import {
 import { bagPrice } from '../src/sell-concert-tickets.contract.js';
 import { getBundleId } from '../tools/bundle-tools.js';
 import { mockBootstrapPowers } from './boot-tools.js';
-import { produceEndoModules } from '../src/platform-goals/marshal-produce.js';
-import { produceBoardAuxManager } from '../src/platform-goals/boardAux.js';
+import { produceEndoModules } from '../src/platform-goals/endo1.core.js';
+import { produceBoardAuxManager } from '../src/platform-goals/board-aux.core.js';
 
 /** @typedef {typeof import('../src/sell-concert-tickets.contract.js').start} AssetContractFn */
 
