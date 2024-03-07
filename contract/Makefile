@@ -103,19 +103,18 @@ print-key: /root/.agoric/user1.key
 	@agd keys show user1 -a --keyring-backend="test"
 	@echo
 
-SCRIPT=start-sell-concert-tickets.js
-PERMIT=start-sell-concert-tickets-permit.json
-start-contract: $(SCRIPT) $(PERMIT) install-bundles
-	scripts/propose-start-contract.sh
+start-contract: start-sell-tickets-contract start-postal-service-contract
 
-install-bundles: bundles/bundle-list
-	./scripts/install-bundles.sh
+start-sell-tickets-contract:
+	yarn node ./scripts/deploy-contract.js --service . \
+		--install src/sell-concert-tickets.contract.js \
+		--evals ./src/platform-goals/endo1.core.js ./src/platform-goals/board-aux.core.js \
+			./src/postal-service.proposal.js
 
-build-proposal: bundles/bundle-list
-
-bundles/bundle-list $(SCRIPT) $(PERMIT):
-	./scripts/build-proposal.sh
-
+start-postal-service-contract:
+	yarn node ./scripts/deploy-contract.js --service . \
+		--install src/postal-service.contract.js \
+		--evals ./src/postal-service.proposal.js
 
 # bundle-X.json.installed show that bundle-X.json was installed
 # see also e2e-tools.js
