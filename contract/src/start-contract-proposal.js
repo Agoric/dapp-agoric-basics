@@ -85,7 +85,7 @@ export const startContract = async permittedPowers => {
   produceInstance.reset();
   produceInstance.resolve(instance);
 
-  console.log(`${contractName} (re)installed`);
+  console.log(`${contractName} (re)started`);
 };
 
 /** @type { import("@agoric/vats/src/core/lib-boot").BootstrapManifest } */
