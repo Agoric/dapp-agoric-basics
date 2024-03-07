@@ -18,7 +18,7 @@ import {
   startSellConcertTicketsContract,
   makeInventory,
   makeTerms,
-} from '../src/sell-concert-tickets-proposal.js';
+} from '../src/sell-concert-tickets.proposal.js';
 import { bagPrice } from '../src/sell-concert-tickets.contract.js';
 import { getBundleId } from '../tools/bundle-tools.js';
 import { mockBootstrapPowers } from './boot-tools.js';
