@@ -19,11 +19,11 @@
     "lint:fix": "eslint --fix '**/*.js'"
   },
   "devDependencies": {
-    "@agoric/deploy-script-support": "^0.10.4-u12.0",
+    "@agoric/deploy-script-support": "^0.10.4-u14.0",
     "@agoric/eslint-config": "dev",
-    "@agoric/smart-wallet": "0.5.3",
-    "@agoric/vats": "0.15.2-u12.0",
-    "@agoric/xsnap": "0.14.3-u12.0",
+    "@agoric/smart-wallet": "0.5.4-u14.0",
+    "@agoric/vats": "0.15.2-u14.0",
+    "@agoric/xsnap": "0.14.3-u14.0",
     "@endo/eslint-plugin": "^0.5.2",
     "@endo/init": "^0.5.60",
     "@endo/nat": "^4.1.27",
@@ -50,8 +50,8 @@
     "typescript": "~5.2.2"
   },
   "dependencies": {
-    "@agoric/ertp": "^0.16.3-u12.0",
-    "@agoric/zoe": "^0.26.3-u12.0",
+    "@agoric/ertp": "^0.16.3-u14.0",
+    "@agoric/zoe": "^0.26.3-u14.0",
     "@endo/bundle-source": "^2.8.0",
     "@endo/far": "^0.2.22",
     "@endo/marshal": "^0.8.9",
