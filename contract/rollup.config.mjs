@@ -17,7 +17,7 @@ import {
   emitPermit,
 } from './tools/rollup-plugin-core-eval.js';
 import { permit as postalServicePermit } from './src/postal-service.proposal.js';
-import { permit as sellPermit } from './src/sell-concert-tickets-proposal.js';
+import { permit as sellPermit } from './src/sell-concert-tickets.proposal.js';
 import { permit as boardAuxPermit } from './src/platform-goals/board-aux.core.js';
 
 /**
@@ -26,7 +26,7 @@ import { permit as boardAuxPermit } from './src/platform-goals/board-aux.core.js
  */
 const config1 = ({
   name,
-  coreEntry,
+  coreEntry = `./src/${name}.proposal.js`,
   contractEntry = `./src/${name}.contract.js`,
   coreScript = `bundles/deploy-${name}.js`,
   permitFile = `deploy-${name}-permit.json`,
@@ -65,12 +65,10 @@ const config = [
   }),
   config1({
     name: 'sell-concert-tickets',
-    coreEntry: `./src/sell-concert-tickets-proposal.js`,
     permit: sellPermit,
   }),
   config1({
     name: 'postal-service',
-    coreEntry: `./src/postal-service.proposal.js`,
     permit: postalServicePermit,
   }),
 ];
