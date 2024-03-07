@@ -64,7 +64,6 @@ waitForBlock 2
 approveProposals &
 
 make -C /workspace/contract mint100
-make -C /workspace/contract lower-bundle-cost
 
 # bring back chain process to foreground
 wait
