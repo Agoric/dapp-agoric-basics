@@ -13,7 +13,6 @@
     "start": "yarn docker:make clean start-contract print-key",
     "build": "agoric run scripts/build-contract-deployer.js",
     "build:deployer": "rollup -c rollup.config.mjs",
-    "build:postal-service-deployer": "yarn run build:deployer src/postal-service.proposal.js",
     "test": "ava --verbose",
     "lint": "eslint '**/*.js'",
     "lint:types": "tsc -p jsconfig.json",
