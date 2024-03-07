@@ -38,8 +38,6 @@ const makeOffer = (
     { give, want },
     undefined,
     (update: { status: string; data?: unknown }) => {
-      // debug logging
-      console.log(update);
       if (update.status === 'error') {
         addNotification({
           text: `Offer error: ${update.data}`,
