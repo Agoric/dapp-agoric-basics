@@ -489,8 +489,8 @@ export const makeE2ETools = (
       const shortId = getBundleId(bundle).slice(0, 8);
 
       if (Object.keys(bundles).length === 1) {
-        progress('mint 100 IST');
-        await runPackageScript('docker:make', 'mint100');
+        progress('mint 100 IST???@@@@');
+        // await runPackageScript('docker:make', 'mint100');
       }
 
       progress('installing', name, shortId);
