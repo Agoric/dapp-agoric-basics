@@ -29,6 +29,4 @@ export const permit = {
   produce: { endo1: true },
 };
 
-export const manifest = {
-  [produceEndoModules.name]: permit,
-};
+export const main = produceEndoModules;
