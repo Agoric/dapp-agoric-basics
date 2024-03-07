@@ -73,8 +73,8 @@ start-contract: start-sell-tickets-contract start-postal-service-contract
 start-sell-tickets-contract:
 	yarn node ./scripts/deploy-contract.js --service . \
 		--install src/sell-concert-tickets.contract.js \
-		--evals ./src/platform-goals/endo1.core.js ./src/platform-goals/board-aux.core.js \
-			./src/postal-service.proposal.js
+		--evals ./src/platform-goals/board-aux.core.js \
+			./src/sell-concert-tickets.proposal.js
 
 start-postal-service-contract:
 	yarn node ./scripts/deploy-contract.js --service . \
