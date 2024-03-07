@@ -30,7 +30,6 @@
     "@endo/promise-kit": "0.2.56",
     "@endo/ses-ava": "^0.2.44",
     "@jessie.js/eslint-plugin": "^0.4.0",
-    "@rollup/plugin-node-resolve": "^15.2.3",
     "@typescript-eslint/eslint-plugin": "^6.7.0",
     "@typescript-eslint/parser": "^6.7.0",
     "agoric": "^0.21.2-u12.0",
