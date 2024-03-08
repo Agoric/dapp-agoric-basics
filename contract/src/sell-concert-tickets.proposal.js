@@ -48,6 +48,7 @@ export const makeTerms = (brand, baseUnit) => {
  * @typedef {{
  *   brand: PromiseSpaceOf<{ Ticket: Brand }>;
  *   issuer: PromiseSpaceOf<{ Ticket: Issuer }>;
+ *   instance: PromiseSpaceOf<{ sellConcertTickets: Instance }>
  * }} SellTicketsSpace
  */
 export const startSellConcertTicketsContract = async (
