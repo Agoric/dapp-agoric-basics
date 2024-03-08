@@ -10,7 +10,7 @@ const BOARD_AUX = 'boardAux';
  * @param {import('@agoric/zone').Zone} zone
  * @param {Marshaller} marshalData
  * @param {{
- *   board: ERef<import('./core-types').Board>;
+ *   board: ERef<import('@agoric/vats').Board>;
  *   chainStorage: ERef<StorageNode>;
  * }} powers
  */
@@ -70,7 +70,7 @@ export const makeBoardAuxManager = (zone, marshalData, powers) => {
 /** @typedef {BoardAuxManager['boardAuxAdmin']} BoardAuxAdmin */
 
 /**
- * @typedef {import('./core-types').PromiseSpaceOf<{
+ * @typedef {PromiseSpaceOf<{
  *   brandAuxPublisher: BrandAuxPublisher;
  *   boardAuxTOFU: BoardAuxTOFU;
  *   boardAuxAdmin: BoardAuxAdmin;
@@ -85,22 +85,25 @@ const marshalData = harden({
   unserialize: () => Fail`not implemented`,
 });
 
-/**
- * @param {import('./core-types').BootstrapPowers
- *   & BoardAuxPowers
- * } powers
- */
+/** @param {BootstrapPowers} powers */
 export const produceBoardAuxManager = async powers => {
   const { zone } = powers;
-  const { board, chainStorage } = powers.consume;
+  const { board } = powers.consume;
+  /** @type {import('../types').NonNullChainStorage['consume']} */
+  // @ts-expect-error cast
+  const { chainStorage } = powers.consume;
+
+  /** @type {BoardAuxPowers['produce']} */
+  // @ts-expect-error cast
+  const produce = powers;
 
   const mgr = makeBoardAuxManager(zone, marshalData, { board, chainStorage });
-  powers.produce.brandAuxPublisher.reset();
+  produce.brandAuxPublisher.reset();
   // TODO: powers.produce.boardAuxTOFU.reset();
-  powers.produce.boardAuxAdmin.reset();
-  powers.produce.brandAuxPublisher.resolve(mgr.brandAuxPublisher);
+  produce.boardAuxAdmin.reset();
+  produce.brandAuxPublisher.resolve(mgr.brandAuxPublisher);
   // TODO: powers.produce.boardAuxTOFU.resolve(mgr.boardAuxTOFU);
-  powers.produce.boardAuxAdmin.resolve(mgr.boardAuxAdmin);
+  produce.boardAuxAdmin.resolve(mgr.boardAuxAdmin);
 };
 
 export const permit = {
