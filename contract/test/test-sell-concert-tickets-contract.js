@@ -18,12 +18,16 @@ import {
   startSellConcertTicketsContract,
   makeInventory,
   makeTerms,
+  permit,
 } from '../src/sell-concert-tickets.proposal.js';
 import { bagPrice } from '../src/sell-concert-tickets.contract.js';
 import { getBundleId } from '../tools/bundle-tools.js';
 import { mockBootstrapPowers } from './boot-tools.js';
-import { produceEndoModules } from '../src/platform-goals/endo1.core.js';
-import { produceBoardAuxManager } from '../src/platform-goals/board-aux.core.js';
+import {
+  produceBoardAuxManager,
+  permit as boardAuxPermit,
+} from '../src/platform-goals/board-aux.core.js';
+import { extract } from '@agoric/vats/src/core/utils.js';
 
 /** @typedef {typeof import('../src/sell-concert-tickets.contract.js').start} AssetContractFn */
 
@@ -103,7 +107,7 @@ test('Start the contract', async t => {
  * Alice trades by paying the price from the contract's terms.
  *
  * @param {import('ava').ExecutionContext} t
- * @param {ZoeService} zoe
+ * @param {ERef<ZoeService>} zoe
  * @param {ERef<import('@agoric/zoe/src/zoeService/utils').Instance<AssetContractFn>>} instance
  * @param {Purse} purse
  * @param {[string, NatValue][]} choices
@@ -229,14 +233,18 @@ test('use the code that will go on chain to start the contract', async t => {
   // When the BLD staker governance proposal passes,
   // the startup function gets called.
   vatAdminState.installBundle(bundleID, bundle);
+  const sellPowers = extract(permit, powers);
+  const boardAuxPowers = extract(boardAuxPermit, powers);
   await Promise.all([
-    produceEndoModules(powers),
-    produceBoardAuxManager(powers),
-    startSellConcertTicketsContract(powers, {
+    produceBoardAuxManager(boardAuxPowers),
+    startSellConcertTicketsContract(sellPowers, {
       options: { sellConcertTickets: { bundleID } },
     }),
   ]);
-  const instance = await powers.instance.consume.sellConcertTickets;
+  /** @type {import('../src/sell-concert-tickets.proposal.js').SellTicketsSpace} */
+  // @ts-expect-error cast
+  const sellSpace = powers;
+  const instance = await sellSpace.instance.consume.sellConcertTickets;
 
   // Now that we have the instance, resume testing as above.
   const { bundleCache } = t.context;
