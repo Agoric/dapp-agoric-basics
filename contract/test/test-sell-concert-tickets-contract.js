@@ -22,7 +22,6 @@ import {
 import { bagPrice } from '../src/sell-concert-tickets.contract.js';
 import { getBundleId } from '../tools/bundle-tools.js';
 import { mockBootstrapPowers } from './boot-tools.js';
-import { produceEndoModules } from '../src/platform-goals/endo1.core.js';
 import { produceBoardAuxManager } from '../src/platform-goals/board-aux.core.js';
 
 /** @typedef {typeof import('../src/sell-concert-tickets.contract.js').start} AssetContractFn */
@@ -230,13 +229,15 @@ test('use the code that will go on chain to start the contract', async t => {
   // the startup function gets called.
   vatAdminState.installBundle(bundleID, bundle);
   await Promise.all([
-    produceEndoModules(powers),
     produceBoardAuxManager(powers),
     startSellConcertTicketsContract(powers, {
       options: { sellConcertTickets: { bundleID } },
     }),
   ]);
-  const instance = await powers.instance.consume.sellConcertTickets;
+  /** @type {import('../src/sell-concert-tickets.proposal.js').SellTicketsSpace} */
+  // @ts-expect-error cast
+  const sellSpace = powers;
+  const instance = await sellSpace.instance.consume.sellConcertTickets;
 
   // Now that we have the instance, resume testing as above.
   const { bundleCache } = t.context;
