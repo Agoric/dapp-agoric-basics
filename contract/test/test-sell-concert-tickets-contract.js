@@ -102,7 +102,7 @@ test('Start the contract', async t => {
  * Alice trades by paying the price from the contract's terms.
  *
  * @param {import('ava').ExecutionContext} t
- * @param {ZoeService} zoe
+ * @param {ERef<ZoeService>} zoe
  * @param {ERef<import('@agoric/zoe/src/zoeService/utils').Instance<AssetContractFn>>} instance
  * @param {Purse} purse
  * @param {[string, NatValue][]} choices
