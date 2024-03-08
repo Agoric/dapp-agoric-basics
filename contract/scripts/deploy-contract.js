@@ -28,16 +28,6 @@ Options:
 `;
 
 /**
- * @template T
- * @param {T | null | undefined } x
- * @returns {T}
- */
-const NonNullish = x => {
-  if (x === undefined || x === null) throw assert.error('NonNullish');
-  return x;
-};
-
-/**
  * @param {string[]} argv
  * @param {{ [k: string]: boolean | [] | undefined }} [style]
  */
@@ -70,7 +60,7 @@ const getopts = (argv, style = {}) => {
 const mockExecutionContext = () => {
   const withSkip = o =>
     Object.assign(o, {
-      skip: (...xs) => {},
+      skip: (..._xs) => {},
     });
   return {
     log: withSkip((...args) => console.log(...args)),
