@@ -20,3 +20,13 @@ export const mapValues = (obj, f) =>
 
 /** @type {<X, Y>(xs: X[], ys: Y[]) => [X, Y][]} */
 export const zip = (xs, ys) => xs.map((x, i) => [x, ys[i]]);
+
+/**
+ * @template T
+ * @param {T | null | undefined } x
+ * @returns {T}
+ */
+export const NonNullish = x => {
+  if (x === undefined || x === null) throw assert.error('NonNullish');
+  return x;
+};
