@@ -8,6 +8,7 @@ import { basename } from 'node:path';
 
 import { makeNodeBundleCache } from '@endo/bundle-source/cache.js';
 import { makeE2ETools } from '../tools/e2e-tools.js';
+import { NonNullish } from '../src/objectTools.js';
 
 const opt0 = {
   service: 'agd',
@@ -26,16 +27,6 @@ Options:
                        use . to run agd outside docker.
   --workdir DIR        workdir for docker service (default: ${opt0.workdir})
 `;
-
-/**
- * @template T
- * @param {T | null | undefined } x
- * @returns {T}
- */
-const NonNullish = x => {
-  if (x === undefined || x === null) throw assert.error('NonNullish');
-  return x;
-};
 
 /**
  * @param {string[]} argv
@@ -70,7 +61,7 @@ const getopts = (argv, style = {}) => {
 const mockExecutionContext = () => {
   const withSkip = o =>
     Object.assign(o, {
-      skip: (...xs) => {},
+      skip: (..._xs) => {},
     });
   return {
     log: withSkip((...args) => console.log(...args)),
