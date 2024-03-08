@@ -1,15 +1,20 @@
 // @ts-check
 import { E } from '@endo/far';
 import { AmountMath } from '@agoric/ertp/src/amountMath.js';
-
-console.warn('swaparoo.proposal.js module evaluating');
+import { ParamTypes } from '@agoric/governance/src/constants.js';
+import { startMyGovernedInstance } from './platform-goals/start-governed-contract.js';
 
 const { Fail } = assert;
 
 const contractName = 'swaparoo';
 
+/** @template SF @typedef {import('@agoric/zoe/src/zoeService/utils').StartResult<SF>} StartResult<SF> */
+
 /**
- * @typedef {{
+ * @typedef {PromiseSpaceOf<{
+ *   swaparooKit: StartResult<*>;
+ *   swaparooCommitteeKit: StartResult<*>;
+ * }> & {
  *   installation: PromiseSpaceOf<{ swaparoo: Installation }>;
  *   instance: PromiseSpaceOf<{ swaparoo: Instance }>;
  * }} SwaparooSpace
@@ -39,6 +44,7 @@ export const installContract = async (powers, config) => {
   produceInstallation.reset();
   produceInstallation.resolve(installation);
   console.log(contractName, '(re)installed');
+  return installation;
 };
 
 /**
@@ -52,69 +58,101 @@ export const startContract = async permittedPowers => {
   // @ts-expect-error bootstrap powers evolve with BLD staker governance
   const swapPowers = permittedPowers;
   const {
-    consume: { startUpgradable, namesByAddressAdmin: namesByAddressAdminP },
+    consume: {
+      board,
+      chainTimerService,
+      namesByAddressAdmin: namesByAddressAdminP,
+      zoe,
+      [`${contractName}CommitteeKit`]: committeeKitP,
+    },
+    produce: { [`${contractName}Kit`]: produceContractKit },
     brand: {
       consume: { IST: istBrandP },
     },
     installation: {
-      consume: { [contractName]: installationP },
+      consume: { [contractName]: installationP, contractGovernor },
     },
     instance: {
       produce: { [contractName]: produceInstance },
     },
   } = swapPowers;
+  /** @type {import('./types').NonNullChainStorage['consume']} */
+  // @ts-expect-error
+  const { chainStorage } = permittedPowers.consume;
 
   const istBrand = await istBrandP;
-  // NOTE: TODO all terms for the contract go here
   const oneIST = AmountMath.make(istBrand, 1n);
   const namesByAddressAdmin = await namesByAddressAdminP;
-  const terms = { feeAmount: oneIST, namesByAddressAdmin };
 
   const installation = await installationP;
 
-  const { instance } = await E(startUpgradable)({
-    installation,
-    label: contractName,
-    terms,
-  });
-  console.log('CoreEval script: started game contract', instance);
+  const governedParams = {
+    Fee: {
+      type: ParamTypes.AMOUNT,
+      value: oneIST,
+    },
+  };
+
+  const marshaller = await E(board).getPublishingMarshaller();
+  const storageNode = await E(chainStorage).makeChildNode(contractName);
+  const it = await startMyGovernedInstance(
+    {
+      zoe,
+      governedContractInstallation: installation,
+      label: contractName,
+      terms: {},
+      privateArgs: {
+        storageNode,
+        marshaller,
+        namesByAddressAdmin,
+      },
+    },
+    {
+      governedParams,
+      timer: chainTimerService,
+      contractGovernor,
+      governorTerms: {},
+      committeeCreatorFacet: E.get(committeeKitP).creatorFacet,
+    },
+  );
+  produceContractKit.resolve(it);
+
+  console.log('CoreEval script: started contract', contractName, it.instance);
   // const {} = await E(zoe).getTerms(instance);
 
   console.log('CoreEval script: share via agoricNames: none');
 
   produceInstance.reset();
-  produceInstance.resolve(instance);
+  produceInstance.resolve(it.instance);
 
   console.log(`${contractName} (re)started`);
 };
 
-/** @type { import("@agoric/vats/src/core/lib-boot").BootstrapManifest } */
-const contractManifest = {
-  [startContract.name]: {
+/** @type { import("@agoric/vats/src/core/lib-boot").BootstrapManifestPermit } */
+export const permit = harden({
+  consume: {
+    namesByAddressAdmin: true, // to convert string addresses to depositFacets
+
+    swaparooCommitteeKit: true,
+    board: true, // for to marshal governance parameter values
+    chainStorage: true, // to publish governance parameter values
+    chainTimerService: true, // to manage vote durations
+    zoe: true, // to start governed contract (TODO: use startUpgradable?)
+  },
+  produce: {
+    swaparooKit: true,
+    swaparooCommitteeKit: true,
+  },
+  installation: {
     consume: {
-      startUpgradable: true,
-      namesByAddressAdmin: true, // to convert string addresses to depositFacets
-    },
-    installation: { consume: { [contractName]: true } },
-    instance: { produce: { [contractName]: true } },
-    brand: {
-      consume: {
-        IST: true, // for use in contract terms
-      },
+      [contractName]: true,
+      contractGovernor: true,
     },
   },
-};
-harden(contractManifest);
-
-export const getManifestForContract = (
-  { restoreRef },
-  { [`${contractName}Ref`]: contractRef },
-) => {
-  console.log('manifest ref', contractName, contractRef);
-  return harden({
-    manifest: contractManifest,
-    installations: {
-      [contractName]: restoreRef(contractRef),
+  instance: { produce: { [contractName]: true } },
+  brand: {
+    consume: {
+      IST: true, // for use in contract terms
     },
-  });
-};
+  },
+});
