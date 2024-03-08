@@ -19,15 +19,6 @@ import { getBundleId } from '../tools/bundle-tools.js';
 const { entries } = Object;
 
 /**
- * In agoric-sdk, the BootstrapPowers.consume['chainStorage'] type includes undefined because
- * of some historical testing practices. It's tedious and unnecessary
- * to check for undefined, so here we override the type to say that it's
- * never undefined.
- *
- * @typedef {PromiseSpaceOf<{ chainStorage: StorageNode }>} NonNullChainStorage
- */
-
-/**
  * Make powers (zoe, timer and name services, etc.) sufficient to test
  * deploying and using contracts. priceAuthority is a dummy.
  *
@@ -103,7 +94,7 @@ export const mockBootstrapPowers = async (
   produce.priceAuthority.resolve(Far('NullPriceAuthority', {}));
 
   /**
-   * @type {BootstrapPowers & NonNullChainStorage}
+   * @type {BootstrapPowers & import('../src/types').NonNullChainStorage}
    */
   // @ts-expect-error mock
   const powers = { produce, consume, ...spaces, zone };
