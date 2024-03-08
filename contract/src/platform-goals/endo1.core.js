@@ -9,13 +9,13 @@ import * as patterns from '@endo/patterns';
  *     patterns: typeof import('@endo/patterns');
  *   }
  * }} Endo1Modules
- * @typedef {import('./core-types').PromiseSpaceOf<Endo1Modules>} Endo1Space
+ * @typedef {PromiseSpaceOf<Endo1Modules>} Endo1Space
  */
 
 /**
  * Make @endo/marshal, @endo/patterns available to CoreEval scripts.
  *
- * @param {import('./core-types').BootstrapPowers & Endo1Space} permittedPowers
+ * @param {BootstrapPowers & Endo1Space} permittedPowers
  */
 export const produceEndoModules = permittedPowers => {
   const { produce } = permittedPowers;
@@ -23,7 +23,7 @@ export const produceEndoModules = permittedPowers => {
   produce.endo1.resolve(endo);
 };
 
-/** @type {import('./core-types').BootstrapManifestPermit} */
+/** @type {import('@agoric/vats/src/core/lib-boot').BootstrapManifestPermit} */
 export const permit = {
   /** @type {Record<keyof Endo1Modules, true>} */
   produce: { endo1: true },
