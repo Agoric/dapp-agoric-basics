@@ -1,12 +1,13 @@
-/**
- * @file core eval script* to start typical contracts.
- */
+/** @file utilities to start typical contracts in core eval scripts. */
 // @ts-check
 
 import { E } from '@endo/far';
 
 /**
- * @param {BootstrapPowers} powers
+ * Given a bundleID and a permitted name, install a bundle and "produce"
+ * the installation, which also publishes it via agoricNames.
+ *
+ * @param {BootstrapPowers} powers - zoe, installation.produce[name]
  * @param {{ name: string, bundleID: string }} opts
  */
 export const installContract = async (
@@ -21,7 +22,12 @@ export const installContract = async (
 };
 
 /**
- * @param {BootstrapPowers} powers
+ * Given a permitted name, start a contract instance; save upgrade info; publish instance.
+ * Optionally: publish issuers/brands.
+ *
+ * Note: publishing brands requires brandAuxPublisher from board-aux.core.js.
+ *
+ * @param {BootstrapPowers} powers - consume.startUpgradable, installation.consume[name], instance.produce[name]
  * @param {{
  *   name: string;
  *   startArgs?: StartArgs;
