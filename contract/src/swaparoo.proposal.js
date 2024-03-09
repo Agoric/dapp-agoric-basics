@@ -31,8 +31,10 @@ export const installContract = async (powers, config) => {
   /** @type { BootstrapPowers & SwaparooSpace} */
   // @ts-expect-error cast
   const swapPowers = powers;
-  const { bundleID = Fail`missing bundleID` } =
-    config.options?.[contractName] || {};
+  const {
+    // must be supplied at runtime or replaced in template fashion
+    bundleID = Fail`missing bundleID`,
+  } = config.options?.[contractName] || {};
   const {
     consume: { zoe },
     installation: {
