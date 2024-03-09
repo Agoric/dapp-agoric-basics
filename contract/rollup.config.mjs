@@ -17,6 +17,7 @@ import {
   emitPermit,
 } from './tools/rollup-plugin-core-eval.js';
 import { permit as postalServicePermit } from './src/postal-service.proposal.js';
+import { permit as swapPermit } from './src/swaparoo.proposal.js';
 import { permit as sellPermit } from './src/sell-concert-tickets.proposal.js';
 import { permit as boardAuxPermit } from './src/platform-goals/board-aux.core.js';
 
@@ -67,6 +68,7 @@ const config = [
     name: 'sell-concert-tickets',
     permit: sellPermit,
   }),
+  config1({ name: 'swaparoo', permit: swapPermit }),
   config1({
     name: 'postal-service',
     permit: postalServicePermit,
