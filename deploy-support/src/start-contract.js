@@ -1,7 +1,7 @@
 /** @file utilities to start typical contracts in core eval scripts. */
 // @ts-check
 
-import { E } from '@endo/far';
+import { E } from "@endo/far";
 
 /**
  * Given a bundleID and a permitted name, install a bundle and "produce"
@@ -12,12 +12,12 @@ import { E } from '@endo/far';
  */
 export const installContract = async (
   { consume: { zoe }, installation: { produce: produceInstallation } },
-  { name, bundleID },
+  { name, bundleID }
 ) => {
   const installation = await E(zoe).installBundleID(bundleID);
   produceInstallation[name].reset();
   produceInstallation[name].resolve(installation);
-  console.log(name, 'installed as', bundleID.slice(0, 8));
+  console.log(name, "installed as", bundleID.slice(0, 8));
   return installation;
 };
 
@@ -38,7 +38,7 @@ export const installContract = async (
  */
 export const startContract = async (
   powers,
-  { name, startArgs, issuerNames },
+  { name, startArgs, issuerNames }
 ) => {
   const {
     consume: { startUpgradable },
@@ -48,7 +48,7 @@ export const startContract = async (
 
   const installation = await consumeInstallation[name];
 
-  console.log(name, 'start args:', startArgs);
+  console.log(name, "start args:", startArgs);
   const started = await E(startUpgradable)({
     ...startArgs,
     installation,
@@ -58,10 +58,10 @@ export const startContract = async (
   produceInstance[name].reset();
   produceInstance[name].resolve(instance);
 
-  console.log(name, 'started');
+  console.log(name, "started");
 
   if (issuerNames) {
-    /** @type {BootstrapPowers & import('./board-aux.core').BoardAuxPowers} */
+    /** @type {BootstrapPowers & import('../contract/src/platform-goals/board-aux.core').BoardAuxPowers} */
     // @ts-expect-error cast
     const auxPowers = powers;
 
@@ -71,10 +71,10 @@ export const startContract = async (
     const { brands, issuers } = await E(zoe).getTerms(instance);
 
     await Promise.all(
-      issuerNames.map(async issuerName => {
+      issuerNames.map(async (issuerName) => {
         const brand = brands[issuerName];
         const issuer = issuers[issuerName];
-        console.log('CoreEval script: share via agoricNames:', brand);
+        console.log("CoreEval script: share via agoricNames:", brand);
 
         produceBrand[issuerName].reset();
         produceIssuer[issuerName].reset();
@@ -82,7 +82,7 @@ export const startContract = async (
         produceIssuer[issuerName].resolve(issuer);
 
         await E(brandAuxPublisher).publishBrandInfo(brand);
-      }),
+      })
     );
   }
 
