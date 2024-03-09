@@ -8,11 +8,11 @@
 // @ts-check
 
 import { E } from '@endo/far';
-import { fixHub } from './fixHub.js';
 import {
   installContract,
   startContract,
-} from './platform-goals/start-contract.js';
+} from 'agoric-basics-deploy-support/src/start-contract.js';
+import { fixHub } from './fixHub.js';
 import { allValues } from './objectTools.js';
 
 const { Fail } = assert;
