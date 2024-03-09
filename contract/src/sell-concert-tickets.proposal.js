@@ -1,10 +1,10 @@
 // @ts-check
 // import { AmountMath } from '@agoric/ertp/src/amountMath.js';
-import { allValues } from './objectTools.js';
 import {
   installContract,
   startContract,
-} from './platform-goals/start-contract.js';
+} from 'agoric-basics-deploy-support/src/start-contract.js';
+import { allValues } from './objectTools.js';
 
 const { Fail } = assert;
 
