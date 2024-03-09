@@ -1,7 +1,7 @@
 // @ts-check
-// import { AmountMath } from '@agoric/ertp/src/amountMath.js';
 import { allValues } from './objectTools.js';
 import {
+  AmountMath,
   installContract,
   startContract,
 } from './platform-goals/start-contract.js';
@@ -10,11 +10,6 @@ const { Fail } = assert;
 
 const contractName = 'sellConcertTickets';
 const IST_UNIT = 1_000_000n;
-
-// avoid bundling from other packages
-const AmountMath = {
-  make: (brand, value) => harden({ brand, value }),
-};
 
 export const makeInventory = (brand, baseUnit) => {
   return {
