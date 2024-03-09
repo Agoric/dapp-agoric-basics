@@ -1,8 +1,9 @@
 // @ts-check
-import { E } from '@endo/far';
-import { AmountMath } from '@agoric/ertp/src/amountMath.js';
-
-console.warn('swaparoo.proposal.js module evaluating');
+import {
+  AmountMath,
+  installContract,
+  startContract,
+} from './platform-goals/start-contract.js';
 
 const { Fail } = assert;
 
@@ -21,100 +22,61 @@ const contractName = 'swaparoo';
  * @param {BootstrapPowers} powers
  * @param {*} config
  */
-export const installContract = async (powers, config) => {
-  console.log('installContract() ...', contractName);
-  /** @type { BootstrapPowers & SwaparooSpace} */
-  // @ts-expect-error cast
-  const swapPowers = powers;
-  const { bundleID = Fail`missing bundleID` } =
-    config.options?.[contractName] || {};
+export const installSwapContract = async (powers, config) => {
   const {
-    consume: { zoe },
-    installation: {
-      produce: { [contractName]: produceInstallation },
-    },
-  } = swapPowers;
+    // must be supplied at runtime or replaced in template fashion
+    bundleID = Fail`missing bundleID`,
+  } = config.options?.[contractName] || {};
 
-  const installation = await E(zoe).installBundleID(bundleID);
-  produceInstallation.reset();
-  produceInstallation.resolve(installation);
-  console.log(contractName, '(re)installed');
+  await installContract(powers, { name: contractName, bundleID });
 };
 
 /**
  * Core eval script to start contract
  *
- * @param {BootstrapPowers} permittedPowers
+ * @param {BootstrapPowers} powers
  */
-export const startContract = async permittedPowers => {
+export const startSwapContract = async powers => {
   console.error('startContract()...');
   /** @type { BootstrapPowers & SwaparooSpace} */
   // @ts-expect-error bootstrap powers evolve with BLD staker governance
-  const swapPowers = permittedPowers;
+  const swapPowers = powers;
   const {
-    consume: { startUpgradable, namesByAddressAdmin: namesByAddressAdminP },
+    consume: { namesByAddressAdmin: namesByAddressAdminP },
     brand: {
       consume: { IST: istBrandP },
-    },
-    installation: {
-      consume: { [contractName]: installationP },
-    },
-    instance: {
-      produce: { [contractName]: produceInstance },
     },
   } = swapPowers;
 
   const istBrand = await istBrandP;
-  // NOTE: TODO all terms for the contract go here
   const oneIST = AmountMath.make(istBrand, 1n);
   const namesByAddressAdmin = await namesByAddressAdminP;
   const terms = { feeAmount: oneIST, namesByAddressAdmin };
 
-  const installation = await installationP;
-
-  const { instance } = await E(startUpgradable)({
-    installation,
-    label: contractName,
-    terms,
-  });
-  console.log('CoreEval script: started game contract', instance);
-  // const {} = await E(zoe).getTerms(instance);
-
-  console.log('CoreEval script: share via agoricNames: none');
-
-  produceInstance.reset();
-  produceInstance.resolve(instance);
-
-  console.log(`${contractName} (re)started`);
+  return startContract(powers, { name: contractName, startArgs: { terms } });
 };
 
-/** @type { import("@agoric/vats/src/core/lib-boot").BootstrapManifest } */
-const contractManifest = {
-  [startContract.name]: {
+export const main = async (powers, config = {}) => {
+  await installSwapContract(powers, config);
+  await startSwapContract(powers);
+};
+
+/** @type { import("@agoric/vats/src/core/lib-boot").BootstrapManifestPermit } */
+export const permit = {
+  consume: {
+    startUpgradable: true,
+    namesByAddressAdmin: true, // to convert string addresses to depositFacets
+    zoe: true, // to install the contract
+  },
+  installation: {
+    produce: { [contractName]: true },
+    consume: { [contractName]: true },
+  },
+  instance: { produce: { [contractName]: true } },
+  brand: {
     consume: {
-      startUpgradable: true,
-      namesByAddressAdmin: true, // to convert string addresses to depositFacets
-    },
-    installation: { consume: { [contractName]: true } },
-    instance: { produce: { [contractName]: true } },
-    brand: {
-      consume: {
-        IST: true, // for use in contract terms
-      },
+      IST: true, // for use in contract terms
     },
   },
 };
-harden(contractManifest);
-
-export const getManifestForContract = (
-  { restoreRef },
-  { [`${contractName}Ref`]: contractRef },
-) => {
-  console.log('manifest ref', contractName, contractRef);
-  return harden({
-    manifest: contractManifest,
-    installations: {
-      [contractName]: restoreRef(contractRef),
-    },
-  });
-};
+harden(permit);
