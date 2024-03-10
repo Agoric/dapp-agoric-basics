@@ -31,7 +31,7 @@ export const startPostalService = async (powers, config) => {
     consume: { namesByAddressAdmin, agoricNames },
   } = powers;
   const {
-    // separate line for bundling
+    // must be supplied by caller or template-replaced
     bundleID = Fail`no bundleID`,
     issuerNames = ['IST', 'Invitation', 'BLD', 'ATOM'],
   } = config?.options?.[contractName] ?? {};
@@ -62,10 +62,12 @@ export const manifest = /** @type {const} */ ({
       agoricNames: true,
       namesByAddress: true,
       namesByAddressAdmin: true,
+      startUpgradable: true,
       zoe: true,
     },
     installation: {
       produce: { postalService: true },
+      consume: { postalService: true },
     },
     instance: {
       produce: { postalService: true },
