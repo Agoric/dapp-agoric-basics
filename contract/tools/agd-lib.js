@@ -119,6 +119,7 @@ export const makeAgd = ({ execFileSync }) => {
           ...(yes ? ['--yes'] : []),
           ...outJson,
         ];
+        console.log('$$$', agdBinary, ...args);
         const out = exec(args);
         try {
           const detail = JSON.parse(out);
