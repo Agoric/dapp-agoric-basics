@@ -9,6 +9,7 @@ const { Fail } = assert;
  * @param {ERef<import('@agoric/vats').NameAdmin>} namesByAddressAdmin
  */
 export const fixHub = async namesByAddressAdmin => {
+  assert(namesByAddressAdmin, 'no namesByAddressAdmin???');
   /** @type {import('@agoric/vats').NameHub} */
   const hub = Far('Hub work-around', {
     lookup: async (addr, ...rest) => {
