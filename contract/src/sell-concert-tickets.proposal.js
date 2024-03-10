@@ -56,7 +56,7 @@ export const startSellConcertTicketsContract = async (
 ) => {
   console.log('core eval for', contractName);
   const {
-    // separate line for bundling
+    // must be supplied by caller or template-replaced
     bundleID = Fail`no bundleID`,
   } = config?.options?.[contractName] ?? {};
 
