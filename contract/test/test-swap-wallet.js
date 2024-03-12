@@ -4,11 +4,16 @@ import { createRequire } from 'node:module';
 import { E } from '@endo/far';
 import { AmountMath } from '@agoric/ertp';
 
+import { extract } from '@agoric/vats/src/core/utils.js';
 import { mockBootstrapPowers } from './boot-tools.js';
-import { installContract, startContract } from '../src/swaparoo.proposal.js';
+import {
+  installSwapContract,
+  permit,
+  startSwapContract,
+} from '../src/swaparoo.proposal.js';
 import { makeStableFaucet } from './mintStable.js';
 import { mockWalletFactory, seatLike } from './wallet-tools.js';
-import { getBundleId, makeBundleCacheContext } from './bundle-tools.js';
+import { getBundleId, makeBundleCacheContext } from '../tools/bundle-tools.js';
 
 /** @typedef {import('./wallet-tools.js').MockWallet} MockWallet */
 
@@ -36,9 +41,10 @@ test.serial('bootstrap and start contract', async t => {
 
   t.log('install contract');
   const config = { options: { [contractName]: { bundleID } } };
-  await installContract(powers, config); // `agoric run` style proposal does this for us
+  const swapPowers = extract(permit, powers);
+  await installSwapContract(swapPowers, config); // `agoric run` style proposal does this for us
   t.log('start contract');
-  await startContract(powers);
+  await startSwapContract(swapPowers);
 
   const instance = await powers.instance.consume[contractName];
   t.log(instance);
