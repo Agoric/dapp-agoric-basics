@@ -13,12 +13,6 @@ const localnet = {
     iconUrl: '/agoriclocal.svg', // Optional icon for dropdown display
   },
 };
-const mainnet = {
-  apis: {
-    rest: ['https://main.api.agoric.net'],
-    rpc: ['https://main.rpc.agoric.net'],
-  },
-};
 
 const Navbar = () => {
   const { themeClass } = useTheme();
@@ -41,7 +35,7 @@ const Navbar = () => {
       <ThemeProvider>
         <div className={themeClass}>
           <div>
-            <NetworkDropdown networkConfigs={[mainnet, localnet]} />
+            <NetworkDropdown networkConfigs={[localnet]} />
           </div>
         </div>
       </ThemeProvider>
