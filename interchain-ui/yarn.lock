@@ -229,13 +229,13 @@
     "@endo/marshal" "0.8.5"
     "@endo/promise-kit" "0.2.56"
 
-"@agoric/react-components@^0.1.1-dev-09ca26c.0":
-  version "0.1.1-dev-09ca26c.0"
-  resolved "https://registry.yarnpkg.com/@agoric/react-components/-/react-components-0.1.1-dev-09ca26c.0.tgz#4d82a1d17fac5bb136e66920882c15ee2978da19"
-  integrity sha512-uO8of9hk23tVuYaFCFP6pr8GPwAzMLiiYGXviV5L9WT6Kc/Dj0SUQOkCnj/dv9dAK2Dvjn0enZzz1Z0Cq9eNAQ==
+"@agoric/react-components@^0.1.1-dev-8fc28e8.0":
+  version "0.1.1-dev-8fc28e8.0"
+  resolved "https://registry.yarnpkg.com/@agoric/react-components/-/react-components-0.1.1-dev-8fc28e8.0.tgz#34078b8d1baf4b60410d03f8f0ef9f97d2a2eb33"
+  integrity sha512-Ah9sEIrJDU1I7GbUHwZxG8zxLCCBA9OgssXmpJEH0d3rSBn/Fp+DOgXia85hw3gjsEWKTXsimkniTkZLM4cGaA==
   dependencies:
-    "@agoric/rpc" "0.9.1-dev-09ca26c.0+09ca26c"
-    "@agoric/web-components" "0.15.1-dev-09ca26c.0+09ca26c"
+    "@agoric/rpc" "0.9.1-dev-8fc28e8.0+8fc28e8"
+    "@agoric/web-components" "0.15.1-dev-8fc28e8.0+8fc28e8"
     "@cosmos-kit/core" "2.8.9"
     "@cosmos-kit/react" "2.10.10"
     "@interchain-ui/react" "1.21.18"
@@ -243,10 +243,10 @@
     react "18.2.0"
     react-dom "18.2.0"
 
-"@agoric/rpc@0.9.1-dev-09ca26c.0+09ca26c":
-  version "0.9.1-dev-09ca26c.0"
-  resolved "https://registry.yarnpkg.com/@agoric/rpc/-/rpc-0.9.1-dev-09ca26c.0.tgz#b9373c94c52e28d0db9ce2fd72e4686202baf314"
-  integrity sha512-bvD2N0/bE33JfnnYPbWSf74pd1a3K+00OEeMXcgJkWlq3DXYH4vVAnPoSVAPkTYndSyJg+ppbl1fLgCUX5Qh2w==
+"@agoric/rpc@0.9.1-dev-8fc28e8.0+8fc28e8":
+  version "0.9.1-dev-8fc28e8.0"
+  resolved "https://registry.yarnpkg.com/@agoric/rpc/-/rpc-0.9.1-dev-8fc28e8.0.tgz#108dc98f9ae91c002f735256ad4d5d5ac649dc7e"
+  integrity sha512-06N5lV+aj64OtKJeFN7amEfxB/PZ9JrGYYH7EFZSFl/F509dCAaZkGvYh3hbS8mDAXi2yYAM2cpNQtwLq4/rww==
   dependencies:
     "@endo/marshal" "^0.8.9"
     axios "^1.6.2"
@@ -548,7 +548,22 @@
     "@endo/promise-kit" "^0.2.56"
     jessie.js "^0.3.2"
 
-"@agoric/web-components@0.15.1-dev-09ca26c.0+09ca26c", "@agoric/web-components@^0.15.1-dev-09ca26c.0":
+"@agoric/web-components@0.15.1-dev-8fc28e8.0+8fc28e8":
+  version "0.15.1-dev-8fc28e8.0"
+  resolved "https://registry.yarnpkg.com/@agoric/web-components/-/web-components-0.15.1-dev-8fc28e8.0.tgz#9a59a14626b6ccc42ac147b289c62ea3b6a97b31"
+  integrity sha512-SnO/G//ySwJmEW/2Tqt4kJC+urgEGoEZTV3won47Nac1aIYmO6FxBOrTA4gNycJrjwL2UEZVzotDVNrvIfGUPg==
+  dependencies:
+    "@agoric/assert" "^0.6.0"
+    "@agoric/cache" "^0.3.2"
+    "@agoric/casting" "^0.4.3-u13.0"
+    "@agoric/ertp" "^0.16.2"
+    "@agoric/notifier" "^0.6.3-dev-8c14632.0"
+    "@agoric/smart-wallet" "^0.5.3"
+    "@endo/captp" "^3.1.1"
+    "@endo/eventual-send" "^0.17.5"
+    "@endo/marshal" "^0.8.5"
+
+"@agoric/web-components@^0.15.1-dev-09ca26c.0":
   version "0.15.1-dev-09ca26c.0"
   resolved "https://registry.yarnpkg.com/@agoric/web-components/-/web-components-0.15.1-dev-09ca26c.0.tgz#03daf96c04757a5d9a18cf60a1bf4b93818fcf51"
   integrity sha512-Xg0c5676bC/+bjR3QFgZ+kQE2uSkio9eeBROaj6enuVh9+VjNPH111COcAZoZM1mlpKWErQbzN9LQz+dg6wadA==
