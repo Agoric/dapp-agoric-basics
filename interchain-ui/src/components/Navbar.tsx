@@ -1,6 +1,28 @@
 import { ConnectWalletButton } from '@agoric/react-components';
+import { NetworkDropdown } from '@agoric/react-components';
+import { ThemeProvider, useTheme } from '@interchain-ui/react';
+
+const localnet = {
+  testChain: {
+    chainId: 'agoriclocal',
+    chainName: 'agoric-local',
+  },
+  apis: {
+    rest: ['http://localhost:1317'],
+    rpc: ['http://localhost:26657'],
+    iconUrl: '/agoriclocal.svg', // Optional icon for dropdown display
+  },
+};
+const mainnet = {
+  apis: {
+    rest: ['https://main.api.agoric.net'],
+    rpc: ['https://main.rpc.agoric.net'],
+  },
+};
 
 const Navbar = () => {
+  const { themeClass } = useTheme();
+
   return (
     <div className="daisyui-navbar bg-neutral text-neutral-content">
       {/* Agoric logo */}
@@ -15,6 +37,14 @@ const Navbar = () => {
           dApp Agoric Basics
         </button>
       </div>
+      {/* network selector */}
+      <ThemeProvider>
+        <div className={themeClass}>
+          <div>
+            <NetworkDropdown networkConfigs={[mainnet, localnet]} />
+          </div>
+        </div>
+      </ThemeProvider>
       {/* connect wallet button */}
       <div className="flex-none">
         <ConnectWalletButton className="daisyui-btn daisyui-btn-outline daisyui-btn-secondary" />
