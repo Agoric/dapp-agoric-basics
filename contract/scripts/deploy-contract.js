@@ -7,55 +7,39 @@ import { execFile, execFileSync } from 'node:child_process';
 import { basename } from 'node:path';
 
 import { makeNodeBundleCache } from '@endo/bundle-source/cache.js';
+import { parseArgs } from 'node:util';
 import { makeE2ETools } from '../tools/e2e-tools.js';
 
-const opt0 = {
-  service: 'agd',
-  workdir: '/workspace/contract',
+/** @type {import('node:util').ParseArgsConfig['options']} */
+const options = {
+  help: { type: 'boolean' },
+  install: { type: 'string' },
+  eval: { type: 'string', multiple: true },
+  service: { type: 'string', default: 'agd' },
+  workdir: { type: 'string', default: '/workspace/contract' },
 };
+/**
+ * @typedef {{
+ *   help: boolean,
+ *   install?: string,
+ *   eval?: string[],
+ *   service: string,
+ *   workdir: string,
+ * }} DeployOptions
+ */
 
 const Usage = `
-deploy-contract [options] [--install <contract>] [--evals <proposal>...]
+deploy-contract [options] [--install <contract>] [--eval <proposal>]...
 
 Options:
   --help               print usage
   --install            entry module of contract to install
-  --evals              entry modules of core evals to run
+  --eval               entry module of core evals to run
                        (cf rollup.config.mjs)
-  --service SVC        docker compose service to run agd (default: ${opt0.service})
-                       use . to run agd outside docker.
-  --workdir DIR        workdir for docker service (default: ${opt0.workdir})
+  --service SVC        docker compose service to run agd (default: ${options.service.default}).
+                       Use . to run agd outside docker.
+  --workdir DIR        workdir for docker service (default: ${options.workdir.default})
 `;
-
-/**
- * @param {string[]} argv
- * @param {{ [k: string]: boolean | [] | undefined }} [style]
- */
-const getopts = (argv, style = {}) => {
-  /** @type {{ [k: string]: string }} */
-  const flags = {};
-  const args = [];
-  while (argv.length > 0) {
-    const arg = NonNullish(argv.shift());
-    if (arg.startsWith('--')) {
-      const name = arg.slice('--'.length);
-      if (style[name] === true) {
-        flags[name] = '+';
-        continue;
-      }
-      if (argv.length <= 0) throw RangeError(`no value for ${arg}`);
-      if (Array.isArray(style[name])) {
-        flags[name] = '+';
-        args.push(...argv);
-        break;
-      }
-      flags[name] = NonNullish(argv.shift());
-    } else {
-      args.push(arg);
-    }
-  }
-  return harden({ flags, args });
-};
 
 const mockExecutionContext = () => {
   const withSkip = o =>
@@ -78,13 +62,14 @@ const main = async (bundleDir = 'bundles') => {
 
   const bundleCache = await makeNodeBundleCache(bundleDir, {}, s => import(s));
 
-  const { flags: given, args } = getopts(argv.slice(2), { evals: [] });
-  /** @type {typeof given} */
-  const flags = { ...opt0, ...given };
-  if (given.help) {
+  /** @type {{ values: DeployOptions }} */
+  // @ts-expect-error options config ensures type
+  const { values: flags } = parseArgs({ args: argv.slice(2), options });
+  if (flags.help) {
     progress(Usage);
     return;
   }
+  /** @type {{ workdir: string, service: string }} */
   const { workdir, service } = flags;
 
   /** @type {import('../tools/agd-lib.js').ExecSync} */
@@ -113,8 +98,8 @@ const main = async (bundleDir = 'bundles') => {
     await tools.installBundles({ [name]: flags.install }, progress);
   }
 
-  if (flags.evals) {
-    for await (const entryFile of args) {
+  if (flags.eval) {
+    for await (const entryFile of flags.eval) {
       const result = await tools.runCoreEval({
         name: stem(entryFile),
         entryFile,
