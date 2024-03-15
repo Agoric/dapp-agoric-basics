@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Mint } from './mint/Mint';
+import { Swap } from './swap/Swap';
 import { TabWrapper } from './TabWrapper';
 import { Notifications } from './Notifications';
 import { NotificationContext } from '../context/NotificationContext';
@@ -19,7 +20,7 @@ type DynamicToastChild = {
 
 const Tabs = () => {
   // tab state related functions
-  const [activeTab, setActiveTab] = useState('Mint');
+  const [activeTab, setActiveTab] = useState('Swap');
 
   const handleTabClick = (tab: string) => {
     setActiveTab(tab);
@@ -57,7 +58,7 @@ const Tabs = () => {
             activeTab={activeTab}
             handleTabClick={handleTabClick}
           >
-            <div>TBD</div>
+            <Swap />
           </TabWrapper>
           <TabWrapper
             tab="Pay"
