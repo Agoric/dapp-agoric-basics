@@ -36,6 +36,9 @@ jobs:
         run: yarn
       - name: yarn start:docker
         run: yarn start:docker
+      - name: yarn build
+        run: yarn build
+      # Borrowed from https://github.com/DCFoundation/cosmos-proposal-builder/blob/main/.github/workflows/pr.yml#L43-L61
       - name: Wait for Docker container to be ready
         run: |
           timeout 180 bash -c '
@@ -57,5 +60,3 @@ jobs:
           '
       - name: yarn start:contract
         run: yarn start:contract
-      - name: yarn build
-        run: yanr build
