@@ -52,6 +52,7 @@
   "dependencies": {
     "@agoric/ertp": "^0.16.3-u14.0",
     "@agoric/governance": "^0.10.4-u14.0",
+    "@agoric/inter-protocol": "0.16.2-u14.1",
     "@agoric/vats": "0.15.2-u14.0",
     "@agoric/zoe": "^0.26.3-u14.0",
     "@endo/bundle-source": "^2.8.0",
