@@ -41,7 +41,7 @@ jobs:
       # Borrowed from https://github.com/DCFoundation/cosmos-proposal-builder/blob/main/.github/workflows/pr.yml#L43-L61
       - name: Wait for Docker container to be ready
         run: |
-          timeout 180 bash -c '
+          timeout 300 bash -c '
             TARGET_HEIGHT=1111
             SLEEP=10
             echo "Waiting for the Agoric service to be fully ready..."
