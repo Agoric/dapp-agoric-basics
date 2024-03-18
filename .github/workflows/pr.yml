@@ -42,7 +42,7 @@ jobs:
       - name: Wait for Docker container to be ready
         run: |
           timeout 180 bash -c '
-            TARGET_HEIGHT=1001
+            TARGET_HEIGHT=1111
             SLEEP=10
             echo "Waiting for the Agoric service to be fully ready..."
             echo "Target block height: $TARGET_HEIGHT"
@@ -60,3 +60,6 @@ jobs:
           '
       - name: yarn start:contract
         run: yarn start:contract
+      - name: verify contracts started onchain
+        run: |
+          curl http://localhost:1317/agoric/vstorage/data/published.agoricNames.instance | grep sellConcertTickets
