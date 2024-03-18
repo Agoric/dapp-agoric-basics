@@ -5,6 +5,13 @@ import { withdrawFromSeat } from '@agoric/zoe/src/contractSupport/zoeHelpers.js'
 
 const { keys, values } = Object;
 
+/** @type {import('./@types/zoe-contract-facet').ContractMeta} */
+export const meta = harden({
+  customTermsShape: { namesByAddress: M.remotable('namesByAddress') },
+});
+// compatibility with an earlier contract metadata API
+export const { customTermsShape } = meta;
+
 /**
  * @typedef {object} PostalSvcTerms
  * @property {import('@agoric/vats').NameHub} namesByAddress
@@ -62,3 +69,4 @@ export const start = zcf => {
   });
   return { publicFacet };
 };
+/** @typedef { typeof start } PostalServiceFn */

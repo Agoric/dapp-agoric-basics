@@ -7,23 +7,16 @@ import { makeFakeVatAdmin } from '@agoric/zoe/tools/fakeVatAdmin.js';
 import { makeZoeKitForTest } from '@agoric/zoe/tools/setup-zoe.js';
 import buildManualTimer from '@agoric/zoe/tools/manualTimer.js';
 import { AmountMath, AssetKind, makeIssuerKit } from '@agoric/ertp';
+import { makeScalarMapStore } from '@agoric/store';
+import { makeDurableZone } from '@agoric/zone/durable.js';
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { makeMockChainStorageRoot } from '@agoric/internal/src/storage-test-utils.js';
 
 import { mockWalletFactory } from './wallet-tools.js';
-import { getBundleId } from './bundle-tools.js';
+import { getBundleId } from '../tools/bundle-tools.js';
 
 const { entries } = Object;
-
-/**
- * In agoric-sdk, the BootstrapPowers.consume['chainStorage'] type includes undefined because
- * of some historical testing practices. It's tedious and unnecessary
- * to check for undefined, so here we override the type to say that it's
- * never undefined.
- *
- * @typedef {PromiseSpaceOf<{ chainStorage: StorageNode }>} NonNullChainStorage
- */
 
 /**
  * Make powers (zoe, timer and name services, etc.) sufficient to test
@@ -39,6 +32,8 @@ export const mockBootstrapPowers = async (
   log,
   spaceNames = ['installation', 'instance', 'issuer', 'brand'],
 ) => {
+  const baggage = makeScalarMapStore('testing');
+  const zone = makeDurableZone(baggage);
   const { produce, consume } = makePromiseSpace();
 
   const { admin, vatAdminState } = makeFakeVatAdmin();
@@ -56,7 +51,11 @@ export const mockBootstrapPowers = async (
   const { nameHub: namesByAddress, nameAdmin: namesByAddressAdmin } =
     makeNameHubKit();
 
-  const chainTimerService = buildManualTimer();
+  const noop = () => {};
+  const modernTime = BigInt(new Date(2024, 6, 1, 9).valueOf() / 1000);
+  const chainTimerService = buildManualTimer(noop, modernTime, {
+    timeStep: 60n,
+  });
   const timerBrand = await E(chainTimerService).getTimerBrand();
 
   const chainStorage = makeMockChainStorageRoot();
@@ -99,10 +98,10 @@ export const mockBootstrapPowers = async (
   produce.priceAuthority.resolve(Far('NullPriceAuthority', {}));
 
   /**
-   * @type {BootstrapPowers & NonNullChainStorage}
+   * @type {BootstrapPowers & import('../src/types').NonNullChainStorage}
    */
   // @ts-expect-error mock
-  const powers = { produce, consume, ...spaces };
+  const powers = { produce, consume, ...spaces, zone };
 
   return { powers, vatAdminState, chainStorage };
 };

@@ -6,8 +6,19 @@ import { E, Far } from '@endo/far';
 import '@agoric/zoe/exported.js';
 import { atomicRearrange } from '@agoric/zoe/src/contractSupport/atomicTransfer.js';
 import '@agoric/zoe/src/contracts/exported.js';
+import { AmountShape } from '@agoric/ertp/src/typeGuards.js';
+import {
+  InstanceHandleShape,
+  InvitationShape,
+} from '@agoric/zoe/src/typeGuards.js';
+// deep imports to avoid bloating our bundle
+import { ParamTypes } from '@agoric/governance/src/constants.js';
+import { CONTRACT_ELECTORATE } from '@agoric/governance/src/contractGovernance/governParam.js';
+import { handleParamGovernance } from '@agoric/governance/src/contractHelper.js';
 import { makeCollectFeesInvitation } from './collectFees.js';
 import { fixHub } from './fixHub.js';
+
+/** @template [Slot=unknown] @typedef {import('@endo/marshal').Marshal<Slot>} Marshaller */
 
 const { quote: q } = assert;
 
@@ -40,18 +51,75 @@ export const swapWithFee = (zcf, firstSeat, secondSeat, feeSeat, feeAmount) => {
 let issuerNumber = 1;
 const IssuerShape = M.remotable('Issuer');
 
+const paramTypes = harden(
+  /** @type {const} */ ({
+    Fee: ParamTypes.AMOUNT,
+  }),
+);
+
+export const meta = harden({
+  customTermsShape: {
+    electionManager: InstanceHandleShape,
+    governedParams: {
+      Fee: {
+        type: ParamTypes.AMOUNT,
+        value: AmountShape,
+      },
+      [CONTRACT_ELECTORATE]: {
+        type: ParamTypes.INVITATION,
+        value: AmountShape,
+      },
+    },
+  },
+  privateArgsShape: M.splitRecord(
+    {
+      marshaller: M.remotable('Marshaller'),
+      storageNode: M.remotable('StorageNode'),
+      namesByAddressAdmin: M.remotable('namesByAddressAdmin'),
+    },
+    {
+      // only necessary on first invocation, not subsequent
+      initialPoserInvitation: InvitationShape,
+    },
+  ),
+});
+export const customTermsShape = meta.customTermsShape;
+export const privateArgsShape = meta.privateArgsShape;
+
 /**
- * @param {ZCF<{feeAmount: Amount<'nat'>, namesByAddressAdmin: import('@agoric/vats').NamesByAddressAdmin}>} zcf
+ * @param {ZCF<GovernanceTerms<paramTypes>>} zcf
+ *
+ * @typedef {{
+ *   initialPoserInvitation: Invitation;
+ *   storageNode: StorageNode;
+ *   marshaller: Marshaller;
+ * }} GovPrivateArgs
+ *
+ * @param {GovPrivateArgs & {
+ *   namesByAddressAdmin: import('@agoric/vats').NamesByAddressAdmin
+ * }} privateArgs
+ * @param {import('@agoric/vat-data').Baggage} baggage
  */
-export const start = async zcf => {
+export const start = async (zcf, privateArgs, baggage) => {
   // set up fee handling
-  const { feeAmount, namesByAddressAdmin } = zcf.getTerms();
+  const { namesByAddressAdmin } = privateArgs;
   /** @type { ERef<Issuer<"nat">> } */
   const stableIssuer = await E(zcf.getZoeService()).getFeeIssuer();
   const feeBrand = await E(stableIssuer).getBrand();
   const { zcfSeat: feeSeat } = zcf.makeEmptySeatKit();
-  const feeShape = makeNatAmountShape(feeBrand, feeAmount.value);
   const depositFacetFromAddr = fixHub(namesByAddressAdmin);
+
+  const { publicMixin, makeDurableGovernorFacet, params } =
+    await handleParamGovernance(
+      zcf,
+      privateArgs.initialPoserInvitation,
+      paramTypes,
+      privateArgs.storageNode,
+      privateArgs.marshaller,
+    );
+
+  // TODO: update with Fee param
+  const feeShape = makeNatAmountShape(feeBrand, params.getFee().value);
 
   /**
    * @param { ZCFSeat } firstSeat
@@ -87,7 +155,7 @@ export const start = async zcf => {
         return;
       }
 
-      return swapWithFee(zcf, firstSeat, secondSeat, feeSeat, feeAmount);
+      return swapWithFee(zcf, firstSeat, secondSeat, feeSeat, params.getFee());
     };
 
     const secondSeatInvitation = await zcf.makeInvitation(
@@ -132,13 +200,17 @@ export const start = async zcf => {
 
   const publicFacet = Far('Public', {
     makeFirstInvitation,
+    ...publicMixin,
   });
-  const creatorFacet = Far('Creator', {
+  const limitedCreatorFacet = Far('Creator', {
     makeCollectFeesInvitation() {
       return makeCollectFeesInvitation(zcf, feeSeat, feeBrand, 'Fee');
     },
   });
-
-  return harden({ publicFacet, creatorFacet });
+  const { governorFacet } = makeDurableGovernorFacet(
+    baggage,
+    limitedCreatorFacet,
+  );
+  return harden({ publicFacet, creatorFacet: governorFacet });
 };
 harden(start);
