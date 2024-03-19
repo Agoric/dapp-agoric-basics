@@ -26,6 +26,19 @@ export const moduleToScript = () => ({
   },
 });
 
+export const configureOptions = ({ options }) => {
+  const pattern = new RegExp(`options: Fail.*`, 'g');
+  const replacement = `options: ${JSON.stringify(options)},`;
+  return {
+    name: 'configureOptions',
+    transform: async (code, _id) => {
+      const revised = code.replace(pattern, replacement);
+      if (revised === code) return null;
+      return { code: revised };
+    },
+  };
+};
+
 export const configureBundleID = ({ name, rootModule, cache }) => {
   const pattern = new RegExp(`bundleID\\b = Fail.*`, 'g');
   const bundleCacheP = makeNodeBundleCache(cache, {}, s => import(s));
