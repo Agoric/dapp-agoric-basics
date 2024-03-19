@@ -147,7 +147,12 @@ export const startSwapContract = async powers => {
   console.log(`${contractName} (re)started`);
 };
 
-export const main = (permittedPowers, config) =>
+export const main = (
+  permittedPowers,
+  config = {
+    options: Fail`missing options config`,
+  },
+) =>
   allValues({
     installation: installSwapContract(permittedPowers, config),
     committeeFacets: startSwaparooCommittee(permittedPowers, config),
