@@ -10,11 +10,13 @@
  *   - `permit` export is emitted as JSON
  */
 // @ts-check
+import process from 'node:process';
 import {
   coreEvalGlobals,
   moduleToScript,
   configureBundleID,
   emitPermit,
+  configureOptions,
 } from './tools/rollup-plugin-core-eval.js';
 import { permit as postalServicePermit } from './src/postal-service.proposal.js';
 import { permit as swapPermit } from './src/swaparoo.proposal.js';
@@ -30,6 +32,7 @@ const config1 = ({
   coreEntry = `./src/${name}.proposal.js`,
   contractEntry = `./src/${name}.contract.js`,
   coreScript = `bundles/deploy-${name}.js`,
+  coreScriptOptions = undefined,
   permitFile = `deploy-${name}-permit.json`,
   permit,
 }) => ({
@@ -51,10 +54,15 @@ const config1 = ({
           }),
         ]
       : []),
+    ...(coreScriptOptions
+      ? [configureOptions({ options: coreScriptOptions })]
+      : []),
     moduleToScript(),
     emitPermit({ permit, file: permitFile }),
   ],
 });
+
+const { env } = process;
 
 /** @type {import('rollup').RollupOptions[]} */
 const config = [
@@ -68,7 +76,15 @@ const config = [
     name: 'sell-concert-tickets',
     permit: sellPermit,
   }),
-  config1({ name: 'swaparoo', permit: swapPermit }),
+  config1({
+    name: 'swaparoo',
+    permit: swapPermit,
+    coreScriptOptions: {
+      swaparooCommittee: {
+        voterAddresses: env.SWAP_GOV_ADDR ? { v1: env.SWAP_GOV_ADDR } : {},
+      },
+    },
+  }),
   config1({
     name: 'postal-service',
     permit: postalServicePermit,
