@@ -89,7 +89,7 @@ const decisionRef = ({ proposal, decided }) =>
   `reserved by chain governance proposal #${proposal} decided ${decided}`;
 const postBootContracts = {
   kread: decisionRef({ proposal: 53, decided: '2023-10-01' }),
-  crabble: decisionRef({ proposal: 64, decided: '23-12-18' }),
+  crabble: decisionRef({ proposal: 64, decided: '2023-12-18' }),
 };
 
 const basics = {
