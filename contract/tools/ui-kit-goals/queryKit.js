@@ -1,6 +1,8 @@
 // @ts-check
 
-import { E, Far } from '@endo/far';
+import { E } from '@endo/far';
+import { M } from '@endo/patterns';
+import { makeExo } from '@endo/exo';
 import { batchVstorageQuery } from './batchQuery.js';
 import { makeClientMarshaller } from './marshalTables.js';
 

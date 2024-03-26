@@ -14,6 +14,7 @@
     "build": "yarn build:deployer",
     "build:deployer": "rollup -c rollup.config.mjs",
     "test": "ava --verbose",
+    "format": "yarn prettier --write .github golang packages",
     "lint": "eslint '**/*.js'",
     "lint:types": "tsc -p jsconfig.json",
     "lint:fix": "eslint --fix '**/*.js'"
@@ -56,6 +57,7 @@
     "@agoric/vats": "0.15.2-u14.0",
     "@agoric/zoe": "^0.26.3-u14.0",
     "@endo/bundle-source": "^2.8.0",
+    "@endo/exo": "^1.3.0",
     "@endo/far": "^0.2.22",
     "@endo/init": "^0.5.60",
     "@endo/marshal": "^0.8.9",

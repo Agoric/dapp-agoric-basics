@@ -19,8 +19,8 @@
  */
 // @ts-check
 
-import { Far } from '@endo/far';
 import { M, getCopyBagEntries, makeCopyBag } from '@endo/patterns';
+import { makeExo } from '@endo/exo';
 import { AssetKind } from '@agoric/ertp/src/amountMath.js';
 import { atomicRearrange } from '@agoric/zoe/src/contractSupport/atomicTransfer.js';
 import '@agoric/zoe/exported.js';

@@ -1,6 +1,7 @@
 // @ts-check
-import { E, Far } from '@endo/far';
+import { E } from '@endo/far';
 import { M, mustMatch } from '@endo/patterns';
+import { makeExo } from '@endo/exo';
 import { withdrawFromSeat } from '@agoric/zoe/src/contractSupport/zoeHelpers.js';
 
 const { keys, values } = Object;

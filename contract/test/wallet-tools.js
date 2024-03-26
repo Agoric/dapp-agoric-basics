@@ -4,7 +4,9 @@
  * @see {mockWalletFactory}
  */
 // @ts-check
-import { E, Far } from '@endo/far';
+import { E } from '@endo/far';
+import { M } from '@endo/patterns';
+import { makeExo } from '@endo/exo';
 import { makePromiseKit } from '@endo/promise-kit';
 
 // eslint-disable-next-line import/no-extraneous-dependencies

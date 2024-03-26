@@ -1,7 +1,8 @@
 import '@endo/init/debug.js';
 import test from 'ava';
 
-import { Far } from '@endo/far';
+import { M } from '@endo/patterns';
+import { makeExo } from '@endo/exo';
 import { makeNameHubKit } from '@agoric/vats';
 import { makeNameProxy } from './name-service-client.js';
 

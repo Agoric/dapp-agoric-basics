@@ -1,6 +1,8 @@
 // @ts-check
 // borrowed from https://github.com/Agoric/agoric-sdk/blob/master/packages/inter-protocol/test/supports.js
-import { E, Far } from '@endo/far';
+import { E } from '@endo/far';
+import { M } from '@endo/patterns';
+import { makeExo } from '@endo/exo';
 import { createRequire } from 'node:module';
 
 const nodeRequire = createRequire(import.meta.url);

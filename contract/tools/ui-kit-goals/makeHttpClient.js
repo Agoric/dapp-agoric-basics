@@ -1,5 +1,6 @@
 // @ts-check
-import { Far } from '@endo/far';
+import { M } from '@endo/patterns';
+import { makeExo } from '@endo/exo';
 
 const { freeze } = Object;
 

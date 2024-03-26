@@ -1,6 +1,8 @@
 // @ts-check
 
-import { E, Far } from '@endo/far';
+import { E } from '@endo/far';
+import { M } from '@endo/patterns';
+import { makeExo } from '@endo/exo';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Nat } from '@endo/nat';
 import { flags, makeAgd } from './agd-lib.js';
