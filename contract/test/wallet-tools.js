@@ -179,7 +179,7 @@ export const mockWalletFactory = (
      *
      * @param {Brand} brand
      */
-    async function* purseUpdates(brand) {
+    async function* purseUpdatesInternal(brand) {
       const purse =
         purseByBrand.get(brand) ||
         Fail`no purse for ${q(brand)}; issuer missing? ${q(
@@ -190,6 +190,8 @@ export const mockWalletFactory = (
         yield amount;
       }
     }
+
+    const purseUpdates = brand => purseUpdatesInternal(brand);
 
     return {
       deposit: depositFacet,

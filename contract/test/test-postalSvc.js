@@ -79,7 +79,7 @@ const makeTestContext = async t => {
 };
 
 test.before(async t => (t.context = await makeTestContext(t)));
-
+ 
 test.serial('well-known brand (ATOM) is available', async t => {
   const { makeQueryTool } = t.context;
   const hub0 = makeAgoricNames(makeQueryTool());

@@ -14,7 +14,6 @@
     "build": "yarn build:deployer",
     "build:deployer": "rollup -c rollup.config.mjs",
     "test": "ava --verbose",
-    "format": "yarn prettier --write .github golang packages",
     "lint": "eslint '**/*.js'",
     "lint:types": "tsc -p jsconfig.json",
     "lint:fix": "eslint --fix '**/*.js'"

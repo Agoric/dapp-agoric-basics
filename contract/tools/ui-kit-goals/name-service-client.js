@@ -39,7 +39,8 @@ export const makeAgoricNames = async qt => {
     },
   });
 
-  return { lookup: hub0.lookup, invalidate };
+  return {
+    lookup: (kind, ...more) => hub0.lookup(kind, ...more), invalidate };
 };
 const pmethods = harden(['then', 'catch', 'finally']);
 // See also: https://github.com/endojs/endo/tree/mfig-o/packages/o
