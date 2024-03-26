@@ -16,7 +16,7 @@ export const makeAgoricNames = async qt => {
     }
     const entries = await qt.queryData(`published.agoricNames.${kind}`);
     const record = Object.fromEntries(entries);
-    const hub = makeExo('NameHub', M.interface('NameHub', {}, { defaultGuards: 'passable' }), {
+    const hub = makeExo('NameHub', M.interface('NameHub', {}, { defaultGuards: 'passable', sloppy: true }), {
       lookup: name => record[name],
       keys: () => entries.map(e => e[0]),
       entries: () => entries,
@@ -29,7 +29,7 @@ export const makeAgoricNames = async qt => {
     nameHubCache.clear();
   };
 
-  const hub0 = makeExo('Hub', M.interface('Hub', {}, { defaultGuards: 'passable' }), {
+  const hub0 = makeExo('Hub', M.interface('Hub', {}, { defaultGuards: 'passable', sloppy: true }), {
     lookup: async (kind, ...more) => {
       const hub2 = lookupKind(kind);
       if (more.length > 0) {

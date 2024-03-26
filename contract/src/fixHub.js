@@ -13,7 +13,7 @@ const { Fail } = assert;
 export const fixHub = async namesByAddressAdmin => {
   assert(namesByAddressAdmin, 'no namesByAddressAdmin???');
   /** @type {import('@agoric/vats').NameHub} */
-  const hub = makeExo('Hub work-around', M.interface('Hub work-around', {}, { defaultGuards: 'passable' }), {
+  const hub = makeExo('Hub work-around', M.interface('Hub work-around', {}, { defaultGuards: 'passable', sloppy: true }), {
     lookup: async (addr, ...rest) => {
       await E(namesByAddressAdmin).reserve(addr);
       const addressAdmin = await E(namesByAddressAdmin).lookupAdmin(addr);

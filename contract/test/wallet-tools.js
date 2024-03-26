@@ -60,7 +60,7 @@ export const mockWalletFactory = (
     const invitationPurse = purseByBrand.get(invitationBrand);
     assert(invitationPurse);
 
-    const depositFacet = makeExo('DepositFacet', M.interface('DepositFacet', {}, { defaultGuards: 'passable' }), {
+    const depositFacet = makeExo('DepositFacet', M.interface('DepositFacet', {}, { defaultGuards: 'passable', sloppy: true }), {
       /** @param {Payment} pmt */
       receive: async pmt => {
         const pBrand = await E(pmt).getAllegedBrand();
@@ -193,8 +193,8 @@ export const mockWalletFactory = (
 
     return {
       deposit: depositFacet,
-      offers: makeExo('Offers', M.interface('Offers', {}, { defaultGuards: 'passable' }), { executeOffer, tryExit }),
-      peek: makeExo('Wallet Peek', M.interface('Wallet Peek', {}, { defaultGuards: 'passable' }), { purseUpdates }),
+      offers: makeExo('Offers', M.interface('Offers', {}, { defaultGuards: 'passable', sloppy: true }), { executeOffer, tryExit }),
+      peek: makeExo('Wallet Peek', M.interface('Wallet Peek', {}, { defaultGuards: 'passable', sloppy: true }), { purseUpdates }),
     };
   };
 

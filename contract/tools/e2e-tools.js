@@ -230,14 +230,14 @@ export const provisionSmartWallet = async (
   }
 
   /** @type {import('../test/wallet-tools.js').MockWallet['offers']} */
-  const offers = makeExo('Offers', M.interface('Offers', {}, { defaultGuards: 'passable' }), {
+  const offers = makeExo('Offers', M.interface('Offers', {}, { defaultGuards: 'passable', sloppy: true }), {
     executeOffer,
     /** @param {string|number} offerId */
     tryExit: offerId => sendAction({ method: 'tryExitOffer', offerId }),
   });
 
   /** @type {import('../test/wallet-tools.js').MockWallet['deposit']} */
-  const deposit = makeExo('DepositFacet', M.interface('DepositFacet', {}, { defaultGuards: 'passable' }), {
+  const deposit = makeExo('DepositFacet', M.interface('DepositFacet', {}, { defaultGuards: 'passable', sloppy: true }), {
     receive: async payment => {
       const brand = await E(payment).getAllegedBrand();
       const asset = vbankEntries.find(([_denom, a]) => a.brand === brand);
@@ -298,7 +298,7 @@ export const provisionSmartWallet = async (
   }
 
   /** @type {import('../test/wallet-tools.js').MockWallet['peek']} */
-  const peek = makeExo('Peek', M.interface('Peek', {}, { defaultGuards: 'passable' }), { purseUpdates });
+  const peek = makeExo('Peek', M.interface('Peek', {}, { defaultGuards: 'passable', sloppy: true }), { purseUpdates });
 
   return { offers, deposit, peek };
 };

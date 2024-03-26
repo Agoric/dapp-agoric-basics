@@ -81,7 +81,7 @@ export async function* eachVstorageUpdate(key, { vstorage, delay }) {
  * @param {import('./batchQuery.js').VStorage} powers.vstorage
  */
 export const makeWalletView = (addr, { query, vstorage }) => {
-  return makeExo('WalletQuery', M.interface('WalletQuery', {}, { defaultGuards: 'passable' }), {
+  return makeExo('WalletQuery', M.interface('WalletQuery', {}, { defaultGuards: 'passable', sloppy: true }), {
     current: () => query.queryData(`published.wallet.${addr}.current`),
     /**
      * TODO: visit in chunks by block
@@ -134,7 +134,7 @@ export const makeQueryKit = (vstorage, m = makeClientMarshaller()) => {
     }
   }
 
-  const query = makeExo('QueryTool', M.interface('QueryTool', {}, { defaultGuards: 'passable' }), {
+  const query = makeExo('QueryTool', M.interface('QueryTool', {}, { defaultGuards: 'passable', sloppy: true }), {
     batchQuery,
     queryData,
     follow,

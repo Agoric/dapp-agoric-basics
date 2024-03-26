@@ -97,7 +97,7 @@ export const mockBootstrapPowers = async (
   spaces.issuer.produce.BLD.resolve(bldIssuerKit.issuer);
   spaces.issuer.produce.IST.resolve(feeIssuer);
   spaces.issuer.produce.Invitation.resolve(invitationIssuer);
-  produce.priceAuthority.resolve(makeExo('NullPriceAuthority', M.interface('NullPriceAuthority', {}, { defaultGuards: 'passable' }), {}));
+  produce.priceAuthority.resolve(makeExo('NullPriceAuthority', M.interface('NullPriceAuthority', {}, { defaultGuards: 'passable', sloppy: true }), {}));
 
   /**
    * @type {BootstrapPowers & import('../src/types').NonNullChainStorage}
@@ -214,7 +214,7 @@ export const makeMockTools = async (t, bundleCache) => {
 
   // XXX marshal context is not fresh. hm.
   const makeQueryTool = () => {
-    return makeExo('QT', M.interface('QT', {}, { defaultGuards: 'passable' }), {
+    return makeExo('QT', M.interface('QT', {}, { defaultGuards: 'passable', sloppy: true }), {
       toCapData: x => boardMarshaller.toCapData(x), // XXX remote???
       fromCapData: d => boardMarshaller.fromCapData(d),
       queryData: async path => {
