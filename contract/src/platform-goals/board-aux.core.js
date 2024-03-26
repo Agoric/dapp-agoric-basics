@@ -1,5 +1,7 @@
 // @ts-check
-import { E, Far } from '@endo/far';
+import { E } from '@endo/far';
+import { M } from '@endo/patterns';
+import { makeExo } from '@endo/exo';
 
 const { Fail } = assert;
 
@@ -59,9 +61,33 @@ export const makeBoardAuxManager = (zone, marshalData, powers) => {
     );
 
   return harden({
-    brandAuxPublisher: Far('BrandAuxPublisher', { publishBrandInfo }),
-    boardAuxTOFU: Far('BoardAuxTOFU', { publishBrandInfo, init }),
-    boardAuxAdmin: Far('BoardAuxAdmin', { publishBrandInfo, init, update }),
+    brandAuxPublisher: makeExo(
+      'BrandAuxPublisher',
+      M.interface(
+        'BrandAuxPublisher',
+        {},
+        { defaultGuards: 'passable', sloppy: true },
+      ),
+      { publishBrandInfo },
+    ),
+    boardAuxTOFU: makeExo(
+      'BoardAuxTOFU',
+      M.interface(
+        'BoardAuxTOFU',
+        {},
+        { defaultGuards: 'passable', sloppy: true },
+      ),
+      { publishBrandInfo, init },
+    ),
+    boardAuxAdmin: makeExo(
+      'BoardAuxAdmin',
+      M.interface(
+        'BoardAuxAdmin',
+        {},
+        { defaultGuards: 'passable', sloppy: true },
+      ),
+      { publishBrandInfo, init, update },
+    ),
   });
 };
 /** @typedef {ReturnType<typeof makeBoardAuxManager>} BoardAuxManager */

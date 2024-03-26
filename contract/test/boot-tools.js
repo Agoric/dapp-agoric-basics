@@ -1,5 +1,7 @@
 // @ts-check
-import { E, Far } from '@endo/far';
+import { E } from '@endo/far';
+import { M } from '@endo/patterns';
+import { makeExo } from '@endo/exo';
 import { makeNameHubKit, makePromiseSpace } from '@agoric/vats';
 import { makeFakeBoard } from '@agoric/vats/tools/board-utils.js';
 import { makeWellKnownSpaces } from '@agoric/vats/src/core/utils.js';
@@ -95,7 +97,17 @@ export const mockBootstrapPowers = async (
   spaces.issuer.produce.BLD.resolve(bldIssuerKit.issuer);
   spaces.issuer.produce.IST.resolve(feeIssuer);
   spaces.issuer.produce.Invitation.resolve(invitationIssuer);
-  produce.priceAuthority.resolve(Far('NullPriceAuthority', {}));
+  produce.priceAuthority.resolve(
+    makeExo(
+      'NullPriceAuthority',
+      M.interface(
+        'NullPriceAuthority',
+        {},
+        { defaultGuards: 'passable', sloppy: true },
+      ),
+      {},
+    ),
+  );
 
   /**
    * @type {BootstrapPowers & import('../src/types').NonNullChainStorage}
@@ -212,20 +224,25 @@ export const makeMockTools = async (t, bundleCache) => {
 
   // XXX marshal context is not fresh. hm.
   const makeQueryTool = () => {
-    return Far('QT', {
-      toCapData: x => boardMarshaller.toCapData(x), // XXX remote???
-      fromCapData: d => boardMarshaller.fromCapData(d),
-      queryData: async path => {
-        const parts = path.split('.');
-        if (parts.shift() !== 'published') throw Error(`not found: ${path}`);
-        if (parts.shift() !== 'agoricNames') throw Error(`not found: ${path}`);
-        if (parts.length !== 1) throw Error(`not found: ${path}`);
-        const hub = E(agoricNames).lookup(parts[0]);
-        const kvs = await E(hub).entries();
-        boardMarshaller.toCapData(kvs); // remember object identities
-        return kvs;
+    return makeExo(
+      'QT',
+      M.interface('QT', {}, { defaultGuards: 'passable', sloppy: true }),
+      {
+        toCapData: x => boardMarshaller.toCapData(x), // XXX remote???
+        fromCapData: d => boardMarshaller.fromCapData(d),
+        queryData: async path => {
+          const parts = path.split('.');
+          if (parts.shift() !== 'published') throw Error(`not found: ${path}`);
+          if (parts.shift() !== 'agoricNames')
+            throw Error(`not found: ${path}`);
+          if (parts.length !== 1) throw Error(`not found: ${path}`);
+          const hub = E(agoricNames).lookup(parts[0]);
+          const kvs = await E(hub).entries();
+          boardMarshaller.toCapData(kvs); // remember object identities
+          return kvs;
+        },
       },
-    });
+    );
   };
 
   return {

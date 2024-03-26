@@ -4,7 +4,9 @@
  * @see {mockWalletFactory}
  */
 // @ts-check
-import { E, Far } from '@endo/far';
+import { E } from '@endo/far';
+import { M } from '@endo/patterns';
+import { makeExo } from '@endo/exo';
 import { makePromiseKit } from '@endo/promise-kit';
 
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -58,19 +60,27 @@ export const mockWalletFactory = (
     const invitationPurse = purseByBrand.get(invitationBrand);
     assert(invitationPurse);
 
-    const depositFacet = Far('DepositFacet', {
-      /** @param {Payment} pmt */
-      receive: async pmt => {
-        const pBrand = await E(pmt).getAllegedBrand();
-        if (!purseByBrand.has(pBrand))
-          throw Error(`brand not known/supported: ${pBrand}`);
-        const purse = purseByBrand.get(pBrand);
-        assert(purse);
-        const amt = await E(purse).deposit(pmt);
-        console.log('receive', address, amt);
-        return amt;
+    const depositFacet = makeExo(
+      'DepositFacet',
+      M.interface(
+        'DepositFacet',
+        {},
+        { defaultGuards: 'passable', sloppy: true },
+      ),
+      {
+        /** @param {Payment} pmt */
+        receive: async pmt => {
+          const pBrand = await E(pmt).getAllegedBrand();
+          if (!purseByBrand.has(pBrand))
+            throw Error(`brand not known/supported: ${pBrand}`);
+          const purse = purseByBrand.get(pBrand);
+          assert(purse);
+          const amt = await E(purse).deposit(pmt);
+          console.log('receive', address, amt);
+          return amt;
+        },
       },
-    });
+    );
     await E(addressAdmin).default(DEPOSIT_FACET_KEY, depositFacet);
 
     /** @param {InvitationSpec & { source: 'contract'}} invitationSpec */
@@ -177,7 +187,7 @@ export const mockWalletFactory = (
      *
      * @param {Brand} brand
      */
-    async function* purseUpdates(brand) {
+    async function* purseUpdatesInternal(brand) {
       const purse =
         purseByBrand.get(brand) ||
         Fail`no purse for ${q(brand)}; issuer missing? ${q(
@@ -189,10 +199,24 @@ export const mockWalletFactory = (
       }
     }
 
+    const purseUpdates = brand => purseUpdatesInternal(brand);
+
     return {
       deposit: depositFacet,
-      offers: Far('Offers', { executeOffer, tryExit }),
-      peek: Far('Wallet Peek', { purseUpdates }),
+      offers: makeExo(
+        'Offers',
+        M.interface('Offers', {}, { defaultGuards: 'passable', sloppy: true }),
+        { executeOffer, tryExit },
+      ),
+      peek: makeExo(
+        'Wallet Peek',
+        M.interface(
+          'Wallet Peek',
+          {},
+          { defaultGuards: 'passable', sloppy: true },
+        ),
+        { purseUpdates },
+      ),
     };
   };
 

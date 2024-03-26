@@ -2,7 +2,8 @@
 // @ts-check
 
 import { M, matches, mustMatch } from '@endo/patterns';
-import { E, Far } from '@endo/far';
+import { E } from '@endo/far';
+import { makeExo } from '@endo/exo';
 import '@agoric/zoe/exported.js';
 import { atomicRearrange } from '@agoric/zoe/src/contractSupport/atomicTransfer.js';
 import '@agoric/zoe/src/contracts/exported.js';
@@ -198,15 +199,23 @@ export const start = async (zcf, privateArgs, baggage) => {
     return firstInvitation;
   };
 
-  const publicFacet = Far('Public', {
-    makeFirstInvitation,
-    ...publicMixin,
-  });
-  const limitedCreatorFacet = Far('Creator', {
-    makeCollectFeesInvitation() {
-      return makeCollectFeesInvitation(zcf, feeSeat, feeBrand, 'Fee');
+  const publicFacet = makeExo(
+    'Public',
+    M.interface('Public', {}, { defaultGuards: 'passable', sloppy: true }),
+    {
+      makeFirstInvitation,
+      ...publicMixin,
     },
-  });
+  );
+  const limitedCreatorFacet = makeExo(
+    'Creator',
+    M.interface('Creator', {}, { defaultGuards: 'passable', sloppy: true }),
+    {
+      makeCollectFeesInvitation() {
+        return makeCollectFeesInvitation(zcf, feeSeat, feeBrand, 'Fee');
+      },
+    },
+  );
   const { governorFacet } = makeDurableGovernorFacet(
     baggage,
     limitedCreatorFacet,

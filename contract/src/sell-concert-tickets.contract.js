@@ -19,8 +19,8 @@
  */
 // @ts-check
 
-import { Far } from '@endo/far';
 import { M, getCopyBagEntries, makeCopyBag } from '@endo/patterns';
+import { makeExo } from '@endo/exo';
 import { AssetKind } from '@agoric/ertp/src/amountMath.js';
 import { atomicRearrange } from '@agoric/zoe/src/contractSupport/atomicTransfer.js';
 import '@agoric/zoe/exported.js';
@@ -209,9 +209,17 @@ export const start = async zcf => {
     zcf.makeInvitation(tradeHandler, 'buy tickets', undefined, proposalShape);
 
   // Mark the publicFacet Far, i.e. reachable from outside the contract
-  const publicFacet = Far('Tickets Public Facet', {
-    makeTradeInvitation,
-  });
+  const publicFacet = makeExo(
+    'Tickets Public Facet',
+    M.interface(
+      'Tickets Public Facet',
+      {},
+      { defaultGuards: 'passable', sloppy: true },
+    ),
+    {
+      makeTradeInvitation,
+    },
+  );
   return harden({ publicFacet });
 };
 harden(start);

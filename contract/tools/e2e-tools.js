@@ -1,6 +1,8 @@
 // @ts-check
 
-import { E, Far } from '@endo/far';
+import { E } from '@endo/far';
+import { M } from '@endo/patterns';
+import { makeExo } from '@endo/exo';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Nat } from '@endo/nat';
 import { flags, makeAgd } from './agd-lib.js';
@@ -228,25 +230,37 @@ export const provisionSmartWallet = async (
   }
 
   /** @type {import('../test/wallet-tools.js').MockWallet['offers']} */
-  const offers = Far('Offers', {
-    executeOffer,
-    /** @param {string|number} offerId */
-    tryExit: offerId => sendAction({ method: 'tryExitOffer', offerId }),
-  });
+  const offers = makeExo(
+    'Offers',
+    M.interface('Offers', {}, { defaultGuards: 'passable', sloppy: true }),
+    {
+      executeOffer,
+      /** @param {string|number} offerId */
+      tryExit: offerId => sendAction({ method: 'tryExitOffer', offerId }),
+    },
+  );
 
   /** @type {import('../test/wallet-tools.js').MockWallet['deposit']} */
-  const deposit = Far('DepositFacet', {
-    receive: async payment => {
-      const brand = await E(payment).getAllegedBrand();
-      const asset = vbankEntries.find(([_denom, a]) => a.brand === brand);
-      if (!asset) throw Error(`unknown brand`);
-      /** @type {Issuer} */
-      const issuer = asset.issuer;
-      const amt = await E(issuer).getAmountOf(payment);
-      await sendFromWhale(asset.denom, amt.value);
-      return amt;
+  const deposit = makeExo(
+    'DepositFacet',
+    M.interface(
+      'DepositFacet',
+      {},
+      { defaultGuards: 'passable', sloppy: true },
+    ),
+    {
+      receive: async payment => {
+        const brand = await E(payment).getAllegedBrand();
+        const asset = vbankEntries.find(([_denom, a]) => a.brand === brand);
+        if (!asset) throw Error(`unknown brand`);
+        /** @type {Issuer} */
+        const issuer = asset.issuer;
+        const amt = await E(issuer).getAmountOf(payment);
+        await sendFromWhale(asset.denom, amt.value);
+        return amt;
+      },
     },
-  });
+  );
 
   const { stringify: lit } = JSON;
   /**
@@ -296,7 +310,11 @@ export const provisionSmartWallet = async (
   }
 
   /** @type {import('../test/wallet-tools.js').MockWallet['peek']} */
-  const peek = Far('Peek', { purseUpdates });
+  const peek = makeExo(
+    'Peek',
+    M.interface('Peek', {}, { defaultGuards: 'passable', sloppy: true }),
+    { purseUpdates },
+  );
 
   return { offers, deposit, peek };
 };

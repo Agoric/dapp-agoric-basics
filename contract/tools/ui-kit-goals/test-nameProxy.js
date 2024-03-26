@@ -1,7 +1,8 @@
 import '@endo/init/debug.js';
 import test from 'ava';
 
-import { Far } from '@endo/far';
+import { M } from '@endo/patterns';
+import { makeExo } from '@endo/exo';
 import { makeNameHubKit } from '@agoric/vats';
 import { makeNameProxy } from './name-service-client.js';
 
@@ -9,7 +10,11 @@ test('makeNameProxy makes NameHub lookup convenient', async t => {
   const k0 = makeNameHubKit();
   const kb = makeNameHubKit();
   k0.nameAdmin.update('brand', kb.nameHub, kb.nameAdmin);
-  const atomBrand = Far('Atom Brand', {});
+  const atomBrand = makeExo(
+    'Atom Brand',
+    M.interface('Atom Brand', {}, { defaultGuards: 'passable', sloppy: true }),
+    {},
+  );
   kb.nameAdmin.update('Atom', atomBrand);
 
   const agoricNames = k0.nameHub;
