@@ -93,9 +93,14 @@ export const makeAPI = (apiAddress, { fetch }) => {
     });
   };
 
-  return makeExo('LCD', M.interface('LCD', {}, { defaultGuards: 'passable', sloppy: true }), {
-    getJSON,
-    latestBlock: () => getJSON(`/cosmos/base/tendermint/v1beta1/blocks/latest`),
-  });
+  return makeExo(
+    'LCD',
+    M.interface('LCD', {}, { defaultGuards: 'passable', sloppy: true }),
+    {
+      getJSON,
+      latestBlock: () =>
+        getJSON(`/cosmos/base/tendermint/v1beta1/blocks/latest`),
+    },
+  );
 };
 /** @typedef {ReturnType<typeof makeAPI>} LCD */

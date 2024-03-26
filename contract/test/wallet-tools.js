@@ -60,19 +60,27 @@ export const mockWalletFactory = (
     const invitationPurse = purseByBrand.get(invitationBrand);
     assert(invitationPurse);
 
-    const depositFacet = makeExo('DepositFacet', M.interface('DepositFacet', {}, { defaultGuards: 'passable', sloppy: true }), {
-      /** @param {Payment} pmt */
-      receive: async pmt => {
-        const pBrand = await E(pmt).getAllegedBrand();
-        if (!purseByBrand.has(pBrand))
-          throw Error(`brand not known/supported: ${pBrand}`);
-        const purse = purseByBrand.get(pBrand);
-        assert(purse);
-        const amt = await E(purse).deposit(pmt);
-        console.log('receive', address, amt);
-        return amt;
+    const depositFacet = makeExo(
+      'DepositFacet',
+      M.interface(
+        'DepositFacet',
+        {},
+        { defaultGuards: 'passable', sloppy: true },
+      ),
+      {
+        /** @param {Payment} pmt */
+        receive: async pmt => {
+          const pBrand = await E(pmt).getAllegedBrand();
+          if (!purseByBrand.has(pBrand))
+            throw Error(`brand not known/supported: ${pBrand}`);
+          const purse = purseByBrand.get(pBrand);
+          assert(purse);
+          const amt = await E(purse).deposit(pmt);
+          console.log('receive', address, amt);
+          return amt;
+        },
       },
-    });
+    );
     await E(addressAdmin).default(DEPOSIT_FACET_KEY, depositFacet);
 
     /** @param {InvitationSpec & { source: 'contract'}} invitationSpec */
@@ -195,8 +203,20 @@ export const mockWalletFactory = (
 
     return {
       deposit: depositFacet,
-      offers: makeExo('Offers', M.interface('Offers', {}, { defaultGuards: 'passable', sloppy: true }), { executeOffer, tryExit }),
-      peek: makeExo('Wallet Peek', M.interface('Wallet Peek', {}, { defaultGuards: 'passable', sloppy: true }), { purseUpdates }),
+      offers: makeExo(
+        'Offers',
+        M.interface('Offers', {}, { defaultGuards: 'passable', sloppy: true }),
+        { executeOffer, tryExit },
+      ),
+      peek: makeExo(
+        'Wallet Peek',
+        M.interface(
+          'Wallet Peek',
+          {},
+          { defaultGuards: 'passable', sloppy: true },
+        ),
+        { purseUpdates },
+      ),
     };
   };
 

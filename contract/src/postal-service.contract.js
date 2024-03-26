@@ -62,12 +62,16 @@ export const start = zcf => {
     return zcf.makeInvitation(handleSend, 'send');
   };
 
-  const publicFacet = makeExo('postalSvc', M.interface('postalSvc', {}, { defaultGuards: 'passable', sloppy: true }), {
-    lookup: (...path) => E(namesByAddress).lookup(...path),
-    getDepositFacet,
-    sendTo,
-    makeSendInvitation,
-  });
+  const publicFacet = makeExo(
+    'postalSvc',
+    M.interface('postalSvc', {}, { defaultGuards: 'passable', sloppy: true }),
+    {
+      lookup: (...path) => E(namesByAddress).lookup(...path),
+      getDepositFacet,
+      sendTo,
+      makeSendInvitation,
+    },
+  );
   return { publicFacet };
 };
 /** @typedef { typeof start } PostalServiceFn */

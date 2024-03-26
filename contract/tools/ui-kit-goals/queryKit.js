@@ -81,24 +81,28 @@ export async function* eachVstorageUpdate(key, { vstorage, delay }) {
  * @param {import('./batchQuery.js').VStorage} powers.vstorage
  */
 export const makeWalletView = (addr, { query, vstorage }) => {
-  return makeExo('WalletQuery', M.interface('WalletQuery', {}, { defaultGuards: 'passable', sloppy: true }), {
-    current: () => query.queryData(`published.wallet.${addr}.current`),
-    /**
-     * TODO: visit in chunks by block
-     * @param {ERef<{visit: (r: import('@agoric/smart-wallet/src/smartWallet.js').UpdateRecord) => void}>} visitor
-     * @param {number} [minHeight]
-     */
-    history: async (visitor, minHeight) => {
-      const history = vstorage.readHistoryBy(
-        s => query.fromCapData(JSON.parse(s)),
-        `published.wallet.${addr}`,
-        minHeight,
-      );
-      for await (const record of history) {
-        await E(visitor).visit(record);
-      }
+  return makeExo(
+    'WalletQuery',
+    M.interface('WalletQuery', {}, { defaultGuards: 'passable', sloppy: true }),
+    {
+      current: () => query.queryData(`published.wallet.${addr}.current`),
+      /**
+       * TODO: visit in chunks by block
+       * @param {ERef<{visit: (r: import('@agoric/smart-wallet/src/smartWallet.js').UpdateRecord) => void}>} visitor
+       * @param {number} [minHeight]
+       */
+      history: async (visitor, minHeight) => {
+        const history = vstorage.readHistoryBy(
+          s => query.fromCapData(JSON.parse(s)),
+          `published.wallet.${addr}`,
+          minHeight,
+        );
+        for await (const record of history) {
+          await E(visitor).visit(record);
+        }
+      },
     },
-  });
+  );
 };
 /** @typedef {ReturnType<typeof makeWalletView>} WalletView } */
 
@@ -134,16 +138,20 @@ export const makeQueryKit = (vstorage, m = makeClientMarshaller()) => {
     }
   }
 
-  const query = makeExo('QueryTool', M.interface('QueryTool', {}, { defaultGuards: 'passable', sloppy: true }), {
-    batchQuery,
-    queryData,
-    follow,
-    queryChildren,
-    fromCapData: m.fromCapData,
-    toCapData: m.toCapData,
-    // XXX wrong layer? add makeWalletView(query) helper function instead?
-    walletView: addr => makeWalletView(addr, { query, vstorage }),
-  });
+  const query = makeExo(
+    'QueryTool',
+    M.interface('QueryTool', {}, { defaultGuards: 'passable', sloppy: true }),
+    {
+      batchQuery,
+      queryData,
+      follow,
+      queryChildren,
+      fromCapData: m.fromCapData,
+      toCapData: m.toCapData,
+      // XXX wrong layer? add makeWalletView(query) helper function instead?
+      walletView: addr => makeWalletView(addr, { query, vstorage }),
+    },
+  );
 
   return { vstorage, query };
 };

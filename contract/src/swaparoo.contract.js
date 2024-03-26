@@ -199,15 +199,23 @@ export const start = async (zcf, privateArgs, baggage) => {
     return firstInvitation;
   };
 
-  const publicFacet = makeExo('Public', M.interface('Public', {}, { defaultGuards: 'passable', sloppy: true }), {
-    makeFirstInvitation,
-    ...publicMixin,
-  });
-  const limitedCreatorFacet = makeExo('Creator', M.interface('Creator', {}, { defaultGuards: 'passable', sloppy: true }), {
-    makeCollectFeesInvitation() {
-      return makeCollectFeesInvitation(zcf, feeSeat, feeBrand, 'Fee');
+  const publicFacet = makeExo(
+    'Public',
+    M.interface('Public', {}, { defaultGuards: 'passable', sloppy: true }),
+    {
+      makeFirstInvitation,
+      ...publicMixin,
     },
-  });
+  );
+  const limitedCreatorFacet = makeExo(
+    'Creator',
+    M.interface('Creator', {}, { defaultGuards: 'passable', sloppy: true }),
+    {
+      makeCollectFeesInvitation() {
+        return makeCollectFeesInvitation(zcf, feeSeat, feeBrand, 'Fee');
+      },
+    },
+  );
   const { governorFacet } = makeDurableGovernorFacet(
     baggage,
     limitedCreatorFacet,

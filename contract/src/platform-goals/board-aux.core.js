@@ -61,9 +61,33 @@ export const makeBoardAuxManager = (zone, marshalData, powers) => {
     );
 
   return harden({
-    brandAuxPublisher: makeExo('BrandAuxPublisher', M.interface('BrandAuxPublisher', {}, { defaultGuards: 'passable', sloppy: true }), { publishBrandInfo }),
-    boardAuxTOFU: makeExo('BoardAuxTOFU', M.interface('BoardAuxTOFU', {}, { defaultGuards: 'passable', sloppy: true }), { publishBrandInfo, init }),
-    boardAuxAdmin: makeExo('BoardAuxAdmin', M.interface('BoardAuxAdmin', {}, { defaultGuards: 'passable', sloppy: true }), { publishBrandInfo, init, update }),
+    brandAuxPublisher: makeExo(
+      'BrandAuxPublisher',
+      M.interface(
+        'BrandAuxPublisher',
+        {},
+        { defaultGuards: 'passable', sloppy: true },
+      ),
+      { publishBrandInfo },
+    ),
+    boardAuxTOFU: makeExo(
+      'BoardAuxTOFU',
+      M.interface(
+        'BoardAuxTOFU',
+        {},
+        { defaultGuards: 'passable', sloppy: true },
+      ),
+      { publishBrandInfo, init },
+    ),
+    boardAuxAdmin: makeExo(
+      'BoardAuxAdmin',
+      M.interface(
+        'BoardAuxAdmin',
+        {},
+        { defaultGuards: 'passable', sloppy: true },
+      ),
+      { publishBrandInfo, init, update },
+    ),
   });
 };
 /** @typedef {ReturnType<typeof makeBoardAuxManager>} BoardAuxManager */
