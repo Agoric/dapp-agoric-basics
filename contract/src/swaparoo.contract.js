@@ -198,11 +198,11 @@ export const start = async (zcf, privateArgs, baggage) => {
     return firstInvitation;
   };
 
-  const publicFacet = Far('Public', {
+  const publicFacet = makeExo('Public', M.interface('Public', {}, { defaultGuards: 'passable' }), {
     makeFirstInvitation,
     ...publicMixin,
   });
-  const limitedCreatorFacet = Far('Creator', {
+  const limitedCreatorFacet = makeExo('Creator', M.interface('Creator', {}, { defaultGuards: 'passable' }), {
     makeCollectFeesInvitation() {
       return makeCollectFeesInvitation(zcf, feeSeat, feeBrand, 'Fee');
     },

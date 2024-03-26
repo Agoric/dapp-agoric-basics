@@ -92,7 +92,7 @@ export const makeAPI = (apiAddress, { fetch }) => {
     });
   };
 
-  return Far('LCD', {
+  return makeExo('LCD', M.interface('LCD', {}, { defaultGuards: 'passable' }), {
     getJSON,
     latestBlock: () => getJSON(`/cosmos/base/tendermint/v1beta1/blocks/latest`),
   });

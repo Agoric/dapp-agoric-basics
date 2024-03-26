@@ -9,7 +9,7 @@ test('makeNameProxy makes NameHub lookup convenient', async t => {
   const k0 = makeNameHubKit();
   const kb = makeNameHubKit();
   k0.nameAdmin.update('brand', kb.nameHub, kb.nameAdmin);
-  const atomBrand = Far('Atom Brand', {});
+  const atomBrand = makeExo('Atom Brand', M.interface('Atom Brand', {}, { defaultGuards: 'passable' }), {});
   kb.nameAdmin.update('Atom', atomBrand);
 
   const agoricNames = k0.nameHub;

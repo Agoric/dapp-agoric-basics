@@ -54,7 +54,7 @@ export const mockElectorate = async (zoe, bundleCache) => {
     await bundleCache.load(assets.invitationMakerContract),
   );
   const arbInstance = await E(zoe).startInstance(installation);
-  const committeeCreatorFacet = Far('Electorate CF', {
+  const committeeCreatorFacet = makeExo('Electorate CF', M.interface('Electorate CF', {}, { defaultGuards: 'passable' }), {
     getPoserInvitation: async () => E(arbInstance.publicFacet).makeInvitation(),
   });
   return { creatorFacet: committeeCreatorFacet };

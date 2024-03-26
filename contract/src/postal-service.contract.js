@@ -61,7 +61,7 @@ export const start = zcf => {
     return zcf.makeInvitation(handleSend, 'send');
   };
 
-  const publicFacet = Far('postalSvc', {
+  const publicFacet = makeExo('postalSvc', M.interface('postalSvc', {}, { defaultGuards: 'passable' }), {
     lookup: (...path) => E(namesByAddress).lookup(...path),
     getDepositFacet,
     sendTo,
