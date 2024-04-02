@@ -45,7 +45,6 @@
     "start:contract": "cd contract && yarn start",
     "print-key": "yarn docker:make print-acct",
     "start:ui": "cd ui && yarn dev",
-    "start:interchain-ui": "cd interchain-ui && yarn dev",
     "lint": "yarn workspaces run lint",
     "test": "yarn workspaces run test",
     "test:e2e": "yarn workspace agoric-basics-ui test:e2e",

@@ -1,5 +1,5 @@
 {
-  "name": "interchain-ui",
+  "name": "ui",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,9 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@agoric/react-components": "^0.1.1-dev-8fc28e8.0",
+    "@agoric/react-components": "0.1.1-dev-8fc28e8.0",
     "@agoric/ui-components": "^0.3.9-u13.0",
-    "@agoric/web-components": "^0.15.1-dev-09ca26c.0",
+    "@agoric/web-components": "0.15.1-dev-8fc28e8.0",
     "buffer": "^6.0.3",
     "chain-registry": "^1.28.1",
     "cosmos-kit": "^2.9.0",
