@@ -1,5 +1,5 @@
 {
-  "name": "dapp-agoric-basics-agservers",
+  "name": "agoric-basics-agservers",
   "version": "0.0.1",
   "description": "Agoric server instances for dapp-agoric-basics",
   "private": true,
