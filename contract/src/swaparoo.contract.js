@@ -16,7 +16,8 @@ import { handleParamGovernance } from '@agoric/governance/src/contractHelper.js'
 import { makeCollectFeesInvitation } from './collectFees.js';
 import { fixHub } from './fixHub.js';
 
-/** @template [Slot=unknown] @typedef {import('@endo/marshal').Marshal<Slot>} Marshaller */
+/** @import { Marshal } from '@endo/marshal'; */
+/** @template [Slot=unknown] @typedef {Marshal<Slot>} Marshaller */
 
 const { quote: q } = assert;
 
