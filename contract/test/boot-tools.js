@@ -98,7 +98,7 @@ export const mockBootstrapPowers = async (
   produce.priceAuthority.resolve(Far('NullPriceAuthority', {}));
 
   /**
-   * @type {BootstrapPowers & import('../src/types').NonNullChainStorage}
+   * @type {BootstrapPowers & NonNullChainStorage}
    */
   // @ts-expect-error mock
   const powers = { produce, consume, ...spaces, zone };
