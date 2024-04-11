@@ -1,5 +1,3 @@
-import '@agoric/vats/src/core/types';
-
 /**
  * In agoric-sdk, the BootstrapPowers.consume['chainStorage'] type includes undefined because
  * of some historical testing practices. It's tedious and unnecessary
