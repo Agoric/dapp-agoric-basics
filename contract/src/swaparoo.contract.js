@@ -3,9 +3,7 @@
 
 import { M, matches, mustMatch } from '@endo/patterns';
 import { E, Far } from '@endo/far';
-import '@agoric/zoe/exported.js';
 import { atomicRearrange } from '@agoric/zoe/src/contractSupport/atomicTransfer.js';
-import '@agoric/zoe/src/contracts/exported.js';
 import { AmountShape } from '@agoric/ertp/src/typeGuards.js';
 import {
   InstanceHandleShape,
