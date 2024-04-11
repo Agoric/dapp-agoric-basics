@@ -193,7 +193,12 @@ export const makeMockTools = async (t, bundleCache) => {
 
   const boardMarshaller = await E(board).getPublishingMarshaller();
   const walletFactory = mockWalletFactory(
-    { namesByAddressAdmin, zoe },
+    {
+      namesByAddressAdmin,
+      zoe,
+      // eslint-disable-next-line no-use-before-define
+      makeQueryTool: () => makeQueryTool(),
+    },
     smartWalletIssuers,
   );
 
