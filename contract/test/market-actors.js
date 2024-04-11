@@ -29,19 +29,14 @@ const { entries, fromEntries, keys } = Object;
  * @param {import('ava').ExecutionContext} t
  * @param {{
  *   wallet: import('./wallet-tools.js').MockWallet;
- *   queryTool: Pick<import('../tools/ui-kit-goals/queryKit.js').QueryTool, 'queryData'>;
  * }} mine
  * @param {{
  *   rxAddr: string,
  *   toSend: AmountKeywordRecord;
  * }} shared
  */
-export const payerPete = async (
-  t,
-  { wallet, queryTool },
-  { rxAddr, toSend },
-) => {
-  const hub = await makeAgoricNames(queryTool);
+export const payerPete = async (t, { wallet }, { rxAddr, toSend }) => {
+  const hub = await makeAgoricNames(wallet.query);
   /** @type {WellKnown} */
   const agoricNames = makeNameProxy(hub);
 
