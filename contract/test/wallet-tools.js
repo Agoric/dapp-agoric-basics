@@ -210,7 +210,7 @@ export const seatLike = updates => {
     /** @type {PromiseKit<AmountKeywordRecord>} */
     payouts: makePromiseKit(),
   };
-  (async () => {
+  const bg = async () => {
     await null;
     try {
       // XXX an error here is somehow and unhandled rejection
@@ -227,9 +227,13 @@ export const seatLike = updates => {
     } catch (reason) {
       sync.result.reject(reason);
       sync.payouts.reject(reason);
-      throw reason;
+      // throw reason;
     }
-  })();
+  };
+  bg().catch(reason => {
+    sync.result.reject(reason);
+    sync.payouts.reject(reason);
+  });
   return harden({
     getOfferResult: () => sync.result.promise,
     getPayoutAmounts: () => sync.payouts.promise,
