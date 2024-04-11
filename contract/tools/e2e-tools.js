@@ -298,7 +298,7 @@ export const provisionSmartWallet = async (
   /** @type {import('../test/wallet-tools.js').MockWallet['peek']} */
   const peek = Far('Peek', { purseUpdates });
 
-  return { offers, deposit, peek };
+  return { offers, deposit, peek, query: q };
 };
 
 /**

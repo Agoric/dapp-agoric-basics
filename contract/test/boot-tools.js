@@ -98,7 +98,7 @@ export const mockBootstrapPowers = async (
   produce.priceAuthority.resolve(Far('NullPriceAuthority', {}));
 
   /**
-   * @type {BootstrapPowers & import('../src/types').NonNullChainStorage}
+   * @type {BootstrapPowers & NonNullChainStorage}
    */
   // @ts-expect-error mock
   const powers = { produce, consume, ...spaces, zone };
@@ -193,7 +193,12 @@ export const makeMockTools = async (t, bundleCache) => {
 
   const boardMarshaller = await E(board).getPublishingMarshaller();
   const walletFactory = mockWalletFactory(
-    { namesByAddressAdmin, zoe },
+    {
+      namesByAddressAdmin,
+      zoe,
+      // eslint-disable-next-line no-use-before-define
+      makeQueryTool: () => makeQueryTool(),
+    },
     smartWalletIssuers,
   );
 

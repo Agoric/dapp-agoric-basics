@@ -3,9 +3,7 @@
 
 import { M, matches, mustMatch } from '@endo/patterns';
 import { E, Far } from '@endo/far';
-import '@agoric/zoe/exported.js';
 import { atomicRearrange } from '@agoric/zoe/src/contractSupport/atomicTransfer.js';
-import '@agoric/zoe/src/contracts/exported.js';
 import { AmountShape } from '@agoric/ertp/src/typeGuards.js';
 import {
   InstanceHandleShape,
@@ -18,13 +16,21 @@ import { handleParamGovernance } from '@agoric/governance/src/contractHelper.js'
 import { makeCollectFeesInvitation } from './collectFees.js';
 import { fixHub } from './fixHub.js';
 
-/** @template [Slot=unknown] @typedef {import('@endo/marshal').Marshal<Slot>} Marshaller */
+/** @import { Marshal } from '@endo/marshal'; */
+/** @template [Slot=unknown] @typedef {Marshal<Slot>} Marshaller */
 
 const { quote: q } = assert;
 
 const makeNatAmountShape = (brand, min) =>
   harden({ brand, value: min ? M.gte(min) : M.nat() });
 
+/**
+ * @param {ZCF} zcf
+ * @param {ZCFSeat} firstSeat
+ * @param {ZCFSeat} secondSeat
+ * @param {ZCFSeat} feeSeat
+ * @param {Amount} feeAmount
+ */
 export const swapWithFee = (zcf, firstSeat, secondSeat, feeSeat, feeAmount) => {
   try {
     const { Fee: _, ...firstGive } = firstSeat.getProposal().give;

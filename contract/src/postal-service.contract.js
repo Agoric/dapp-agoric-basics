@@ -5,7 +5,10 @@ import { withdrawFromSeat } from '@agoric/zoe/src/contractSupport/zoeHelpers.js'
 
 const { keys, values } = Object;
 
-/** @type {import('./@types/zoe-contract-facet').ContractMeta} */
+/** @import { ContractMeta } from './@types/zoe-contract-facet'; */
+/** @import { NameHub } from '@agoric/vats'; */
+
+/** @type {ContractMeta} */
 export const meta = harden({
   customTermsShape: { namesByAddress: M.remotable('namesByAddress') },
 });
@@ -14,7 +17,7 @@ export const { customTermsShape } = meta;
 
 /**
  * @typedef {object} PostalSvcTerms
- * @property {import('@agoric/vats').NameHub} namesByAddress
+ * @property {NameHub} namesByAddress
  */
 
 /** @param {ZCF<PostalSvcTerms>} zcf */

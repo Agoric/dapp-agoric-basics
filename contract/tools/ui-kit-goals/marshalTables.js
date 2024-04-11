@@ -60,8 +60,11 @@ const makeTranslationTable = (makeSlot, makeVal) => {
 };
 
 /** @type {(slot: string, iface: string | undefined) => any} */
-const synthesizeRemotable = (slot, iface) =>
-  Far(`${(iface ?? '').replace(/^Alleged: /, '')}#${slot}`, {});
+const synthesizeRemotable = (slot, iface) => {
+  const ifaceStr = iface ?? '';
+  const suffix = ifaceStr.endsWith(`#${slot}`) ? '' : `#${slot}`;
+  return Far(`${ifaceStr.replace(/^Alleged: /, '')}${suffix}`, {});
+};
 
 /**
  * Make a marshaller that synthesizes a remotable the first

@@ -23,7 +23,6 @@
     "@agoric/eslint-config": "dev",
     "@agoric/smart-wallet": "0.5.4-u14.0",
     "@agoric/store": "0.9.3-u14.0",
-    "@agoric/xsnap": "0.14.3-u14.0",
     "@agoric/zone": "0.2.3-u14.0",
     "@endo/eslint-plugin": "^0.5.2",
     "@endo/nat": "^4.1.27",
