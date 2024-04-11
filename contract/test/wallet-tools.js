@@ -23,17 +23,20 @@ const { Fail, quote: q } = assert;
 
 const DEPOSIT_FACET_KEY = 'depositFacet'; // XXX does agoric-sdk export this?
 
+/** @import { QueryTool } from '../tools/ui-kit-goals/queryKit.js'; */
+
 /**
  * @param {{
  *   zoe: ERef<ZoeService>;
  *   namesByAddressAdmin: ERef<import('@agoric/vats').NameAdmin>;
+ *   makeQueryTool: () => Pick<QueryTool, 'toCapData' | 'fromCapData' | 'queryData'>;
  * }} powers
  * @param {IssuerKeywordRecord} issuerKeywordRecord
  *
  * @typedef {Awaited<ReturnType<Awaited<ReturnType<typeof mockWalletFactory>['makeSmartWallet']>>>} MockWallet
  */
 export const mockWalletFactory = (
-  { zoe, namesByAddressAdmin },
+  { zoe, namesByAddressAdmin, makeQueryTool },
   issuerKeywordRecord,
 ) => {
   /** @param {string} address */
@@ -189,10 +192,13 @@ export const mockWalletFactory = (
       }
     }
 
+    const theQueryTool = makeQueryTool();
+
     return {
       deposit: depositFacet,
       offers: Far('Offers', { executeOffer, tryExit }),
       peek: Far('Wallet Peek', { purseUpdates }),
+      query: theQueryTool,
     };
   };
 
