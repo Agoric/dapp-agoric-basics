@@ -25,6 +25,13 @@ const { quote: q } = assert;
 const makeNatAmountShape = (brand, min) =>
   harden({ brand, value: min ? M.gte(min) : M.nat() });
 
+/**
+ * @param {ZCF} zcf
+ * @param {ZCFSeat} firstSeat
+ * @param {ZCFSeat} secondSeat
+ * @param {ZCFSeat} feeSeat
+ * @param {Amount} feeAmount
+ */
 export const swapWithFee = (zcf, firstSeat, secondSeat, feeSeat, feeAmount) => {
   try {
     const { Fee: _, ...firstGive } = firstSeat.getProposal().give;
