@@ -41,6 +41,14 @@ const scriptRoots = {
   postalService: nodeRequire.resolve('../src/postal-service.proposal.js'),
 };
 
+const keyring = {
+  // yarn docker:bash
+  // agd keys show -a user1 --keyring-backend=test
+  user1: 'agoric1rwwley550k9mmk6uq6mm6z4udrg8kyuyvfszjk',
+  // agd keys show -a user2 --keyring-backend=test
+  user2: 'agoric1ahsjklvps67a0y7wj0hqs0ekp55hxayppdw5az',
+};
+
 /** @param {import('ava').ExecutionContext} t */
 const makeTestContext = async t => {
   const bc = await makeBundleCacheContext(t);
@@ -115,7 +123,7 @@ test.serial('deploy contract with core eval: postalService / send', async t => {
   const { bundles } = t.context.shared;
   const bundleID = getBundleId(bundles.postalService);
 
-  const name = 'send';
+  const name = 'postal-service';
   const result = await runCoreEval({
     name,
     behavior: startPostalService,
@@ -155,31 +163,23 @@ test.serial('deliver payment using offer', async t => {
 
   await null;
   const { make: amt } = AmountMath;
-  const shared = {
-    rxAddr: 'agoric1aap7m84dt0rwhhfw49d4kv2gqetzl56vn8aaxj',
+
+  const shared = harden({
+    rxAddr: keyring.user2,
     toSend: {
       Pmt: amt(await agoricNames.brand.ATOM, 3n),
     },
-  };
+  });
 
   const wallet = {
-    pete: await provisionSmartWallet(
-      'agoric1xe269y3fhye8nrlduf826wgn499y6wmnv32tw5',
-      { ATOM: 10n, BLD: 75n },
-    ),
-    rose: await provisionSmartWallet(shared.rxAddr, {
-      BLD: 20n,
-    }),
+    pete: await provisionSmartWallet(keyring.user1, { ATOM: 10n, BLD: 75n }),
+    rose: await provisionSmartWallet(shared.rxAddr, { BLD: 20n }),
   };
-  const pqt = makeQueryTool();
-  for (const kind of ['instance', 'brand']) {
-    const entries = await E(E(hub0).lookup(kind)).entries();
-    pqt.fromCapData(qt.toCapData(entries));
-  }
 
+  const wrt = who => x => wallet[who].query.fromCapData(qt.toCapData(x));
   await Promise.all([
-    payerPete(t, { wallet: wallet.pete, queryTool: pqt }, shared),
-    receiverRose(t, { wallet: wallet.rose }, shared),
+    payerPete(t, { wallet: wallet.pete }, wrt('pete')(shared)),
+    receiverRose(t, { wallet: wallet.rose }, wrt('rose')(shared)),
   ]);
 });
 
@@ -202,10 +202,9 @@ test('send invitation* from contract using publicFacet of postalService', async 
     IST: await E(zoe).getFeeIssuer(),
   };
 
-  // TODO: use CapData across vats
-  // const boardMarshaller = await E(board).getPublishingMarshaller();
+  const { makeQueryTool } = t.context;
   const walletFactory = mockWalletFactory(
-    { zoe, namesByAddressAdmin },
+    { zoe, namesByAddressAdmin, makeQueryTool },
     smartWalletIssuers,
   );
 
