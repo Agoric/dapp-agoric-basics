@@ -54,7 +54,6 @@ export const payerPete = async (t, { wallet }, { rxAddr, toSend }) => {
     },
     proposal: { give: toSend },
   };
-  t.snapshot(sendOffer, 'client sends offer');
   const updates = await E(wallet.offers).executeOffer(sendOffer);
 
   const seat = seatLike(updates);
@@ -65,6 +64,7 @@ export const payerPete = async (t, { wallet }, { rxAddr, toSend }) => {
     t.log('Pete payout should be empty', kwd, amt);
     t.deepEqual(amt, AmountMath.makeEmpty(brand, kind));
   }
+  t.snapshot(sendOffer, 'client sends offer');
 };
 
 const trackDeposits = async (t, initial, purseUpdates, toSend) =>
