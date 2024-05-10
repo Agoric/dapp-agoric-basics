@@ -1,13 +1,6 @@
 # Agoric Dapp Starter: Agoric Basics
 
-This is a simple app for the [Agoric smart contract platform](https://docs.agoric.com/).
-
-<img alt="Vite + React + Agoric page with Connect Wallet button"
-style="border: 1px solid" width="300"
-src="https://docs.agoric.com/assets/img/new_002_small2.2dfb7462.png" />
-
-The contract lets you make an offer to give a small amount of [IST](https://inter.trade/) in exchange for
-a few NFTs.
+This is a basic Agoric Dapp that contains three smart contracts `postal-service`, `sell-concert-tickets`, and `swaparoo` demonstrating different scenarios which can be implemented easily using Agoric SDK. There is also a UI for `sell-concert-tickets` contract that a user can use to buy three different types of concert tickets and pay through a wallet extension in the browser. 
 
 ## Getting started
 
