@@ -22,6 +22,13 @@ demo-agd-1  | 2023-12-27T04:08:08.407Z block-manager: block 1005 commit
 
 To follow more detailed tutorial, go [here](https://docs.agoric.com/guides/getting-started/tutorial-dapp-agoric-basics.html).
 
+## Testing
+
+To perform unit tests:
+-run the command `yarn test` in the root directory.
+To perform end to end test
+-run the command `yarn test:e2e` in the root directory.
+
 ## Contributing: Development, Testing
 
 The UI is a React app started with the [vite](https://vitejs.dev/) `react-ts` template.
