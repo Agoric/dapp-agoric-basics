@@ -11,7 +11,7 @@ a few NFTs.
 
 ## Getting started
 
-See [Your First Agoric Dapp](https://docs.agoric.com/guides/getting-started/) tutorial.
+See [dapp-agoric-basics tutorial](https://docs.agoric.com/guides/getting-started/tutorial-dapp-agoric-basics.html).
 
 ## Contributing: Development, Testing
 
