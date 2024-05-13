@@ -2,7 +2,6 @@ import { AmountMath } from '@agoric/ertp';
 import { ConnectWalletButton, useAgoric } from '@agoric/react-components';
 import { stringifyAmountValue } from '@agoric/web-components';
 import { usePurse } from '../hooks/usePurse';
-import type { CopyBag } from '../types';
 
 const Inventory = () => {
   const istPurse = usePurse('IST');
@@ -38,7 +37,9 @@ const Inventory = () => {
                   {ticketsPurse ? (
                     <ul>
                       {(
-                        ticketsPurse.currentAmount.value as CopyBag
+                        ticketsPurse.currentAmount.value as {
+                          payload: [string, bigint][];
+                        }
                       ).payload.map(([name, number]) => (
                         <li key={name}>
                           {String(number)} {name}

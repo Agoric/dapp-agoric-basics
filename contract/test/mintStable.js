@@ -12,7 +12,7 @@ const centralSupplyPath = myRequire.resolve(
   '@agoric/vats/src/centralSupply.js',
 );
 
-/** @typedef {Installation<typeof import('@agoric/vats/src/centralSupply.js').start>} CentralSupplyInstallation */
+/** @typedef {Installation<typeof import('@agoric/vats/src/centralSupply').start>} CentralSupplyInstallation */
 /** @typedef {Awaited<ReturnType<import('@endo/bundle-source/cache.js').makeNodeBundleCache>>} BundleCache */
 
 /**
