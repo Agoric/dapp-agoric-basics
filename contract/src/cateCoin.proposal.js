@@ -1,11 +1,4 @@
-const contractName = 'cateCoin';
 
-/**
- * Core eval script to start contract
- *
- * @param {BootstrapPowers} permittedPowers
- * @param {*} config
- */
 
 
 import {
@@ -14,6 +7,15 @@ import {
 import { allValues } from './objectTools.js';
 
 const { Fail } = assert;
+
+const contractName = 'cateCoin';
+
+/**
+ * Core eval script to start contract
+ *
+ * @param {BootstrapPowers} permittedPowers
+ * @param {*} config
+ */
 
 export const startCateCoin = async (powers, config) => {
   console.log('core eval for', contractName);
