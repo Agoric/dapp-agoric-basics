@@ -22,7 +22,7 @@ import { permit as postalServicePermit } from './src/postal-service.proposal.js'
 import { permit as swapPermit } from './src/swaparoo.proposal.js';
 import { permit as sellPermit } from './src/sell-concert-tickets.proposal.js';
 import { permit as boardAuxPermit } from './src/platform-goals/board-aux.core.js';
-
+import { permit as catePermit} from './src/cateCoin.proposal.js'
 /**
  * @param {*} opts
  * @returns {import('rollup').RollupOptions}
@@ -88,6 +88,10 @@ const config = [
   config1({
     name: 'postal-service',
     permit: postalServicePermit,
+  }),
+  config1({
+    name: 'cateCoin',
+    permit: catePermit,
   }),
 ];
 export default config;
