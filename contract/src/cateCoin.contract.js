@@ -1,8 +1,7 @@
 
-import { AmountMath, AmountShape, makeIssuerKit, AssetKind } from '@agoric/ertp';
+import { AmountMath, makeIssuerKit } from '@agoric/ertp';
 import { Far } from '@endo/far';
-import { M, getCopyBagEntries, makeCopyBag } from '@endo/patterns';
-//import { atomicRearrange } from '@agoric/zoe/src/contractSupport/atomicTransfer.js';
+
 import '@agoric/zoe/exported.js';
 
 

@@ -6,6 +6,15 @@ const contractName = 'cateCoin';
  * @param {BootstrapPowers} permittedPowers
  * @param {*} config
  */
+
+
+import {
+  installContract,
+} from './platform-goals/start-contract.js';
+import { allValues } from './objectTools.js';
+
+const { Fail } = assert;
+
 export const startCateCoin = async (powers, config) => {
   console.log('core eval for', contractName);
   const {
