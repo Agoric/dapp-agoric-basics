@@ -1,24 +1,33 @@
 # Agoric Dapp Starter: Agoric Basics
 
-This is a simple app for the [Agoric smart contract platform](https://docs.agoric.com/).
-
-<img alt="Vite + React + Agoric page with Connect Wallet button"
-style="border: 1px solid" width="300"
-src="https://docs.agoric.com/assets/img/new_002_small2.2dfb7462.png" />
-
-The contract lets you make an offer to give a small amount of [IST](https://inter.trade/) in exchange for
-a few NFTs.
+This is a basic Agoric Dapp that contains three smart contracts `postal-service`, `sell-concert-tickets`, and `swaparoo` demonstrating different scenarios which can be implemented easily using Agoric SDK. There is also a UI for `sell-concert-tickets` contract that a user can use to buy three different types of concert tickets and pay through a wallet extension in the browser. 
 
 ## Getting started
 
-See [Your First Agoric Dapp](https://docs.agoric.com/guides/getting-started/) tutorial.
+Make sure all the required dependecies are already installed (including node, nvm, docker, Keplr, and that your node version is set to `18.x.x` by running `nvm use 18.20.2`. See [a tutorial here](https://docs.agoric.com/guides/getting-started/) on how to install these dependecies.). Here are the steps to run `dapp-agoric-basics`: 
+- run `yarn install` in the `agoric-basics` directory, to install dependencies of the Dapp.
+- run `yarn start:docker` to start Agoric blockchain from the container.
+- run `yarn docker:logs` to to make sure blocks are being produced by viewing the Docker logs; once your logs resemble the following, stop the logs by pressing `ctrl+c`.
+```
+demo-agd-1  | 2023-12-27T04:08:06.384Z block-manager: block 1003 begin
+demo-agd-1  | 2023-12-27T04:08:06.386Z block-manager: block 1003 commit
+demo-agd-1  | 2023-12-27T04:08:07.396Z block-manager: block 1004 begin
+demo-agd-1  | 2023-12-27T04:08:07.398Z block-manager: block 1004 commit
+demo-agd-1  | 2023-12-27T04:08:08.405Z block-manager: block 1005 begin
+demo-agd-1  | 2023-12-27T04:08:08.407Z block-manager: block 1005 commit
+```
+- run `yarn start:contract` to start the contracts.
+- run `yarn start:ui` to start `sell-concert-tickets` contract UI.
+- open a browser and navigate to `localhost:5173` to interact with the contract via UI.
 
-## Contributing: Development, Testing
+To follow more detailed tutorial, go [here](https://docs.agoric.com/guides/getting-started/tutorial-dapp-agoric-basics.html).
 
-The UI is a React app started with the [vite](https://vitejs.dev/) `react-ts` template.
-On top of that, we add
+## Testing
 
-- Watching [blockchain state queries](https://docs.agoric.com/guides/getting-started/contract-rpc.html#querying-vstorage)
-- [Signing and sending offers](https://docs.agoric.com/guides/getting-started/contract-rpc.html#signing-and-broadcasting-offers)
+To perform unit tests:
+-run the command `yarn test` in the root directory.
+To perform end to end test
+-run the command `yarn test:e2e` in the root directory.
 
-See [CONTRIBUTING](./CONTRIBUTING.md) for more on testing.
+## Contributing
+See [CONTRIBUTING](./CONTRIBUTING.md) for more on contributions.
