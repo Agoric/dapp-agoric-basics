@@ -1,8 +1,6 @@
-
-
-
 import {
   installContract,
+  startContract,
 } from './platform-goals/start-contract.js';
 import { allValues } from './objectTools.js';
 
@@ -34,7 +32,7 @@ export const startCateCoin = async (powers, config) => {
     issuer: powers.issuer.consume.IST,
   });
 
-  const terms = makeTerms(ist.brand, 1n * IST_UNIT);
+  const terms = undefined;
 
   await startContract(powers, {
     name: contractName,
@@ -51,19 +49,23 @@ export const startCateCoin = async (powers, config) => {
 
 // Define a manifest object describing the contract's capabilities and permissions
 export const manifest = /** @type {const} */ ({
-  [startCateCoin.name]: { // Define entry for the postalService contract
-    consume: { // Resources consumed by the contract
+  [startCateCoin.name]: {
+    // Define entry for the postalService contract
+    consume: {
+      // Resources consumed by the contract
       agoricNames: true, // Needs access to the agoricNames registry
       namesByAddress: true, // Needs access to the namesByAddress registry
       namesByAddressAdmin: true, // Needs administrative access to the namesByAddress registry
       startUpgradable: true, // Allows upgrades to the contract
       zoe: true, // Needs access to the Zoe service for contract execution
     },
-    installation: { // Capabilities provided by the contract during installation
-    consume: { [contractName]: true },
-    produce: { [contractName]: true },
+    installation: {
+      // Capabilities provided by the contract during installation
+      consume: { [contractName]: true },
+      produce: { [contractName]: true },
     },
-    instance: { // Capabilities provided by the contract instance
+    instance: {
+      // Capabilities provided by the contract instance
       produce: { [contractName]: true }, // Produces a "postalService" instance
     },
   },
