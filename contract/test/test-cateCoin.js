@@ -45,7 +45,7 @@ const makeTestContext = async _t => {
 
   E(zoe).install(bundle);
   // Installs the contract bundle on Zoe.
-  //const { instance } = await E(zoe).startInstance(installation);
+  // const { instance } = await E(zoe).startInstance(installation);
   return { zoe, bundle, bundleCache, feeMintAccess };
   // Returns the test context containing Zoe service, contract bundle, bundle cache, and fee mint access.
 };
@@ -85,16 +85,17 @@ test('createInitialCoins creates a fixed amount of initial CateCoin', async t =>
   // Defines a test case to calculate the total price for a bag of tickets.
   const { zoe, bundle } = t.context;
 
-  //Does not work here -
+  // Does not work here -
   const installation = E(zoe).install(bundle);
-  const { instance, creatorFacet } = await E(zoe).startInstance(installation);
+  // I am removing instance from below
+  const { creatorFacet } = await E(zoe).startInstance(installation);
 
   const cateIssuer = await E(creatorFacet).getIssuer();
   const cateBrand = await E(cateIssuer).getBrand();
 
   const myPurse = await E(cateIssuer).makeEmptyPurse();
 
-  const coins = await E(creatorFacet).createInitialCoins(myPurse, 100n);
+  await E(creatorFacet).createInitialCoins(myPurse, 100n);
 
   // Creates a bag of tickets with different rows and quantities.
   const amnt = await myPurse.getCurrentAmount();
@@ -107,13 +108,14 @@ test('createInitialCoins CateCoin more than maxSupply', async t => {
   // Defines a test case to calculate the total price for a bag of tickets.
   const { zoe, bundle } = t.context;
   const installation = E(zoe).install(bundle);
-  const { instance, creatorFacet } = await E(zoe).startInstance(installation);
+  // I am removing instance from below
+  const { creatorFacet } = await E(zoe).startInstance(installation);
 
   const cateIssuer = await E(creatorFacet).getIssuer();
   const cateBrand = await E(cateIssuer).getBrand();
   const myPurse = await E(cateIssuer).makeEmptyPurse();
 
-  const coins = await E(creatorFacet).createInitialCoins(myPurse, 1000_001n);
+  await E(creatorFacet).createInitialCoins(myPurse, 1000_001n);
 
   // Creates a bag of tickets with different rows and quantities.
   const amnt = await myPurse.getCurrentAmount();
@@ -126,9 +128,10 @@ test('transferCateCoins two purses', async t => {
   // Defines a test case to calculate the total price for a bag of tickets.
   const { zoe, bundle } = t.context;
 
-  //Does not work here -
+  // Does not work here -
   const installation = E(zoe).install(bundle);
-  const { instance, creatorFacet } = await E(zoe).startInstance(installation);
+  // I am removing instance from below
+  const { creatorFacet } = await E(zoe).startInstance(installation);
 
   const cateIssuer = await E(creatorFacet).getIssuer();
   const fromPurse = await E(cateIssuer).makeEmptyPurse();
@@ -144,9 +147,10 @@ test('transferCateCoins more than sender has', async t => {
   // Defines a test case to calculate the total price for a bag of tickets.
   const { zoe, bundle } = t.context;
 
-  //Does not work here -
+  // Does not work here -
   const installation = E(zoe).install(bundle);
-  const { instance, creatorFacet } = await E(zoe).startInstance(installation);
+  // I am removing instance from below
+  const { creatorFacet } = await E(zoe).startInstance(installation);
 
   const cateIssuer = await E(creatorFacet).getIssuer();
   const fromPurse = await E(cateIssuer).makeEmptyPurse();
