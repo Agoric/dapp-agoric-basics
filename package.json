@@ -16,6 +16,7 @@
     "@agoric/governance": "0.10.4-u14.0",
     "@agoric/store": "0.9.3-u14.0",
     "@agoric/xsnap": "0.14.3-u14.0",
+    "**/@agoric/zoe": "0.26.3-u15.0",
     "@agoric/vat-data": "0.5.3-u14.0",
     "@endo/bundle-source": "2.5.2-upstream-rollup",
     "@endo/captp": "3.1.1",
