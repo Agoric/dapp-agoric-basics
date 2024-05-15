@@ -20,47 +20,71 @@ export const start = async zcf => {
   console.log('AssetKind for Cate Coin is : ', cateAssetKind);
 
   const createInitialCoins = (myPurse, amount) => {
-    if (isInitialized === 1) return 'Fail - already initialized';
+    try {
+      if (isInitialized === 1) {
+        throw new Error('Fail - already initialized');
+      }
 
-    console.log('creating first coins');
-    isInitialized = 1;
-    creatorPurse = myPurse;
+      console.log('creating first coins');
+      isInitialized = 1;
+      creatorPurse = myPurse;
 
-    const cateAmount = AmountMath.make(cateBrand, amount);
-    if (AmountMath.isGTE(cateAmount, maxSupply))
-      return 'fail - amount exceeds maxSupply';
-    const catePayment = cateMint.mintPayment(cateAmount);
+      const cateAmount = AmountMath.make(cateBrand, amount);
+      if (AmountMath.isGTE(cateAmount, maxSupply)) {
+        throw new Error('Fail - amount exceeds maxSupply');
+      }
 
-    creatorPurse.deposit(catePayment);
-    currSupply = amount;
+      const catePayment = cateMint.mintPayment(cateAmount);
+      creatorPurse.deposit(catePayment);
+      currSupply = amount;
 
-    const currentAmount = creatorPurse.getCurrentAmount();
-    console.log(
-      'Current Amount in my purse after deposit is : ',
-      currentAmount,
-    );
-    return 'success';
+      const currentAmount = creatorPurse.getCurrentAmount();
+      console.log(
+        'Current Amount in my purse after deposit is : ',
+        currentAmount,
+      );
+      return 'success';
+    } catch (error) {
+      console.error('Error in createInitialCoins:', error);
+      return error.message;
+    }
   };
+
   const mintCateCoins = (myPurse, amount) => {
-    if (creatorPurse !== myPurse)
-      return 'Fail - Only creator can mint new tokens';
-    if (currSupply + amount > maxSupply) return 'Fail - reached max supply';
+    try {
+      if (creatorPurse !== myPurse) {
+        throw new Error('Fail - Only creator can mint new tokens');
+      }
+      if (currSupply + amount > maxSupply) {
+        throw new Error('Fail - reached max supply');
+      }
 
-    const cateAmount = AmountMath.make(cateBrand, amount);
-    const catePayment = cateMint.mintPayment(cateAmount);
-    creatorPurse.deposit(catePayment);
-    currSupply += amount;
+      const cateAmount = AmountMath.make(cateBrand, amount);
+      const catePayment = cateMint.mintPayment(cateAmount);
+      creatorPurse.deposit(catePayment);
+      currSupply += amount;
 
-    return 'success';
+      return 'success';
+    } catch (error) {
+      console.error('Error in mintCateCoins:', error);
+      return error.message;
+    }
   };
+
   const transferCateCoins = (fromPurse, toPurse, amount) => {
-    const cateAmount = AmountMath.make(cateBrand, amount);
-    if (AmountMath.isGTE(fromPurse.getCurrentAmount(), cateAmount)) {
+    try {
+      const cateAmount = AmountMath.make(cateBrand, amount);
+      if (!AmountMath.isGTE(fromPurse.getCurrentAmount(), cateAmount)) {
+        throw new Error('Fail - not enough funds in sender account');
+      }
+
       const catePayment = fromPurse.withdraw(cateAmount);
       toPurse.deposit(catePayment);
       return 'success';
+    } catch (error) {
+      console.error('Error in transferCateCoins:', error);
+      return error.message;
     }
-    return 'fail - not enough funds in sender account';
   };
 
   return {
@@ -72,40 +96,6 @@ export const start = async zcf => {
     }),
     publicFacet: Far('Public Facet', { transferCateCoins }),
   };
-
-  // // Step 1: Get the address of the inviter
-  // //Check if this is the first call to this instance of the contract
-  // //Get the address of the party.
-  // const inviterAddress = zcf.state.get('inviterAddress');
-  // if (inviterAddress === undefined) {
-  //   zcf.state.inviterAddress = zcf.getAddress();
-  //   inviterAddress = zcf.state.get('inviterAddress');
-
-  // }
-
-  // console.log("The address of zoe I got is : ${inviterAddress}");
-  // return ;
-
-  // const { inventory } = zcf.getTerms();
-
-  // const inventoryValues = Object.values(inventory);
-
-  //   const paymentAmount = cateIssuer.getAmountOf(catePayment);
-
-  //   //TODO: check - Not sure if we can burn partial amount from a payment
-  //   const amountToBurn = AmountMath.make(cateBrand, 5n);
-  //   const burntAmount = cateIssuer.burn(catePayment, amountToBurn);
-  //   console.log(burntAmount);
-
-  //   const catePurse = cateIssuer.makeEmptyPurse();
-  //   const currentAmount = catePurse.getCurrentAmount();
-  //   console.log("Current Amount in my purse is : ",currentAmount);
-  //   catePurse.deposit(catePayment);
-  //   currentAmount = catePurse.getCurrentAmount();
-  //   console.log("Current Amount in my purse after deposit is : ",currentAmount);
-
-  //   const cate3 = AmountMath.make(brand, 30n);
-  //   const withdrawalPayment = purse.withdraw(cate3);
 };
 
 harden(start);
