@@ -11,14 +11,15 @@ const contractPath = myRequire.resolve(`../src/cateCoin.contract.js`);
 
 const test = anyTest;
 
+const { zoeService: zoe, feeMintAccess } = makeZoeKitForTest();
+const bundleCache = await makeNodeBundleCache(
+  'bundles/',
+  {},
+  nodeModuleSpecifier => import(nodeModuleSpecifier),
+);
+
 const makeTestContext = async _t => {
   try {
-    const { zoeService: zoe, feeMintAccess } = makeZoeKitForTest();
-    const bundleCache = await makeNodeBundleCache(
-      'bundles/',
-      {},
-      nodeModuleSpecifier => import(nodeModuleSpecifier),
-    );
     const bundle = await bundleCache.load(contractPath, 'assetContract');
 
     await E(zoe).install(bundle);
@@ -122,6 +123,7 @@ test('transferCateCoins two purses', async t => {
     const { creatorFacet } = await E(zoe).startInstance(installation);
 
     const cateIssuer = await E(creatorFacet).getIssuer();
+    const cateBrand = cateIssuer.getBrand();
     const fromPurse = await E(cateIssuer).makeEmptyPurse();
     await E(creatorFacet).createInitialCoins(fromPurse, 1000n);
     const toPurse = await E(cateIssuer).makeEmptyPurse();
@@ -145,6 +147,7 @@ test('transferCateCoins more than sender has', async t => {
     const { creatorFacet } = await E(zoe).startInstance(installation);
 
     const cateIssuer = await E(creatorFacet).getIssuer();
+    const cateBrand = cateIssuer.getBrand();
     const fromPurse = await E(cateIssuer).makeEmptyPurse();
     await E(creatorFacet).createInitialCoins(fromPurse, 1000n);
     const toPurse = await E(cateIssuer).makeEmptyPurse();
