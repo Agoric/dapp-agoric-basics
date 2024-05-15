@@ -11,14 +11,14 @@ const contractPath = myRequire.resolve(`../src/cateCoin.contract.js`);
 
 const test = anyTest;
 
-const { zoeService: zoe, feeMintAccess } = makeZoeKitForTest();
-const bundleCache = await makeNodeBundleCache(
-  'bundles/',
-  {},
-  nodeModuleSpecifier => import(nodeModuleSpecifier),
-);
-
 const makeTestContext = async _t => {
+  const { zoeService: zoe, feeMintAccess } = makeZoeKitForTest();
+  const bundleCache = await makeNodeBundleCache(
+    'bundles/',
+    {},
+    nodeModuleSpecifier => import(nodeModuleSpecifier),
+  );
+
   try {
     const bundle = await bundleCache.load(contractPath, 'assetContract');
 
