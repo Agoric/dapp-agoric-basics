@@ -22,29 +22,34 @@ export const startCateCoin = async (powers, config) => {
     bundleID = Fail`no bundleID`,
   } = config?.options?.[contractName] ?? {};
 
-  const installation = await installContract(powers, {
-    name: contractName,
-    bundleID,
-  });
+  try {
+    const installation = await installContract(powers, {
+      name: contractName,
+      bundleID,
+    });
 
-  const ist = await allValues({
-    brand: powers.brand.consume.IST,
-    issuer: powers.issuer.consume.IST,
-  });
+    const ist = await allValues({
+      brand: powers.brand.consume.IST,
+      issuer: powers.issuer.consume.IST,
+    });
 
-  const terms = undefined;
+    const terms = undefined;
 
-  await startContract(powers, {
-    name: contractName,
-    startArgs: {
-      installation,
-      issuerKeywordRecord: { Price: ist.issuer },
-      terms,
-    },
-    issuerNames: ['Ticket'],
-  });
+    await startContract(powers, {
+      name: contractName,
+      startArgs: {
+        installation,
+        issuerKeywordRecord: { Price: ist.issuer },
+        terms,
+      },
+      issuerNames: ['Ticket'],
+    });
 
-  console.log(contractName, '(re)started');
+    console.log(contractName, '(re)started');
+  } catch (error) {
+    console.error(`Error starting ${contractName} contract:`, error);
+    throw error; // Rethrow the error after logging it
+  }
 };
 
 // Define a manifest object describing the contract's capabilities and permissions
