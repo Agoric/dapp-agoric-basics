@@ -1,9 +1,12 @@
+// @ts-check
+
+/* eslint-disable import/order -- https://github.com/endojs/endo/issues/1235 */
 import { test as anyTest } from './prepare-test-env-ava.js';
+import { AmountMath } from '@agoric/ertp';
 import { createRequire } from 'module';
 import { E } from '@endo/far';
 import { makeNodeBundleCache } from '@endo/bundle-source/cache.js';
 import { makeZoeKitForTest } from '@agoric/zoe/tools/setup-zoe.js';
-import { AmountMath } from '@agoric/ertp';
 
 const myRequire = createRequire(import.meta.url);
 const contractPath = myRequire.resolve(`../src/cateCoin.contract.js`);
