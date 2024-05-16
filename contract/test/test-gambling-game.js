@@ -79,7 +79,6 @@ test('Make a deposit', async t => {
     const installation = await E(zoe).install(bundle);
     const { issuer, mint, brand } = makeIssuerKit('IST');
     const { publicFacet } = await E(zoe).startInstance(installation, { IST: issuer });
-    t.log(brand, mint)
     
     const aliceAmount = AmountMath.make(brand, 100n);
     const alicePayment = mint.mintPayment(aliceAmount);

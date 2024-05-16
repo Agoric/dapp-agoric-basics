@@ -18,9 +18,11 @@ const startGame = async () => {
     const { publicFacet } = await E(zoeService).startInstance(installation, { IST: issuer });
 
     // Mint some IST to test with
+    console.log(brand);
     const aliceAmount = AmountMath.make(brand, 100n);
     const alicePayment = mint.mintPayment(aliceAmount);
 
+    // Create a deposit invitation
     const aliceInvitation = E(publicFacet).makeDepositInvitation();
     const proposal = { give: { IST: aliceAmount } };
     const payments = { IST: alicePayment };
