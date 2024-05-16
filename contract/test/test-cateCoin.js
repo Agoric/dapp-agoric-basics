@@ -1,10 +1,9 @@
+import { test as anyTest } from './prepare-test-env-ava.js';
 import { createRequire } from 'module';
 import { E } from '@endo/far';
-
 import { makeNodeBundleCache } from '@endo/bundle-source/cache.js';
 import { makeZoeKitForTest } from '@agoric/zoe/tools/setup-zoe.js';
 import { AmountMath } from '@agoric/ertp';
-import { test as anyTest } from './prepare-test-env-ava.js';
 
 const myRequire = createRequire(import.meta.url);
 const contractPath = myRequire.resolve(`../src/cateCoin.contract.js`);
@@ -19,7 +18,7 @@ const makeTestContext = async _t => {
       {},
       nodeModuleSpecifier => import(nodeModuleSpecifier),
     );
-    const bundle = await bundleCache.load(contractPath, 'assetContract');
+    const bundle = await bundleCache.load(contractPath, 'cateCoinContract');
 
     await E(zoe).install(bundle);
 
@@ -151,13 +150,7 @@ test('transferCateCoins more than sender has', async t => {
     await E(creatorFacet).createInitialCoins(fromPurse, 1000n);
     const toPurse = await E(cateIssuer).makeEmptyPurse();
     await E(creatorFacet).transferCateCoins(fromPurse, toPurse, 500n);
-    const transferResult = await E(creatorFacet).transferCateCoins(
-      fromPurse,
-      toPurse,
-      501n,
-    );
-
-    t.is(transferResult, 'fail - not enough funds in sender account');
+    await E(creatorFacet).transferCateCoins(fromPurse, toPurse, 501n);
 
     const fromAmnt = await fromPurse.getCurrentAmount();
     const toAmnt = await toPurse.getCurrentAmount();

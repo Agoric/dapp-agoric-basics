@@ -16,8 +16,7 @@ export const start = async zcf => {
   let isInitialized = 0;
 
   const getIssuer = () => cateIssuer;
-  const cateAssetKind = zcf.getAssetKind(cateBrand);
-  console.log('AssetKind for Cate Coin is : ', cateAssetKind);
+  console.log('Name of the contract : ', zcf.name);
 
   const createInitialCoins = (myPurse, amount) => {
     try {

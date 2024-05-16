@@ -4,7 +4,7 @@ import {
 } from './platform-goals/start-contract.js';
 import { allValues } from './objectTools.js';
 
-const { Fail } = assert;
+// const { Fail } = assert;
 
 const contractName = 'cateCoin';
 
@@ -17,11 +17,10 @@ const contractName = 'cateCoin';
 
 export const startCateCoin = async (powers, config) => {
   console.log('core eval for', contractName);
-  const {
-    // must be supplied by caller or template-replaced
-    bundleID = Fail`no bundleID`,
-  } = config?.options?.[contractName] ?? {};
-
+  // const {
+  //   bundleID = Fail`no bundleID`,
+  // } = config?.options?.[contractName] ?? {};
+  const bundleID = config?.options?.[contractName] ?? {};
   try {
     const installation = await installContract(powers, {
       name: contractName,
