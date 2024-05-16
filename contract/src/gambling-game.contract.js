@@ -7,18 +7,20 @@ Once the winner is decided, they can claim the reward which transfers all the IS
 */
 
 import { AmountMath } from '@agoric/ertp';
-import { makeNotifierKit } from '@agoric/notifier';
+import { Far } from '@endo/far';
 
 const start = zcf => {
   const { zcfSeat: contractSeat } = zcf.makeEmptySeatKit();
 
   const MAX_ENTRIES = 14;
   let entries = [];
-  const { notifier, updater } = makeNotifierKit();
 
   const depositInvitation = zcf.makeInvitation(async seat => {
     const offerAmount = seat.getAmountAllocated('IST');
-    const depositAmount = AmountMath.coerce(zcf.getBrandForIssuer(zcf.getIssuerForBrand(offerAmount.brand)), offerAmount);
+    const depositAmount = AmountMath.coerce(
+        zcf.getBrandForIssuer(zcf.getIssuerForBrand(offerAmount.brand)),
+        offerAmount
+    );
     
     // Prevent reentrancy attacks by updating state before making external calls
     entries.push(seat);
@@ -37,19 +39,16 @@ const start = zcf => {
       seat.exit();
     }
 
-    updater.updateState(entries.length);
-
     // Transfer funds from player to contract
     contractSeat.incrementBy(depositAmount);
     zcf.reallocate(contractSeat, seat);
   }, 'Deposit IST');
 
   return {
-    publicFacet: {
+    publicFacet: Far('publicFacet', {
       makeDepositInvitation: () => depositInvitation,
-      getEntriesNotifier: () => notifier,
       getEntriesCount: () => entries.length,
-    },
+    },)
   };
 };
 

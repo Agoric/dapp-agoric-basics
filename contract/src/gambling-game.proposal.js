@@ -1,13 +1,12 @@
 import { E } from '@endo/far';
 import { AmountMath, makeIssuerKit } from '@agoric/ertp';
 import { makeZoeKit } from '@agoric/zoe';
-// import { makeFakeVatAdmin } from '@agoric/zoe/tools/fakeVatAdmin';
 import { start } from './gambling-game.contract.js';
 
 const contractName = 'gambling-game';
 
 const startGame = async () => {
-    const { zoeService } = makeZoeKit(null);
+    const { zoeService } = makeZoeKit();
 
     // Create IST issuer and mint
     const { issuer, mint, brand } = makeIssuerKit('IST');
@@ -28,7 +27,7 @@ const startGame = async () => {
 
     // Make an offer to deposit IST
     const seat = await E(zoeService).offer(aliceInvitation, proposal, payments);
-    console.log('Alice made a deposit.', seat);
+    console.log('Alice made a deposit.');
 
     // Check the number of entries
     const entriesCount = await E(publicFacet).getEntriesCount();
