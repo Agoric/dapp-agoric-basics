@@ -27,7 +27,7 @@ const startGame = async () => {
 
     // Make an offer to deposit IST
     const seat = await E(zoeService).offer(aliceInvitation, proposal, payments);
-    console.log('Alice made a deposit.');
+    console.log(`Alice made a deposit: ${seat}`);
 
     // Check the number of entries
     const entriesCount = await E(publicFacet).getEntriesCount();
@@ -37,7 +37,7 @@ const startGame = async () => {
 // Define a manifest object describing the contract's capabilities and permissions
 export const manifest = /** @type {const} */ ({
     [startGame.name]: {
-        // Define entry for the postalService contract
+        // Define entry for the GamblingGame contract
         consume: {
             // Resources consumed by the contract
             agoricNames: true, // Needs access to the agoricNames registry
@@ -53,7 +53,7 @@ export const manifest = /** @type {const} */ ({
         },
         instance: {
             // Capabilities provided by the contract instance
-            produce: { [contractName]: true }, // Produces a "postalService" instance
+            produce: { [contractName]: true }, // Produces a "GamblingGameService" instance
         },
     },
 });

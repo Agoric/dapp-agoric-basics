@@ -71,7 +71,6 @@ test.skip('Start Gambling Game contract', async t => {
   }
 });
 
-// Test case to deposit game tokens and the entry becomes 1
 test('Make a deposit', async t => {
   try {
     // @ts-ignore

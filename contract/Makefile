@@ -60,7 +60,7 @@ vote:
 instance-q:
 	agd query vstorage data published.agoricNames.instance -o json
 
-start-contract: start-contract-gambling-game
+start-contract: start-contract-mint start-contract-swap start-contract-pay start-contract-gambling-game
 
 start-contract-mint:
 	yarn node scripts/deploy-contract.js \
