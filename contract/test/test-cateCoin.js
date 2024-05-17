@@ -14,13 +14,13 @@ const contractPath = myRequire.resolve(`../src/cateCoin.contract.js`);
 const test = anyTest;
 
 const makeTestContext = async _t => {
+  const { zoeService: zoe, feeMintAccess } = makeZoeKitForTest();
+  const bundleCache = await makeNodeBundleCache(
+    'bundles/',
+    {},
+    nodeModuleSpecifier => import(nodeModuleSpecifier),
+  );
   try {
-    const { zoeService: zoe, feeMintAccess } = makeZoeKitForTest();
-    const bundleCache = await makeNodeBundleCache(
-      'bundles/',
-      {},
-      nodeModuleSpecifier => import(nodeModuleSpecifier),
-    );
     const bundle = await bundleCache.load(contractPath, 'cateCoinContract');
 
     await E(zoe).install(bundle);
@@ -33,19 +33,13 @@ const makeTestContext = async _t => {
 };
 
 test.before(async t => {
-  try {
-    t.context = await makeTestContext(t);
-  } catch (error) {
-    console.error('Error in test.before:', error);
-    throw error;
-  }
+  t.context = await makeTestContext(t);
 });
 
 test('Install CateCoin contract', async t => {
+  const { zoe, bundle } = t.context;
+  const installation = await E(zoe).install(bundle);
   try {
-    const { zoe, bundle } = t.context;
-
-    const installation = await E(zoe).install(bundle);
     t.log(installation);
     t.is(typeof installation, 'object');
   } catch (error) {
@@ -55,10 +49,9 @@ test('Install CateCoin contract', async t => {
 });
 
 test('Start CateCoin contract', async t => {
+  const { zoe, bundle } = t.context;
+  const installation = await E(zoe).install(bundle);
   try {
-    const { zoe, bundle } = t.context;
-
-    const installation = await E(zoe).install(bundle);
     const { instance } = await E(zoe).startInstance(installation);
     t.log(instance);
     t.is(typeof instance, 'object');
@@ -69,12 +62,10 @@ test('Start CateCoin contract', async t => {
 });
 
 test('createInitialCoins creates a fixed amount of initial CateCoin', async t => {
+  const { zoe, bundle } = t.context;
+  const installation = await E(zoe).install(bundle);
   try {
-    const { zoe, bundle } = t.context;
-
-    const installation = await E(zoe).install(bundle);
     const { creatorFacet } = await E(zoe).startInstance(installation);
-
     const cateIssuer = await E(creatorFacet).getIssuer();
     const cateBrand = await E(cateIssuer).getBrand();
 
@@ -92,12 +83,10 @@ test('createInitialCoins creates a fixed amount of initial CateCoin', async t =>
 });
 
 test('createInitialCoins CateCoin more than maxSupply', async t => {
+  const { zoe, bundle } = t.context;
+  const installation = await E(zoe).install(bundle);
   try {
-    const { zoe, bundle } = t.context;
-
-    const installation = await E(zoe).install(bundle);
     const { creatorFacet } = await E(zoe).startInstance(installation);
-
     const cateIssuer = await E(creatorFacet).getIssuer();
     const cateBrand = await E(cateIssuer).getBrand();
     const myPurse = await E(cateIssuer).makeEmptyPurse();
@@ -117,12 +106,10 @@ test('createInitialCoins CateCoin more than maxSupply', async t => {
 });
 
 test('transferCateCoins two purses', async t => {
+  const { zoe, bundle } = t.context;
+  const installation = await E(zoe).install(bundle);
   try {
-    const { zoe, bundle } = t.context;
-
-    const installation = await E(zoe).install(bundle);
     const { creatorFacet } = await E(zoe).startInstance(installation);
-
     const cateIssuer = await E(creatorFacet).getIssuer();
     const cateBrand = cateIssuer.getBrand();
     const fromPurse = await E(cateIssuer).makeEmptyPurse();
@@ -141,12 +128,10 @@ test('transferCateCoins two purses', async t => {
 });
 
 test('transferCateCoins more than sender has', async t => {
+  const { zoe, bundle } = t.context;
+  const installation = await E(zoe).install(bundle);
   try {
-    const { zoe, bundle } = t.context;
-
-    const installation = await E(zoe).install(bundle);
     const { creatorFacet } = await E(zoe).startInstance(installation);
-
     const cateIssuer = await E(creatorFacet).getIssuer();
     const cateBrand = cateIssuer.getBrand();
     const fromPurse = await E(cateIssuer).makeEmptyPurse();

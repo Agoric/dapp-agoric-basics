@@ -21,12 +21,11 @@ export const startCateCoin = async (powers, config) => {
   //   bundleID = Fail`no bundleID`,
   // } = config?.options?.[contractName] ?? {};
   const bundleID = config?.options?.[contractName] ?? {};
+  const installation = await installContract(powers, {
+    name: contractName,
+    bundleID,
+  });
   try {
-    const installation = await installContract(powers, {
-      name: contractName,
-      bundleID,
-    });
-
     const ist = await allValues({
       brand: powers.brand.consume.IST,
       issuer: powers.issuer.consume.IST,
