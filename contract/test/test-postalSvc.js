@@ -209,7 +209,7 @@ test('send invitation* from contract using publicFacet of postalService', async 
     smartWalletIssuers,
   );
 
-  /** @type {StartedInstanceKit<import('../src/postal-service.contract').PostalServiceFn>['instance']} */
+  /** @type {StartedInstanceKit<import('../src/postal-service.contract.js').PostalServiceFn>['instance']} */
   // @ts-expect-error not (yet?) in BootstrapPowers
   const instance = await powers.instance.consume.postalService;
 

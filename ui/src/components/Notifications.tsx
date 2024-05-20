@@ -28,24 +28,22 @@ const Notifications = (props: {
   };
 
   return (
-    <div>
-      <Toast className="daisyui-toast daisyui-toast-end daisyui-toast-top">
-        {props.notifications.map((alert, index) => (
-          <Alert
-            className={'daisyui-alert ' + daisyUiAlertClass(alert.status)}
-            key={index}
-            status={alert.status}
-          >
-            <div className="w-full flex-row justify-between gap-2">
-              <h3>{alert.text}</h3>
-            </div>
-            <Button color="ghost" onClick={() => handleRemoveToast(index)}>
-              X
-            </Button>
-          </Alert>
-        ))}
-      </Toast>
-    </div>
+    <Toast className="daisyui-toast daisyui-toast-end daisyui-toast-top mt-14">
+      {props.notifications.map((alert, index) => (
+        <Alert
+          className={'daisyui-alert ' + daisyUiAlertClass(alert.status)}
+          key={index}
+          status={alert.status}
+        >
+          <div className="w-full flex-row justify-between gap-2">
+            <h3>{alert.text}</h3>
+          </div>
+          <Button color="ghost" onClick={() => handleRemoveToast(index)}>
+            X
+          </Button>
+        </Alert>
+      ))}
+    </Toast>
   );
 };
 

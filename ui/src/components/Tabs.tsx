@@ -3,6 +3,7 @@ import { Mint } from './mint/Mint';
 import { TabWrapper } from './TabWrapper';
 import { Notifications } from './Notifications';
 import { NotificationContext } from '../context/NotificationContext';
+import Swap from './swap/Swap';
 
 // notification related types
 const dynamicToastChildStatuses = [
@@ -43,7 +44,7 @@ const Tabs = () => {
       >
         <div
           role="tablist"
-          className="daisyui-tabs daisyui-tabs-lifted daisyui-tabs-lg"
+          className="daisyui-tabs-boxed daisyui-tabs daisyui-tabs-lg"
         >
           <TabWrapper
             tab="Mint"
@@ -57,7 +58,7 @@ const Tabs = () => {
             activeTab={activeTab}
             handleTabClick={handleTabClick}
           >
-            <div>TBD</div>
+            <Swap />
           </TabWrapper>
           <TabWrapper
             tab="Pay"

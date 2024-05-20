@@ -81,7 +81,7 @@ export const startSellConcertTicketsContract = async (
   console.log(contractName, '(re)started');
 };
 
-/** @type { import("@agoric/vats/src/core/lib-boot").BootstrapManifestPermit } */
+/** @type { import("@agoric/vats/src/core/lib-boot.js").BootstrapManifestPermit } */
 export const permit = harden({
   consume: {
     agoricNames: true,

@@ -14,9 +14,7 @@ const watchContract = (watcher: ChainStorageWatcher) => {
     instances => {
       console.log('Got instances', instances);
       useContractStore.setState({
-        instance: instances
-          .find(([name]) => name === 'sellConcertTickets')!
-          .at(1),
+        instances: fromEntries(instances),
       });
     },
   );
@@ -27,6 +25,16 @@ const watchContract = (watcher: ChainStorageWatcher) => {
       console.log('Got brands', brands);
       useContractStore.setState({
         brands: fromEntries(brands),
+      });
+    },
+  );
+
+  watcher.watchLatest<Array<[string, unknown]>>(
+    [Kind.Data, 'published.agoricNames.vbankAsset'],
+    vbank => {
+      console.log('Got vbank', vbank);
+      useContractStore.setState({
+        vbank: fromEntries(vbank),
       });
     },
   );

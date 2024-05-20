@@ -16,7 +16,8 @@ const makeOffer = (
   ticketValue: bigint,
   giveValue: bigint,
 ) => {
-  const { instance, brands } = useContractStore.getState();
+  const { instances, brands } = useContractStore.getState();
+  const instance = instances?.['sellConcertTickets'];
   if (!instance) throw Error('no contract instance');
   if (!(brands && brands.IST && brands.Ticket))
     throw Error('brands not available');

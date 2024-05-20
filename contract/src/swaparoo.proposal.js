@@ -23,7 +23,7 @@ const contractName = 'swaparoo';
 
 /**
  * @typedef {PromiseSpaceOf<{
- *   swaparooKit: GovernanceFacetKit<typeof import('./swaparoo.contract').start>;
+ *   swaparooKit: GovernanceFacetKit<typeof import('./swaparoo.contract.js').start>;
  *   swaparooCommitteeKit: StartResult<*>;
  *   swaparooCharterKit: StartResult<*>;
  * }> & {
@@ -93,7 +93,7 @@ export const startSwapContract = async powers => {
     },
   } = swapPowers;
 
-  /** @type {import('./types').NonNullChainStorage['consume']} */
+  /** @type {import('./types.js').NonNullChainStorage['consume']} */
   // @ts-expect-error
   const { chainStorage } = powers.consume;
 
@@ -160,7 +160,7 @@ export const main = (
     charterFacets: startSwaparooCharter(permittedPowers, config),
   });
 
-/** @type { import("@agoric/vats/src/core/lib-boot").BootstrapManifestPermit } */
+/** @type { import("@agoric/vats/src/core/lib-boot.js").BootstrapManifestPermit } */
 export const permit = harden({
   consume: {
     namesByAddress: true,
