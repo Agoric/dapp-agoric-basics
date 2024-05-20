@@ -147,7 +147,8 @@ const isPurseEmpty = (purse: PurseJSONState<AssetKind>) => {
     return value === 0n;
   }
   if (assetKind === 'set') {
-    return value.length === 0;
+    // UNTIL: https://github.com/Agoric/agoric-sdk/issues/9378
+    return true;
   }
   if (assetKind === 'copyBag') {
     return value.payload.length === 0;
