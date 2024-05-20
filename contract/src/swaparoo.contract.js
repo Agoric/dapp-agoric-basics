@@ -121,6 +121,17 @@ export const start = async (zcf, privateArgs, baggage) => {
   // TODO: update with Fee param
   const feeShape = makeNatAmountShape(feeBrand, params.getFee().value);
 
+  const generateOfferNonce = (() => {
+    // XXX: This is not stored durably, so ensure it stays unique after upgrade,
+    // perhaps by appending a new character each time.
+    let offerNonce = -1;
+
+    return () => {
+      offerNonce += 1;
+      return `${offerNonce}`;
+    };
+  })();
+
   /**
    * @param { ZCFSeat } firstSeat
    * @param {{ addr: string }} offerArgs
@@ -158,9 +169,10 @@ export const start = async (zcf, privateArgs, baggage) => {
       return swapWithFee(zcf, firstSeat, secondSeat, feeSeat, params.getFee());
     };
 
+    const description = `matchOffer-${generateOfferNonce()}`;
     const secondSeatInvitation = await zcf.makeInvitation(
       secondSeatOfferHandler,
-      'matchOffer',
+      description,
       { give: give1, want: want1 }, // "give" and "want" are from the proposer's perspective
     );
 
