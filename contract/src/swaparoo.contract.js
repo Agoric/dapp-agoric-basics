@@ -15,9 +15,9 @@ import {
 import { ParamTypes } from '@agoric/governance/src/constants.js';
 import { CONTRACT_ELECTORATE } from '@agoric/governance/src/contractGovernance/governParam.js';
 import { handleParamGovernance } from '@agoric/governance/src/contractHelper.js';
+import { provide } from '@agoric/vat-data';
 import { makeCollectFeesInvitation } from './collectFees.js';
 import { fixHub } from './fixHub.js';
-import { provide } from '@agoric/vat-data';
 
 /** @template [Slot=unknown] @typedef {import('@endo/marshal').Marshal<Slot>} Marshaller */
 
