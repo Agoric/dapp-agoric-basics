@@ -15,6 +15,7 @@ import {
 import { ParamTypes } from '@agoric/governance/src/constants.js';
 import { CONTRACT_ELECTORATE } from '@agoric/governance/src/contractGovernance/governParam.js';
 import { handleParamGovernance } from '@agoric/governance/src/contractHelper.js';
+import { provide } from '@agoric/vat-data';
 import { makeCollectFeesInvitation } from './collectFees.js';
 import { fixHub } from './fixHub.js';
 
@@ -121,6 +122,18 @@ export const start = async (zcf, privateArgs, baggage) => {
   // TODO: update with Fee param
   const feeShape = makeNatAmountShape(feeBrand, params.getFee().value);
 
+  const generateOfferNonce = (() => {
+    // Provide the nonce durably so it can stay unique if contract upgrades.
+    // See: https://docs.agoric.com/guides/zoe/contract-upgrade.html#durability
+    let offerNonce = provide(baggage, 'offerNonce', () => -1);
+
+    return () => {
+      offerNonce += 1;
+      baggage.set('offerNonce', offerNonce);
+      return offerNonce;
+    };
+  })();
+
   /**
    * @param { ZCFSeat } firstSeat
    * @param {{ addr: string }} offerArgs
@@ -158,9 +171,10 @@ export const start = async (zcf, privateArgs, baggage) => {
       return swapWithFee(zcf, firstSeat, secondSeat, feeSeat, params.getFee());
     };
 
+    const description = `matchOffer-${generateOfferNonce()}`;
     const secondSeatInvitation = await zcf.makeInvitation(
       secondSeatOfferHandler,
-      'matchOffer',
+      description,
       { give: give1, want: want1 }, // "give" and "want" are from the proposer's perspective
     );
 

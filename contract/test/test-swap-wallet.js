@@ -161,6 +161,7 @@ const startAlice = async (
  * @param {MockWallet} wallet
  * @param {Amount} beansAmount
  * @param {Amount} cowsAmount
+ * @param {string} offerDescription
  * @param {boolean} [jackPays]
  */
 const startJack = async (
@@ -169,6 +170,7 @@ const startJack = async (
   wallet,
   beansAmount,
   cowsAmount,
+  offerDescription,
   jackPays = false,
 ) => {
   const instance = wellKnown.instance[contractName];
@@ -188,7 +190,7 @@ const startJack = async (
     invitationSpec: {
       source: 'purse',
       instance,
-      description: 'matchOffer',
+      description: offerDescription,
     },
     proposal,
   };
@@ -278,7 +280,14 @@ test.serial('basic swap', async t => {
     await E(E.get(bldIssuerKit).mint).mintPayment(cowAmount),
   );
   const jackSeat = seatLike(
-    await startJack(t, wellKnown, wallet.jack, fiveBeans, cowAmount),
+    await startJack(
+      t,
+      wellKnown,
+      wallet.jack,
+      fiveBeans,
+      cowAmount,
+      'matchOffer-0',
+    ),
   );
 
   const jackPayouts = await jackSeat.getPayoutAmounts();
