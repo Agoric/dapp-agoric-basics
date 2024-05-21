@@ -17,6 +17,7 @@ import { CONTRACT_ELECTORATE } from '@agoric/governance/src/contractGovernance/g
 import { handleParamGovernance } from '@agoric/governance/src/contractHelper.js';
 import { makeCollectFeesInvitation } from './collectFees.js';
 import { fixHub } from './fixHub.js';
+import { provide } from '@agoric/vat-data';
 
 /** @template [Slot=unknown] @typedef {import('@endo/marshal').Marshal<Slot>} Marshaller */
 
@@ -122,13 +123,14 @@ export const start = async (zcf, privateArgs, baggage) => {
   const feeShape = makeNatAmountShape(feeBrand, params.getFee().value);
 
   const generateOfferNonce = (() => {
-    // XXX: This is not stored durably, so ensure it stays unique after upgrade,
-    // perhaps by appending a new character each time.
-    let offerNonce = -1;
+    // Provide the nonce durably so it can stay unique if contract upgrades.
+    // See: https://docs.agoric.com/guides/zoe/contract-upgrade.html#durability
+    let offerNonce = provide(baggage, 'offerNonce', () => -1);
 
     return () => {
       offerNonce += 1;
-      return `${offerNonce}`;
+      baggage.set('offerNonce', offerNonce);
+      return offerNonce;
     };
   })();
 
