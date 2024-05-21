@@ -116,7 +116,7 @@ test('Get the number of entries', async t => {
     const proposal = { give: { IST: aliceAmount } };
     const payments = { IST: alicePayment };
 
-    const seat = await E(zoe).offer(aliceInvitation, proposal, payments);
+    await E(zoe).offer(aliceInvitation, proposal, payments);
     const newEntriesCount = await E(publicFacet).getEntriesCount();
     t.log(newEntriesCount);
     t.is(newEntriesCount, entriesCount + 1);

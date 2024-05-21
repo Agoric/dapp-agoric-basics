@@ -6,7 +6,7 @@ This is a simple example of the dangers of a smart contracts and why testing and
 Once the winner is decided, they can claim the reward which transfers all the IST to their wallet. The game starts all over again and the contract does not end. 
 */
 
-import { AmountMath, makeIssuerKit } from '@agoric/ertp';
+import { AmountMath } from '@agoric/ertp';
 import { atomicRearrange } from '@agoric/zoe/src/contractSupport/atomicTransfer.js';
 import { Far } from '@endo/far';
 
