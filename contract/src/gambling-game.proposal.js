@@ -17,23 +17,7 @@ const startGame = async () => {
     // Start the instance
     const { publicFacet } = await E(zoeService).startInstance(installation, { IST: issuer });
 
-    // Mint some IST to test with
-    console.log(brand);
-    const aliceAmount = AmountMath.make(brand, 100n);
-    const alicePayment = mint.mintPayment(aliceAmount);
-
-    // Create a deposit invitation
-    const aliceInvitation = E(publicFacet).makeDepositInvitation();
-    const proposal = { give: { IST: aliceAmount } };
-    const payments = { IST: alicePayment };
-
-    // Make an offer to deposit IST
-    const seat = await E(zoeService).offer(aliceInvitation, proposal, payments);
-    console.log(`Alice made a deposit: ${seat}`);
-
-    // Check the number of entries
-    const entriesCount = await E(publicFacet).getEntriesCount();
-    console.log(`Current number of entries: ${entriesCount}`);
+    // Todo: Can add Publishes Brand Info to the chain
 };
 
 // Define a manifest object describing the contract's capabilities and permissions
