@@ -6,7 +6,8 @@ This is a simple example of the dangers of a smart contracts and why testing and
 Once the winner is decided, they can claim the reward which transfers all the IST to their wallet. The game starts all over again and the contract does not end. 
 */
 
-import { AmountMath } from '@agoric/ertp';
+import { AmountMath, makeIssuerKit } from '@agoric/ertp';
+import { atomicRearrange } from '@agoric/zoe/src/contractSupport/atomicTransfer.js';
 import { Far } from '@endo/far';
 
 const start = zcf => {
@@ -16,54 +17,62 @@ const start = zcf => {
     let entries = [];
 
     const depositInvitation = zcf.makeInvitation(async seat => {
-    // Ensure the player only sends IST
-    const offerAmount = seat.getAmountAllocated('IST');
 
-    if (!offerAmount) {
-        throw new Error('Only IST is accepted');
-    }
+        // Ensure the player only sends IST
+        const offerAmount = seat.getAmountAllocated('IST');
 
-    // Coerce the amount to the correct brand
-    const depositAmount = AmountMath.coerce(
-        zcf.getBrandForIssuer(zcf.getIssuerForBrand(offerAmount.brand)),
-        offerAmount
-    );
-    
-    // Prevent reentrancy attacks by updating state before making external calls
-    entries.push(seat);
-    
-    // Check if the game is over
-    if (entries.length === MAX_ENTRIES) {
 
-        // Select the winner
-        const winnerSeat = entries[MAX_ENTRIES - 1];
+        if (!offerAmount.brand) {
+            throw new Error('Only IST is accepted');
+        }
 
-        // Payout the winner
-        const payoutAmount = contractSeat.getAmountAllocated('IST');
-        contractSeat.decrementBy(contractSeat.getCurrentAllocation('IST'));
-        winnerSeat.incrementBy(payoutAmount);
+        // Coerce the amount to the correct brand
+        const depositAmount = AmountMath.coerce(
+            zcf.getBrandForIssuer(zcf.getIssuerForBrand(offerAmount.brand)),
+            offerAmount
+        );
+        if (!depositAmount) {
+            throw new Error('Only IST is accepted');
+        }
 
-        // Transfer funds from contract to winner
-        zcf.reallocate(contractSeat, winnerSeat);
+        // Prevent reentrancy attacks by updating state before making external calls
+        entries.push(seat);
 
-        winnerSeat.exit();
-        entries = []; // Reset the game
-    } else {
-        seat.exit();
-    }
+        // Transfer funds from player to contract
+        atomicRearrange(
+            zcf,
+            harden([
+                [seat, contractSeat, { IST: depositAmount }],
+            ]),
+        );
 
-    // Transfer funds from player to contract
-    contractSeat.incrementBy(depositAmount);
-    zcf.reallocate(contractSeat, seat);
+        // Check if the game is over
+        if (entries.length === MAX_ENTRIES) {
 
-}, 'Deposit IST');
+            // Select the winner
+            const winnerSeat = entries[MAX_ENTRIES - 1];
 
-  return {
-    publicFacet: Far('publicFacet', {
-      makeDepositInvitation: () => depositInvitation,
-      getEntriesCount: () => entries.length,
-    },)
-  };
+            // Payout the winner
+            const payoutAmount = contractSeat.getAmountAllocated('IST');
+            atomicRearrange(
+                zcf,
+                harden([
+                    [contractSeat, winnerSeat, { IST: payoutAmount }],
+                ]),
+            );
+            winnerSeat.exit();
+            entries = []; // Reset the game
+        } else {
+            seat.exit();
+        }
+    }, 'Deposit IST');
+
+    return {
+        publicFacet: Far('publicFacet', {
+            makeDepositInvitation: () => depositInvitation,
+            getEntriesCount: () => entries.length,
+        },)
+    };
 };
 
 harden(start);

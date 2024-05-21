@@ -95,3 +95,34 @@ test('Make a deposit', async t => {
     t.fail(error.message);
   }
 });
+
+test('Get the number of entries', async t => {
+  try {
+    // @ts-ignore
+    const { zoe, bundle } = t.context;
+
+    const installation = await E(zoe).install(bundle);
+    const { issuer, brand, mint } = makeIssuerKit('IST');
+    const { publicFacet } = await E(zoe).startInstance(installation, { IST: issuer });
+    
+    const entriesCount = await E(publicFacet).getEntriesCount();
+    t.log(entriesCount);
+    t.is(typeof entriesCount, 'number');
+
+    const aliceAmount = AmountMath.make(brand, 100n);
+    const alicePayment = mint.mintPayment(aliceAmount);
+
+    const aliceInvitation = E(publicFacet).makeDepositInvitation();
+    const proposal = { give: { IST: aliceAmount } };
+    const payments = { IST: alicePayment };
+
+    const seat = await E(zoe).offer(aliceInvitation, proposal, payments);
+    const newEntriesCount = await E(publicFacet).getEntriesCount();
+    t.log(newEntriesCount);
+    t.is(newEntriesCount, entriesCount + 1);
+    
+  } catch (error) {
+    console.error('Error in Get the number of entries test:', error);
+    t.fail(error.message);
+  }
+});

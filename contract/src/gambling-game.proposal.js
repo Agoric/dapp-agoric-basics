@@ -9,7 +9,7 @@ const startGame = async () => {
     const { zoeService } = makeZoeKit();
 
     // Create IST issuer and mint
-    const { issuer, mint, brand } = makeIssuerKit('IST');
+    const { issuer, mint, brand } = makeIssuerKit('IST');    
 
     // Install the contract code
     const installation = await E(zoeService).install(start);
