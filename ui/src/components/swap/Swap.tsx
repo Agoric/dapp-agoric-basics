@@ -1,6 +1,6 @@
 import { type PurseJSONState, useAgoric } from '@agoric/react-components';
-import ProposalAmountsBox from './ProposalAmountsBox';
-import RecipientInput from './RecipientInput';
+import ProposalAmountsBox from '../ProposalAmountsBox';
+import RecipientInput from '../RecipientInput';
 import { queryPurses } from '../../utils/queryPurses';
 import { useContext, useEffect, useState } from 'react';
 import type { Amount, AssetKind } from '@agoric/web-components';

@@ -1,10 +1,10 @@
 import type { PurseJSONState } from '@agoric/react-components';
-import type { DisplayInfoForBrand } from '../../store/displayInfo';
+import type { DisplayInfoForBrand } from '../store/displayInfo';
 import { stringifyValue, type AssetKind } from '@agoric/web-components';
 import type { Amount } from '@agoric/ertp/src/types';
 import { isCopyBagValue } from '@agoric/ertp';
 import { useEffect, useRef, useState } from 'react';
-import { stringifyData } from '../../utils/stringify';
+import { stringifyData } from '../utils/stringify';
 
 export const PurseValue = ({
   purse,

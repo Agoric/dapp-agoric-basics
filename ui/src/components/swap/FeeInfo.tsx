@@ -1,5 +1,5 @@
 import type { Amount } from '@agoric/web-components';
-import { AmountValue } from './DisplayAmount';
+import { AmountValue } from '../DisplayAmount';
 
 type Props = {
   fee: Amount;

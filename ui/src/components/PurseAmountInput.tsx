@@ -2,7 +2,7 @@ import { AmountInput, type PurseJSONState } from '@agoric/react-components';
 import type { Amount, AssetKind } from '@agoric/web-components';
 import { useState } from 'react';
 import { CopyBagEntry, PurseValue, SetEntry } from './DisplayAmount';
-import { stringifyData } from '../../utils/stringify';
+import { stringifyData } from '../utils/stringify';
 import { makeCopyBag } from '@endo/patterns';
 
 type Props = {

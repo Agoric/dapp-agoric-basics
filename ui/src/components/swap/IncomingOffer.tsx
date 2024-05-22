@@ -1,5 +1,5 @@
 import { type Amount, AssetKind, type Brand } from '@agoric/web-components';
-import { AmountValue } from './DisplayAmount';
+import { AmountValue } from '../DisplayAmount';
 import { useAgoric } from '@agoric/react-components';
 import { useContext, useEffect, useState } from 'react';
 import { useDisplayInfo } from '../../store/displayInfo';

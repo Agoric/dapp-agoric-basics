@@ -28,16 +28,6 @@ const watchContract = (watcher: ChainStorageWatcher) => {
       });
     },
   );
-
-  watcher.watchLatest<Array<[string, unknown]>>(
-    [Kind.Data, 'published.agoricNames.vbankAsset'],
-    vbank => {
-      console.log('Got vbank', vbank);
-      useContractStore.setState({
-        vbank: fromEntries(vbank),
-      });
-    },
-  );
 };
 
 export const ContractProvider = ({ children }: PropsWithChildren) => {
