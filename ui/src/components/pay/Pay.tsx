@@ -6,6 +6,7 @@ import { useContext, useEffect, useState } from 'react';
 import type { Amount } from '@agoric/web-components';
 import { useDisplayInfo } from '../../store/displayInfo';
 import { NotificationContext } from '../../context/NotificationContext';
+import { queryIssuers } from '../../utils/queryIssuers';
 
 const Pay = () => {
   const { addNotification } = useContext(NotificationContext);
@@ -50,11 +51,21 @@ const Pay = () => {
 
   const sendOffer = async () => {
     assert(chainStorageWatcher && makeOffer);
+
+    assert(chainStorageWatcher && makeOffer);
     try {
+      const brandPetnameToIssuer = await queryIssuers(chainStorageWatcher);
+      const issuers = new Set(
+        [...myAmounts].map(amount => {
+          const { petname } = brandToDisplayInfo.get(amount.brand)!;
+          return brandPetnameToIssuer.get(petname);
+        }),
+      );
+
       const invitationSpec = {
         source: 'agoricContract',
         instancePath: ['postalService'],
-        callPipe: [['makeSendInvitation', [recipientAddr]]],
+        callPipe: [['makeSendInvitation', [recipientAddr, [...issuers]]]],
       };
 
       const gives = myAmounts.map(amount => {

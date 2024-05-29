@@ -99,10 +99,12 @@ const Swap = () => {
     try {
       const brandPetnameToIssuer = await queryIssuers(chainStorageWatcher);
       const issuers = new Set(
-        [...myAmounts, ...recipientAmounts].map(amount => {
-          const { petname } = brandToDisplayInfo.get(amount.brand)!;
-          return brandPetnameToIssuer.get(petname);
-        }),
+        [...myAmounts, ...recipientAmounts, ...(fee ? [fee] : [])].map(
+          amount => {
+            const { petname } = brandToDisplayInfo.get(amount.brand)!;
+            return brandPetnameToIssuer.get(petname);
+          },
+        ),
       );
 
       const invitationSpec = {

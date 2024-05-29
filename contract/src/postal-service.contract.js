@@ -12,6 +12,9 @@ export const meta = harden({
 // compatibility with an earlier contract metadata API
 export const { customTermsShape } = meta;
 
+let issuerNumber = 1;
+const IssuerShape = M.remotable('Issuer');
+
 /**
  * @typedef {object} PostalSvcTerms
  * @property {import('@agoric/vats').NameHub} namesByAddress
@@ -19,9 +22,8 @@ export const { customTermsShape } = meta;
 
 /** @param {ZCF<PostalSvcTerms>} zcf */
 export const start = zcf => {
-  const { namesByAddress, issuers } = zcf.getTerms();
+  const { namesByAddress } = zcf.getTerms();
   mustMatch(namesByAddress, M.remotable('namesByAddress'));
-  console.log('postal-service issuers', Object.keys(issuers));
 
   /**
    * @param {string} addr
@@ -38,9 +40,19 @@ export const start = zcf => {
    */
   const sendTo = (addr, pmt) => E(getDepositFacet(addr)).receive(pmt);
 
-  /** @param {string} recipient */
-  const makeSendInvitation = recipient => {
+  /**
+   * @param {string} recipient
+   * @param {Issuer[]} issuers
+   */
+  const makeSendInvitation = (recipient, issuers) => {
     assert.typeof(recipient, 'string');
+    mustMatch(issuers, M.arrayOf(IssuerShape));
+
+    for (const i of issuers) {
+      if (!Object.values(zcf.getTerms().issuers).includes(i)) {
+        zcf.saveIssuer(i, `Issuer${(issuerNumber += 1)}`);
+      }
+    }
 
     /** @type {OfferHandler} */
     const handleSend = async seat => {

@@ -33,13 +33,14 @@ const { entries, fromEntries, keys } = Object;
  * }} mine
  * @param {{
  *   rxAddr: string,
- *   toSend: AmountKeywordRecord;
+ *   toSend: AmountKeywordRecord,
+ *   issuers: Issuer[]
  * }} shared
  */
 export const payerPete = async (
   t,
   { wallet, queryTool },
-  { rxAddr, toSend },
+  { rxAddr, toSend, issuers },
 ) => {
   const hub = await makeAgoricNames(queryTool);
   /** @type {WellKnown} */
@@ -55,7 +56,7 @@ export const payerPete = async (
       source: 'contract',
       instance,
       publicInvitationMaker: 'makeSendInvitation',
-      invitationArgs: [rxAddr],
+      invitationArgs: [rxAddr, issuers],
     },
     proposal: { give: toSend },
   };
