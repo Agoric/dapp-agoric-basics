@@ -6,7 +6,7 @@ import { E, Far } from '@endo/far';
 import '@agoric/zoe/exported.js';
 import { atomicRearrange } from '@agoric/zoe/src/contractSupport/atomicTransfer.js';
 import '@agoric/zoe/src/contracts/exported.js';
-import { AmountShape } from '@agoric/ertp/src/typeGuards.js';
+import { AmountShape, IssuerShape } from '@agoric/ertp/src/typeGuards.js';
 import {
   InstanceHandleShape,
   InvitationShape,
@@ -48,9 +48,6 @@ export const swapWithFee = (zcf, firstSeat, secondSeat, feeSeat, feeAmount) => {
   secondSeat.exit();
   return 'success';
 };
-
-let issuerNumber = 1;
-const IssuerShape = M.remotable('Issuer');
 
 const paramTypes = harden(
   /** @type {const} */ ({
@@ -133,6 +130,8 @@ export const start = async (zcf, privateArgs, baggage) => {
       return offerNonce;
     };
   })();
+
+  let issuerNumber = 1;
 
   /**
    * @param { ZCFSeat } firstSeat

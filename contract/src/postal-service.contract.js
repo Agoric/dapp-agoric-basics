@@ -2,6 +2,7 @@
 import { E, Far } from '@endo/far';
 import { M, mustMatch } from '@endo/patterns';
 import { withdrawFromSeat } from '@agoric/zoe/src/contractSupport/zoeHelpers.js';
+import { IssuerShape } from '@agoric/ertp/src/typeGuards.js';
 
 const { keys, values } = Object;
 
@@ -12,9 +13,6 @@ export const meta = harden({
 // compatibility with an earlier contract metadata API
 export const { customTermsShape } = meta;
 
-let issuerNumber = 1;
-const IssuerShape = M.remotable('Issuer');
-
 /**
  * @typedef {object} PostalSvcTerms
  * @property {import('@agoric/vats').NameHub} namesByAddress
@@ -24,6 +22,8 @@ const IssuerShape = M.remotable('Issuer');
 export const start = zcf => {
   const { namesByAddress } = zcf.getTerms();
   mustMatch(namesByAddress, M.remotable('namesByAddress'));
+
+  let issuerNumber = 1;
 
   /**
    * @param {string} addr
