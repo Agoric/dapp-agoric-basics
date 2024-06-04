@@ -121,7 +121,7 @@ test.serial('deploy contract with core eval: postalService / send', async t => {
     behavior: startPostalService,
     entryFile: scriptRoots.postalService,
     config: {
-      options: { postalService: { bundleID, issuerNames: ['ATOM', 'Item'] } },
+      options: { postalService: { bundleID } },
     },
   });
 
@@ -160,6 +160,7 @@ test.serial('deliver payment using offer', async t => {
     toSend: {
       Pmt: amt(await agoricNames.brand.ATOM, 3n),
     },
+    issuers: [await agoricNames.issuer.ATOM],
   };
 
   const wallet = {
@@ -192,7 +193,7 @@ test('send invitation* from contract using publicFacet of postalService', async 
   const postalPowers = extract(permit, powers);
   await startPostalService(postalPowers, {
     options: {
-      postalService: { bundleID, issuerNames: ['IST', 'Invitation'] },
+      postalService: { bundleID },
     },
   });
 

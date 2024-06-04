@@ -1,6 +1,6 @@
 import { type PurseJSONState, useAgoric } from '@agoric/react-components';
-import ProposalAmountsBox from './ProposalAmountsBox';
-import RecipientInput from './RecipientInput';
+import ProposalAmountsBox from '../ProposalAmountsBox';
+import RecipientInput from '../RecipientInput';
 import { queryPurses } from '../../utils/queryPurses';
 import { useContext, useEffect, useState } from 'react';
 import type { Amount, AssetKind } from '@agoric/web-components';
@@ -99,10 +99,12 @@ const Swap = () => {
     try {
       const brandPetnameToIssuer = await queryIssuers(chainStorageWatcher);
       const issuers = new Set(
-        [...myAmounts, ...recipientAmounts].map(amount => {
-          const { petname } = brandToDisplayInfo.get(amount.brand)!;
-          return brandPetnameToIssuer.get(petname);
-        }),
+        [...myAmounts, ...recipientAmounts, ...(fee ? [fee] : [])].map(
+          amount => {
+            const { petname } = brandToDisplayInfo.get(amount.brand)!;
+            return brandPetnameToIssuer.get(petname);
+          },
+        ),
       );
 
       const invitationSpec = {

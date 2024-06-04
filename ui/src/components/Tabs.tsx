@@ -4,6 +4,7 @@ import { TabWrapper } from './TabWrapper';
 import { Notifications } from './Notifications';
 import { NotificationContext } from '../context/NotificationContext';
 import Swap from './swap/Swap';
+import Pay from './pay/Pay';
 
 // notification related types
 const dynamicToastChildStatuses = [
@@ -65,7 +66,7 @@ const Tabs = () => {
             activeTab={activeTab}
             handleTabClick={handleTabClick}
           >
-            <div>TBD</div>
+            <Pay />
           </TabWrapper>
           <TabWrapper
             tab="Vote"
