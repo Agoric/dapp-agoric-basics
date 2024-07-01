@@ -22,6 +22,7 @@ import { permit as postalServicePermit } from './src/postal-service.proposal.js'
 import { permit as swapPermit } from './src/swaparoo.proposal.js';
 import { permit as sellPermit } from './src/sell-concert-tickets.proposal.js';
 import { permit as boardAuxPermit } from './src/platform-goals/board-aux.core.js';
+import { permit as gamblingGamePermit } from './src/gambling-game.proposal.js';
 
 /**
  * @param {*} opts
@@ -88,6 +89,10 @@ const config = [
   config1({
     name: 'postal-service',
     permit: postalServicePermit,
+  }),
+  config1({
+    name: 'gambling-game',
+    permit: gamblingGamePermit,
   }),
 ];
 export default config;

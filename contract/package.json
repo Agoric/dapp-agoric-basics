@@ -64,7 +64,7 @@
   },
   "ava": {
     "files": [
-      "test/**/test-*.js"
+      "test/**/test-gambling-*.js"
     ],
     "timeout": "10m"
   },

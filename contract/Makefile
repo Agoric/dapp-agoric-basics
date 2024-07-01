@@ -60,7 +60,7 @@ vote:
 instance-q:
 	agd query vstorage data published.agoricNames.instance -o json
 
-start-contract: start-contract-mint start-contract-swap start-contract-pay
+start-contract: start-contract-mint start-contract-swap start-contract-pay start-contract-gambling-game
 
 start-contract-mint:
 	yarn node scripts/deploy-contract.js \
@@ -77,6 +77,11 @@ start-contract-pay:
 	yarn node scripts/deploy-contract.js \
 		--install src/postal-service.contract.js \
 		--eval src/postal-service.proposal.js
+
+start-contract-gambling-game:
+	yarn node scripts/deploy-contract.js \
+		--install src/gambling-game.contract.js \
+		--eval src/gambling-game.proposal.js
 
 # bundle-X.json.installed show that bundle-X.json was installed
 # see also e2e-tools.js
