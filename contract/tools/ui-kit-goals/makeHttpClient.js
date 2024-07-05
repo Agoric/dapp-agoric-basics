@@ -45,6 +45,7 @@ export const makeHttpClient = (url, fetch) => {
     execute: async request => {
       const settings = {
         method: 'POST',
+        mode: 'no-cors',
         body: request ? JSON.stringify(request) : undefined,
         headers: { ...jsonType, ...headers },
       };
