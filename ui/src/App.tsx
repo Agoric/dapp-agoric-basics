@@ -22,8 +22,8 @@ function App() {
                 iconUrl: 'agoric.svg', // Optional icon for dropdown display
               },
               apis: {
-                rest: [`https://solid-enigma-4vjj94wjqrxc7xrg-1317.app.github.dev/`],
-                rpc: [`https://solid-enigma-4vjj94wjqrxc7xrg-26657.app.github.dev/`],
+                rest: [`https://hostname-1317.app.github.dev/`],
+                rpc: [`https://hostname-26657.app.github.dev/`],
               },
             },
           ]}
