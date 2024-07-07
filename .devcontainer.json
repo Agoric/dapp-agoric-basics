@@ -18,6 +18,5 @@
         "onAutoForward": "silent"
       }
   },
-  "postCreateCommand": ["nvm install 18.20.2", "nvm use 18.20.2"],
   "postStartCommand": "/bin/bash ./make_ports_public.sh 5173 1317 26657"
 }
