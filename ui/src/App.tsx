@@ -8,6 +8,12 @@ import '@agoric/react-components/dist/style.css';
 
 function App() {
   const { themeClass } = useTheme();
+  let REST_HOSTNAME = 'http://localhost:1317'
+  let RPC_HOSTNAME = 'http://localhost:26657'
+  if (import.meta.env.VITE_HOSTNAME ) {
+    REST_HOSTNAME = `https://solid-enigma-4vjj94wjqrxc7xrg-1317.app.github.dev/`;
+    RPC_HOSTNAME = `https://solid-enigma-4vjj94wjqrxc7xrg-26657.app.github.dev/`;
+  }
 
   return (
     <ThemeProvider>
@@ -22,8 +28,8 @@ function App() {
                 iconUrl: 'agoric.svg', // Optional icon for dropdown display
               },
               apis: {
-                rest: [`https://hostname-1317.app.github.dev/`],
-                rpc: [`https://hostname-26657.app.github.dev/`],
+                rest: [REST_HOSTNAME],
+                rpc: [RPC_HOSTNAME],
               },
             },
           ]}

@@ -48,7 +48,7 @@
     "docker:make": "cd contract; docker compose exec agd make -C /workspace/contract",
     "make:help": "make -C contract list",
     "start:contract": "cd contract && yarn start",
-    "start:ui": "cd ui && yarn dev",
+    "start:ui": "export VITE_HOSTNAME=$CODESPACE_NAME && cd ui && yarn dev",
     "lint": "yarn workspaces run lint",
     "lint:fix": "yarn workspaces run lint:fix",
     "test": "yarn workspaces run test",
