@@ -11,7 +11,7 @@ function App() {
   let REST_HOSTNAME = 'http://localhost:1317';
   let RPC_HOSTNAME = 'http://localhost:26657';
 
-  let codeSpaceHostName = import.meta.env.VITE_HOSTNAME;
+  const codeSpaceHostName = import.meta.env.VITE_HOSTNAME;
 
   if (codeSpaceHostName) {
     REST_HOSTNAME = `https://${codeSpaceHostName}-1317.app.github.dev/`;
