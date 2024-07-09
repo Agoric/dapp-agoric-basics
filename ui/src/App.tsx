@@ -14,8 +14,8 @@ function App() {
   const codeSpaceHostName = import.meta.env.VITE_HOSTNAME;
 
   if (codeSpaceHostName) {
-    REST_HOSTNAME = `https://${codeSpaceHostName}-1317.app.github.dev/`;
-    RPC_HOSTNAME = `https://${codeSpaceHostName}-26657.app.github.dev/`;
+    REST_HOSTNAME = `https://${codeSpaceHostName}-1317.app.github.dev`;
+    RPC_HOSTNAME = `https://${codeSpaceHostName}-26657.app.github.dev`;
   }
 
   return (
