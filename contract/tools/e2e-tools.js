@@ -550,10 +550,20 @@ export const makeE2ETools = (
       throw Error('@@TODO: agoric run style');
     }
     const { name, title = name, description = title, entryFile, permit } = info;
+
     const eval0 = {
       code: `bundles/deploy-${name}.js`,
       permit: `bundles/deploy-${name}-permit.json`,
     };
+    const loadResult = await deployBundleCache.load(
+      entryFile,
+      name,
+      console.log,
+    );
+    console.log('loadResult', loadResult);
+    throw 1;
+    await writeFile(eval0.code, loadResult);
+    await writeFile(eval0.permit, JSON.stringify(permit, null, 2));
     await null;
     try {
       const todo = await runMake(`${eval0.code}.done`);
@@ -574,9 +584,6 @@ export const makeE2ETools = (
     const detail = { evals: [eval0], title, description };
 
     // await runPackageScript('build:deployer', entryFile);
-    await bundleCache.load(eval0.code, name, console.log);
-
-    await writeFile(eval0.permit, JSON.stringify(permit, null, 2));
 
     const proposal = await runCoreEval(t, detail, { agd, blockTool });
     await writeFile(

@@ -56,7 +56,7 @@
     "@agoric/vat-data": "0.5.3-u14.0",
     "@agoric/vats": "0.15.2-u14.0",
     "@agoric/zoe": "^0.26.3-u14.0",
-    "@endo/bundle-source": "^2.8.0",
+    "@endo/bundle-source": "https://github.com/endojs/endo.git#7277ef6ed47cc9bff0c1df5808c22cc17b4444ad2e25552740f3b7fdce5c5a81",
     "@endo/far": "^0.2.22",
     "@endo/init": "^0.5.60",
     "@endo/marshal": "^0.8.9",

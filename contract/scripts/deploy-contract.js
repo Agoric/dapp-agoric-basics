@@ -58,6 +58,11 @@ const mockExecutionContext = () => {
 };
 
 //
+// const redactImportDecls = txt =>
+// txt.replace(/^\s*import\b\s*(.*)/gm, '// XMPORT: $1');
+
+const hideImportExpr = txt => txt.replace(/\bimport\(/g, 'XMPORT(');
+
 const generateDeployArtifact = async (path, name, { readFile, writeFile }) => {
   // readtemplate
   const template = await readFile('src/auto-deploy.template.js', 'utf-8');
@@ -65,7 +70,7 @@ const generateDeployArtifact = async (path, name, { readFile, writeFile }) => {
   console.log(process.cwd());
   console.log(name);
   // string replace for contract name
-  const finalFile = template.replace('_CONTRACT_NAME_', name);
+  const finalFile = hideImportExpr(template.replace('_CONTRACT_NAME_', name));
 
   //write result to bundles/deploy-name.js
   return writeFile(`bundles/deploy-${name}.js`, finalFile);
@@ -121,7 +126,7 @@ const main = async (bundleDir = 'bundles') => {
       const name = stem(contractEntry);
       await tools.installBundles({ [name]: contractEntry }, progress);
 
-      const generatedCoreEval = `bundles/deploy-${name}.js`;
+      const generatedCoreEval = `bundles/deploy-${name}-entry.js`;
       // TODO: fix
       await generateDeployArtifact(generatedCoreEval, name, fsp);
       console.log({ contractEntry });

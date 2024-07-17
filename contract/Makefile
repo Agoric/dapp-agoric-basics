@@ -68,6 +68,7 @@ start-contract-mint:
 		--eval src/platform-goals/board-aux.core.js \
 		--eval src/sell-concert-tickets.proposal.js
 
+
 deploy-contract-mint:
 	yarn node scripts/deploy-contract.js \
 		--deploy ./src/sell-concert-tickets.contract.js
@@ -101,3 +102,6 @@ bundles/deploy-swaparoo.js: src/swaparoo.proposal.js
 
 clean:
 	@rm -rf bundles/
+
+patch-bn: 
+	cp ./patch-bn.js ../node_modules/bn.js/lib/bn.js
