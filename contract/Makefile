@@ -68,6 +68,10 @@ start-contract-mint:
 		--eval src/platform-goals/board-aux.core.js \
 		--eval src/sell-concert-tickets.proposal.js
 
+deploy-contract-mint:
+	yarn node scripts/deploy-contract.js \
+		--deploy ./src/sell-concert-tickets.contract.js
+
 start-contract-swap:
 	yarn node scripts/deploy-contract.js \
 		--install src/swaparoo.contract.js \

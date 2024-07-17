@@ -423,6 +423,7 @@ const runCoreEval = async (
  * @param {string} [io.apiAddress]
  * @param {typeof import('fs/promises').writeFile} io.writeFile
  * @param {(...parts: string[]) => string} [io.join]
+ * @param {import('../test/mintStable.js').BundleCache} [io.deployBundleCache]
  */
 export const makeE2ETools = (
   t,
@@ -437,6 +438,7 @@ export const makeE2ETools = (
     rpcAddress = 'http://localhost:26657',
     apiAddress = 'http://localhost:1317',
     join = (...parts) => parts.join('/'),
+    deployBundleCache = bundleCache, // XXX is this a good default arg name
   },
 ) => {
   const agd = makeAgd({ execFileSync }).withOpts({ keyringBackend: 'test' });
@@ -530,12 +532,14 @@ export const makeE2ETools = (
     return harden(bundles);
   };
 
+  /** @import {BootstrapManifestPermit} from "@agoric/vats/src/core/lib-boot.js" */
   /**
    * @param {{
    *   name: string,
    *   title?: string,
    *   description?: string,
    *   config?: unknown,
+   *   permit?: BootstrapManifestPermit
    * } & {
    *   behavior?: Function,
    * } & ({ builderPath: string } | { entryFile: string })
@@ -545,7 +549,7 @@ export const makeE2ETools = (
     if ('builderPath' in info) {
       throw Error('@@TODO: agoric run style');
     }
-    const { name, title = name, description = title, entryFile } = info;
+    const { name, title = name, description = title, entryFile, permit } = info;
     const eval0 = {
       code: `bundles/deploy-${name}.js`,
       permit: `bundles/deploy-${name}-permit.json`,
@@ -568,7 +572,12 @@ export const makeE2ETools = (
       // not yet bundled
     }
     const detail = { evals: [eval0], title, description };
-    await runPackageScript('build:deployer', entryFile);
+
+    // await runPackageScript('build:deployer', entryFile);
+    await bundleCache.load(eval0.code, name, console.log);
+
+    await writeFile(eval0.permit, JSON.stringify(permit, null, 2));
+
     const proposal = await runCoreEval(t, detail, { agd, blockTool });
     await writeFile(
       `${eval0.code}.done`,
