@@ -8,6 +8,16 @@ import '@agoric/react-components/dist/style.css';
 
 function App() {
   const { themeClass } = useTheme();
+  let REST_HOSTNAME = 'http://localhost:1317';
+  let RPC_HOSTNAME = 'http://localhost:26657';
+
+  const codeSpaceHostName = import.meta.env.VITE_HOSTNAME;
+  const codeSpaceDomain = import.meta.env.VITE_GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN;
+
+  if (codeSpaceHostName) {
+    REST_HOSTNAME = `https://${codeSpaceHostName}-1317.${codeSpaceDomain}`;
+    RPC_HOSTNAME = `https://${codeSpaceHostName}-26657.${codeSpaceDomain}`;
+  }
 
   return (
     <ThemeProvider>
@@ -22,8 +32,8 @@ function App() {
                 iconUrl: 'agoric.svg', // Optional icon for dropdown display
               },
               apis: {
-                rest: ['http://localhost:1317'],
-                rpc: ['http://localhost:26657'],
+                rest: [REST_HOSTNAME],
+                rpc: [RPC_HOSTNAME],
               },
             },
           ]}
