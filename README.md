@@ -1,6 +1,7 @@
 # Agoric Dapp Starter: Agoric Basics
 
 This is a basic Agoric Dapp that contains three smart contracts `postal-service`, `sell-concert-tickets`, and `swaparoo` demonstrating different scenarios which can be implemented easily using Agoric SDK. There is also a UI for `sell-concert-tickets` contract that a user can use to buy three different types of concert tickets and pay through a wallet extension in the browser. 
+The following instrucions provide a guide to setup an environment to try `dapp-agoric-basics` on your local machine. If you want to try it in cloud environment without any installations or downloads, you can [try it in github codespaces](README-code-space.md).
 
 ## Getting started
 
