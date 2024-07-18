@@ -18,5 +18,5 @@
         "onAutoForward": "silent"
       }
   },
-  "postStartCommand": "bash -i -c 'nvm install 18.20 && nvm alias default 18.20' && bash ./make_ports_public.sh 5173 1317 26657"
+  // "postStartCommand": "bash -i -c 'nvm install 18.20 && nvm alias default 18.20' && bash ./make_ports_public.sh 5173 1317 26657"
 }
