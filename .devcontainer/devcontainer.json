@@ -1,0 +1,39 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/javascript-node
+{
+	"name": "Node.js",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"image": "mcr.microsoft.com/devcontainers/javascript-node:1-18-bookworm",
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {},
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	"forwardPorts": [5173, 1317, 26657, 26656],
+	"portsAttributes": {
+      "5173": {
+        "label": "UI",
+        "onAutoForward": "openBrowser"
+      },
+      "1317": {
+        "label": "API",
+        "onAutoForward": "silent"
+      },
+      "26657": {
+          "label": "RPC",
+          "onAutoForward": "silent"
+      },
+      "26656": {
+        "label": "P2P",
+        "onAutoForward": "silent"
+      }
+	},
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "bash ./make_ports_public.sh 5173 1317 26657 && yarn install"
+
+	// Configure tool-specific properties.
+	// "customizations": {},
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}
