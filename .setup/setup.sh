@@ -1,2 +1,2 @@
-./make_ports_public.sh 5173 1317 26657
+../make_ports_public.sh 5173 1317 26657
 
