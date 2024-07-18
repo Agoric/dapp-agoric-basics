@@ -29,8 +29,8 @@
       }
 	},
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "bash ./make_ports_public.sh 5173 1317 26657 && yarn install",
-"postStartCommand": "bash ./make_ports_public.sh 5173 1317 26657 && yarn install",
+	"postCreateCommand": "bash /workspaces/dapp-agoric-basics/make_ports_public.sh 26657 5173 1317",
+"postStartCommand": "/workspaces/dapp-agoric-basics/make_ports_public.sh 26656 5173 1317 26657 && yarn install",
 "features": {
 	"ghcr.io/devcontainers/features/docker-in-docker:2": {}
 }
