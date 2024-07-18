@@ -29,7 +29,8 @@ const filterBadStatus = res => {
  * @returns {import('@cosmjs/tendermint-rpc').RpcClient}
  */
 export const makeHttpClient = (url, fetch) => {
-  const headers = {'Access-Control-Allow-Origin': '*'
+  const headers = { // 'Access-Control-Allow-Origin': '*',
+    'X-Github-Token: TOKEN': import.meta.env.VITE_GITHUB_TOKEN
         }; // XXX needed?
 
   // based on cosmjs 0.30.1:
@@ -81,7 +82,8 @@ export const makeAPI = (apiAddress, { fetch }) => {
       keepalive: true,
       headers: {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
+        // 'Access-Control-Allow-Origin': '*',
+        'X-Github-Token: TOKEN': import.meta.env.VITE_GITHUB_TOKEN,
         ...options.headers,
       },
     };
