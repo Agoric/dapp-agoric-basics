@@ -19,9 +19,9 @@ demo-agd-1  | 2023-12-27T04:08:08.407Z block-manager: block 1005 commit
 ```
 - run `yarn start:contract` to start the contracts.
 - run `yarn start:ui` to start `sell-concert-tickets` contract UI.
-- open a browser and navigate to `localhost:5173` to interact with the contract via UI.
+- open a browser and navigate to [localhost:5173](http://localhost:5173) to interact with the contract via UI.
 
-To follow more detailed tutorial, go [here](https://docs.agoric.com/guides/getting-started/tutorial-dapp-agoric-basics.html).
+See a [more detailed tutorial](https://docs.agoric.com/guides/getting-started/tutorial-dapp-agoric-basics.html).
 
 ## Testing
 
@@ -38,12 +38,11 @@ Here are the step-by-step instructions to run/work on `dapp-agoric-basic` in git
 2. Click on ![Green `<> Code` button](https://docs.github.com/assets/cb-13128/mw-1440/images/help/repository/code-button.webp)
 3. Click on `Codespaces` tab and create a new Codespace. If you are already using Codespaces on current repo then click the "+" button on top right of the `Codespaces` tab to create a new one.
 4. You should see a VSCode environment load in your browser followed by a setup. This should take a few minutes.
-5. Once it's done do `yarn install` in the terminal.
-6. Do `yarn start:docker` followed by `yarn docker:logs` - kill it after you see `begin`/`commit`.
-7.  Do `yarn start:contract`.
-8. Do `yarn start:ui` - a pop-up should appear in bottom right. Click open in browser if needed.
-9. DApp should be load in your browser.
-10. Connect your Wallet and interact with DApp as usual.
+5. Do `yarn start:docker` followed by `yarn docker:logs` - kill it after you see `begin`/`commit`.
+6.  Do `yarn start:contract`.
+7. Do `yarn start:ui` - a pop-up should appear in bottom right. Click open in browser if needed.
+8. DApp should be load in your browser.
+9. Connect your Wallet and interact with DApp as usual.
 
 ## Contributing
 See [CONTRIBUTING](./CONTRIBUTING.md) for more on contributions.
