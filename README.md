@@ -19,7 +19,7 @@ demo-agd-1  | 2023-12-27T04:08:08.407Z block-manager: block 1005 commit
 ```
 - run `yarn start:contract` to start the contracts.
 - run `yarn start:ui` to start `sell-concert-tickets` contract UI.
-- open a browser and navigate to `localhost:5173` to interact with the contract via UI.
+- open a browser and navigate to [localhost:5173](http://localhost:5173) to interact with the contract via UI.
 
 See a [more detailed tutorial](https://docs.agoric.com/guides/getting-started/tutorial-dapp-agoric-basics.html).
 
