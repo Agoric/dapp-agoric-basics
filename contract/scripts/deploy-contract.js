@@ -17,6 +17,7 @@ const options = {
   eval: { type: 'string', multiple: true },
   service: { type: 'string', default: 'agd' },
   workdir: { type: 'string', default: '/workspace/contract' },
+  deploy: { type: 'string', multiple: true },
 };
 /**
  * @typedef {{
@@ -25,10 +26,12 @@ const options = {
  *   eval?: string[],
  *   service: string,
  *   workdir: string,
+ *   deploy: string[],
  * }} DeployOptions
  */
 
-const Usage = `
+//TODo make help test
+const Usage = ` 
 deploy-contract [options] [--install <contract>] [--eval <proposal>]...
 
 Options:
@@ -54,6 +57,25 @@ const mockExecutionContext = () => {
   };
 };
 
+//
+// const redactImportDecls = txt =>
+// txt.replace(/^\s*import\b\s*(.*)/gm, '// XMPORT: $1');
+
+const hideImportExpr = txt => txt.replace(/\bimport\(/g, 'XMPORT(');
+
+const generateDeployArtifact = async (path, name, { readFile, writeFile }) => {
+  // readtemplate
+  const template = await readFile('src/auto-deploy.template.js', 'utf-8');
+  console.log(template);
+  console.log(process.cwd());
+  console.log(name);
+  // string replace for contract name
+  const finalFile = hideImportExpr(template.replace('_CONTRACT_NAME_', name));
+
+  //write result to bundles/deploy-name.js
+  return writeFile(`bundles/deploy-${name}.js`, finalFile);
+};
+
 const main = async (bundleDir = 'bundles') => {
   const { argv } = process;
   const { writeFile } = fsp;
@@ -61,6 +83,11 @@ const main = async (bundleDir = 'bundles') => {
   const progress = (...args) => console.warn(...args); // stderr
 
   const bundleCache = await makeNodeBundleCache(bundleDir, {}, s => import(s));
+  const deployBundleCache = await makeNodeBundleCache(
+    bundleDir,
+    { format: 'endoScript' },
+    s => import(s),
+  );
 
   /** @type {{ values: DeployOptions }} */
   // @ts-expect-error options config ensures type
@@ -88,9 +115,35 @@ const main = async (bundleDir = 'bundles') => {
     setTimeout,
     writeFile,
     bundleDir,
+    deployBundleCache,
   });
 
   const stem = path => basename(path).replace(/\..*/, '');
+
+  // deploy in one step
+  if (flags.deploy) {
+    for await (const contractEntry of flags.deploy) {
+      const name = stem(contractEntry);
+      await tools.installBundles({ [name]: contractEntry }, progress);
+
+      const generatedCoreEval = `bundles/deploy-${name}-entry.js`;
+      // TODO: fix
+      await generateDeployArtifact(generatedCoreEval, name, fsp);
+      console.log({ contractEntry });
+      // handle paths without .
+      const { meta } = await import(`../${contractEntry}`);
+      console.log('meta: ', meta);
+
+      const result = await tools.runCoreEval({
+        name,
+        entryFile: generatedCoreEval, // put core eval
+        permit: meta.permit,
+      });
+
+      progress(result);
+    }
+    return;
+  }
 
   if (flags.install) {
     const name = stem(flags.install);
