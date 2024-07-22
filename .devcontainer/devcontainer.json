@@ -31,5 +31,7 @@
   "features": {
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
 		"ghcr.io/devcontainers/features/github-cli:1": {}
-	}
+	},
+  // TODO: The image address in the line below needs to be updated
+  "postStartCommand": "yarn install && docker run -d -v '.:/workspace' --platform linux/amd64 -p 26656:26656 -p 26657:26657 -p 1317:1317 mudassirshabbir/agoric:mc2 && yarn start:ui"
 }
