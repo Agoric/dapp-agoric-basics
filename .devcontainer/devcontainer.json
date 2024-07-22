@@ -3,7 +3,8 @@
 {
 	"name": "Node+GH+DinD",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mudassirshabbir/dab:basic",
+	// "image": "mudassirshabbir/dab:basic",
+  "image": "mudassirshabbir/dab:updated",
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [5173, 1317, 26657, 26656],
