@@ -27,5 +27,9 @@
       }
 	},
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "bash /workspaces/dapp-agoric-basics/make_ports_public.sh 26657 5173 1317"
+	"postCreateCommand": "bash /workspaces/dapp-agoric-basics/make_ports_public.sh 26657 5173 1317",
+  "features": {
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
+		"ghcr.io/devcontainers/features/github-cli:1": {}
+	}
 }
