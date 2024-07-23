@@ -11,4 +11,4 @@ EXPOSE 1317
 
 
 # Set the entrypoint or command if necessary (adjust as needed)
-ENTRYPOINT ["/bin/bash /workspaces/dapp-agoric-basics/make_ports_public.sh 26657 5173 1317"]
+ENTRYPOINT ["/workspaces/dapp-agoric-basics/entrypoint.sh"]
