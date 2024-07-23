@@ -1,11 +1,20 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/javascript-node
 {
-	"name": "Node+GH+DinD",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	// "image": "mudassirshabbir/dab:basic",
-  "image": "mudassirshabbir/dab:updated",
-
+  "name": "Node+GH+DinD",
+  "build": {
+      "dockerfile": "Dockerfile",
+      "context": ".."
+  },
+  "runArgs": [
+      "--privileged",
+      "--platform", "linux/amd64"
+  ],
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+  "mounts": [
+      "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+  ],
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	"forwardPorts": [5173, 1317, 26657, 26656],
 	"portsAttributes": {
@@ -27,11 +36,11 @@
       }
 	},
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "bash /workspaces/dapp-agoric-basics/make_ports_public.sh 26657 5173 1317",
-  "features": {
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
-		"ghcr.io/devcontainers/features/github-cli:1": {}
-	},
-  // TODO: The image address in the line below needs to be updated
-  "postStartCommand": "yarn install && docker run -d -v '.:/workspace' --platform linux/amd64 -p 26656:26656 -p 26657:26657 -p 1317:1317 mudassirshabbir/agoric:mc2 && yarn start:ui"
+	// "postCreateCommand": "bash /workspaces/dapp-agoric-basics/make_ports_public.sh 26657 5173 1317",
+  // "features": {
+	// 	"ghcr.io/devcontainers/features/docker-in-docker:2": {},
+	// 	"ghcr.io/devcontainers/features/github-cli:1": {}
+	// },
+  // // TODO: The image address in the line below needs to be updated
+  // "postStartCommand": "yarn install && docker run -d -v '.:/workspace' --platform linux/amd64 -p 26656:26656 -p 26657:26657 -p 1317:1317 mudassirshabbir/agoric:mc2 && yarn start:ui"
 }
