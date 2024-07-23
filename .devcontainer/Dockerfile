@@ -8,7 +8,10 @@ WORKDIR /workspace
 EXPOSE 26656
 EXPOSE 26657
 EXPOSE 1317
+EXPOSE 5173
 
-
+RUN "/workspaces/dapp-agoric-basics/entrypoint.sh"
 # Set the entrypoint or command if necessary (adjust as needed)
 ENTRYPOINT ["/workspaces/dapp-agoric-basics/entrypoint.sh"]
+
+CMD ["/bin/bash"]
