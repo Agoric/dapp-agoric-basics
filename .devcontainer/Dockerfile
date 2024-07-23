@@ -10,6 +10,7 @@ EXPOSE 26657
 EXPOSE 1317
 EXPOSE 5173
 
+RUN /usr/scripts/entrypoint.sh
 # Set the entrypoint or command if necessary (adjust as needed)
 ENTRYPOINT ["/usr/scripts/entrypoint.sh"]
 
