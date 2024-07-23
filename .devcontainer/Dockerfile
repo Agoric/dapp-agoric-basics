@@ -10,8 +10,7 @@ EXPOSE 26657
 EXPOSE 1317
 EXPOSE 5173
 
-RUN entrypoint.sh
 # Set the entrypoint or command if necessary (adjust as needed)
-ENTRYPOINT ["/workspace/entrypoint.sh"]
+ENTRYPOINT ["/usr/scripts/entrypoint.sh"]
 
 CMD ["/bin/bash"]
