@@ -10,6 +10,6 @@ EXPOSE 5173
 # Set the NODE_PATH environment variable
 ENV NODE_PATH=/usr/src/cache
 # Set the entrypoint or command if necessary (adjust as needed)
-ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT ["/bin/bash -c"]
 
-CMD "/bin/bash"
+CMD "/bin/bash -c"
