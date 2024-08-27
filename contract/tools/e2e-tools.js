@@ -3,11 +3,13 @@
 import { E, Far } from '@endo/far';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Nat } from '@endo/nat';
+import { exec } from 'child_process';
 import { flags, makeAgd } from './agd-lib.js';
 import { makeHttpClient, makeAPI } from './ui-kit-goals/makeHttpClient.js';
 import { dedup, makeQueryKit, poll } from './ui-kit-goals/queryKit.js';
 import { getBundleId } from './bundle-tools.js';
 import { makeVStorage } from './ui-kit-goals/batchQuery.js';
+
 
 const BLD = '000000ubld';
 
@@ -102,6 +104,13 @@ const installBundle = async (fullPath, opts) => {
   const { id, agd, delay, follow, progress = console.log } = opts;
   const { chainId = 'agoriclocal', installer = 'user1' } = opts;
   const from = await agd.lookup(installer);
+  const containerId = 'e299b5304da0'; // Replace with your container ID
+  const localPath = './bundles'; // Replace with the local file or directory path
+  const containerPath = '/workspace/contract/'; // Replace with the path in the container
+
+  const command = `docker cp ${localPath} ${containerId}:${containerPath}`;
+  exec(command);
+
 
   const explainDelay = (ms, info) => {
     progress('follow', { ...info, delay: ms / 1000 }, '...');
