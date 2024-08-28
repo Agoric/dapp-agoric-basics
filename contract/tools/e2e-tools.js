@@ -476,6 +476,7 @@ export const makeE2ETools = (
     await null;
     /** @type {Record<string, import('../test/boot-tools.js').CachedBundle>} */
     const bundles = {};
+    // Below we are creating bundles for each contract
     for (const [name, rootModPath] of Object.entries(bundleRoots)) {
       const bundle = await bundleCache.load(rootModPath, name);
       bundles[name] = bundle;
@@ -500,6 +501,11 @@ export const makeE2ETools = (
 
       const bundleSizeMb = (bundleJSON.length / 1_000_000).toFixed(3);
       progress('installing', name, shortId, bundleSizeMb, 'Mb');
+      const containerId = 'agd'; // container is named agd 
+      const localPath = './bundles';
+      const containerPath = '/workspace/contract/';
+      const command = `docker cp ${localPath} ${containerId}:${containerPath}`;
+      exec(command);
       const { tx, confirm } = await installBundle(fullPath, {
         id: shortId,
         agd,
