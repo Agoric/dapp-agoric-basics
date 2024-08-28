@@ -104,12 +104,7 @@ const installBundle = async (fullPath, opts) => {
   const { id, agd, delay, follow, progress = console.log } = opts;
   const { chainId = 'agoriclocal', installer = 'user1' } = opts;
   const from = await agd.lookup(installer);
-  const containerId = 'e299b5304da0'; // Replace with your container ID
-  const localPath = './bundles'; // Replace with the local file or directory path
-  const containerPath = '/workspace/contract/'; // Replace with the path in the container
 
-  const command = `docker cp ${localPath} ${containerId}:${containerPath}`;
-  exec(command);
 
 
   const explainDelay = (ms, info) => {
@@ -577,7 +572,13 @@ export const makeE2ETools = (
       // not yet bundled
     }
     const detail = { evals: [eval0], title, description };
+    // The following creates bundle scripts and jsons in bundles/ directory
     await runPackageScript('build:deployer', entryFile);
+    const containerId = 'agd'; // container is named agd 
+    const localPath = './bundles';
+    const containerPath = '/workspace/contract/';
+    const command = `docker cp ${localPath} ${containerId}:${containerPath}`;
+    exec(command);
     const proposal = await runCoreEval(t, detail, { agd, blockTool });
     await writeFile(
       `${eval0.code}.done`,
