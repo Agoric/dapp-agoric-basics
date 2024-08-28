@@ -12,8 +12,6 @@ services:
     environment:
       DEST: 1
       DEBUG: "SwingSet:ls,SwingSet:vat"
-    volumes:
-      - ./contract/Makefile:/workspace/contract/Makefile
-      - ./contract/tools:/workspace/contract/tools
+    volumes:      
       - ./contract/scripts:/workspace/contract/scripts
     entrypoint: /workspace/contract/scripts/run-chain.sh
