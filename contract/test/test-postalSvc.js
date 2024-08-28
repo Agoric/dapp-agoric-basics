@@ -52,9 +52,9 @@ const makeTestContext = async t => {
   /** @type {import('../tools/agd-lib.js').ExecSync} */
   const dockerExec = (file, args, opts = { encoding: 'utf-8' }) => {
     const workdir = '/workspace/contract';
-    const execArgs = ['compose', 'exec', '--workdir', workdir, 'agd'];
+    const execArgs = ['exec', '--workdir', workdir, 'agd'];
     opts.verbose &&
-      console.log('docker compose exec', JSON.stringify([file, ...args]));
+      console.log('docker exec', JSON.stringify([file, ...args]));
     return execFileSync('docker', [...execArgs, file, ...args], opts);
   };
 

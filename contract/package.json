@@ -7,8 +7,8 @@
   "scripts": {
     "start:docker": "docker compose up -d",
     "docker:logs": "docker compose logs --tail 200 -f",
-    "docker:bash": "docker compose exec agd bash",
-    "docker:make": "docker compose exec agd make -C /workspace/contract",
+    "docker:bash": "docker exec agd bash",
+    "docker:make": "docker exec agd make -C /workspace/contract",
     "make:help": "make list",
     "docker:copy-Makefile": "docker exec agd mkdir -p /workspace/contract; docker cp Makefile agd:/workspace/contract/",
     "docker:copy-scripts": "docker cp scripts agd:/workspace/contract/",
