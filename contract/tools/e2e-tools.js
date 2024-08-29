@@ -503,7 +503,7 @@ export const makeE2ETools = (
       progress('installing', name, shortId, bundleSizeMb, 'Mb');
       const containerId = 'agd'; // container is named agd 
       const localPath = './bundles';
-      const containerPath = '/workspace/contract/';
+      const containerPath = '/ws-agoric-basics/contract/';
       const command = `docker cp ${localPath} ${containerId}:${containerPath}`;
       exec(command);
       const { tx, confirm } = await installBundle(fullPath, {
@@ -582,7 +582,7 @@ export const makeE2ETools = (
     await runPackageScript('build:deployer', entryFile);
     const containerId = 'agd'; // container is named agd 
     const localPath = './bundles';
-    const containerPath = '/workspace/contract/';
+    const containerPath = '/ws-agoric-basics/contract/';
     const command = `docker cp ${localPath} ${containerId}:${containerPath}`;
     exec(command);
     const proposal = await runCoreEval(t, detail, { agd, blockTool });

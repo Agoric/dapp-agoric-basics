@@ -16,7 +16,7 @@ const options = {
   install: { type: 'string' },
   eval: { type: 'string', multiple: true },
   service: { type: 'string', default: 'agd' },
-  workdir: { type: 'string', default: '/workspace/contract' },
+  workdir: { type: 'string', default: '/ws-agoric-basics/contract' },
 };
 /**
  * @typedef {{
