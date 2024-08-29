@@ -41,11 +41,11 @@ waitForBlock() (
 
 approveProposals() {
     while true; do
-        proposals=$(make -s -C /workspace/contract gov-voting-q 2>/dev/null)
+        proposals=$(make -s -C /ws-agoric-basics/contract gov-voting-q 2>/dev/null)
         exit_status=$?
         if [ $exit_status -eq 0 ]; then
             echo "Approving proposals: $proposals"
-            printf $proposals | xargs -I {} make -s -C /workspace/contract vote PROPOSAL={}
+            printf $proposals | xargs -I {} make -s -C /ws-agoric-basics/contract vote PROPOSAL={}
         else
             echo "No proposals to approve, continuing..."
         fi
@@ -63,7 +63,7 @@ waitForBlock 2
 # Approve any proposals forever in the background.
 approveProposals &
 
-make -C /workspace/contract mint100
+# make -C /ws-agoric-basics/contract mint100
 
 # bring back chain process to foreground
 wait

@@ -16,7 +16,7 @@ const options = {
   install: { type: 'string' },
   eval: { type: 'string', multiple: true },
   service: { type: 'string', default: 'agd' },
-  workdir: { type: 'string', default: '/workspace/contract' },
+  workdir: { type: 'string', default: '/ws-agoric-basics/contract' },
 };
 /**
  * @typedef {{
@@ -74,9 +74,9 @@ const main = async (bundleDir = 'bundles') => {
 
   /** @type {import('../tools/agd-lib.js').ExecSync} */
   const dockerExec = (file, dargs, opts = { encoding: 'utf-8' }) => {
-    const execArgs = ['compose', 'exec', '--workdir', workdir, service];
+    const execArgs = [ 'exec', '--workdir', workdir, service];
     opts.verbose &&
-      console.log('docker compose exec', JSON.stringify([file, ...dargs]));
+      console.log('docker exec', JSON.stringify([file, ...dargs]));
     return execFileSync('docker', [...execArgs, file, ...dargs], opts);
   };
 

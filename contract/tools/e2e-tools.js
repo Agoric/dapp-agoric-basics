@@ -3,11 +3,13 @@
 import { E, Far } from '@endo/far';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { Nat } from '@endo/nat';
+import { exec } from 'child_process';
 import { flags, makeAgd } from './agd-lib.js';
 import { makeHttpClient, makeAPI } from './ui-kit-goals/makeHttpClient.js';
 import { dedup, makeQueryKit, poll } from './ui-kit-goals/queryKit.js';
 import { getBundleId } from './bundle-tools.js';
 import { makeVStorage } from './ui-kit-goals/batchQuery.js';
+
 
 const BLD = '000000ubld';
 
@@ -102,6 +104,8 @@ const installBundle = async (fullPath, opts) => {
   const { id, agd, delay, follow, progress = console.log } = opts;
   const { chainId = 'agoriclocal', installer = 'user1' } = opts;
   const from = await agd.lookup(installer);
+
+
 
   const explainDelay = (ms, info) => {
     progress('follow', { ...info, delay: ms / 1000 }, '...');
@@ -472,6 +476,7 @@ export const makeE2ETools = (
     await null;
     /** @type {Record<string, import('../test/boot-tools.js').CachedBundle>} */
     const bundles = {};
+    // Below we are creating bundles for each contract
     for (const [name, rootModPath] of Object.entries(bundleRoots)) {
       const bundle = await bundleCache.load(rootModPath, name);
       bundles[name] = bundle;
@@ -496,6 +501,11 @@ export const makeE2ETools = (
 
       const bundleSizeMb = (bundleJSON.length / 1_000_000).toFixed(3);
       progress('installing', name, shortId, bundleSizeMb, 'Mb');
+      const containerId = 'agd'; // container is named agd 
+      const localPath = './bundles';
+      const containerPath = '/ws-agoric-basics/contract/';
+      const command = `docker cp ${localPath} ${containerId}:${containerPath}`;
+      exec(command);
       const { tx, confirm } = await installBundle(fullPath, {
         id: shortId,
         agd,
@@ -568,7 +578,13 @@ export const makeE2ETools = (
       // not yet bundled
     }
     const detail = { evals: [eval0], title, description };
+    // The following creates bundle scripts and jsons in bundles/ directory
     await runPackageScript('build:deployer', entryFile);
+    const containerId = 'agd'; // container is named agd 
+    const localPath = './bundles';
+    const containerPath = '/ws-agoric-basics/contract/';
+    const command = `docker cp ${localPath} ${containerId}:${containerPath}`;
+    exec(command);
     const proposal = await runCoreEval(t, detail, { agd, blockTool });
     await writeFile(
       `${eval0.code}.done`,
