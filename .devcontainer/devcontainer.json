@@ -27,23 +27,9 @@
 	},
 	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "bash /workspaces/dapp-agoric-basics/make_ports_public.sh 26657 5173 1317",
-<<<<<<< HEAD
 	"postStartCommand": "yarn install",
 	"features": {
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
 		"ghcr.io/devcontainers/features/github-cli:1": {}
 	}
-=======
-"postStartCommand": "/workspaces/dapp-agoric-basics/make_ports_public.sh 26656 5173 1317 26657 && yarn install",
-"features": {
-	"ghcr.io/devcontainers/features/docker-in-docker:2": {},
-	"ghcr.io/devcontainers/features/github-cli:1": {}
-}
-
-	// Configure tool-specific properties.
-	// "customizations": {},
-
-	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-	// "remoteUser": "root"
->>>>>>> 593eec0 (fix: add gh CLI to features)
 }
