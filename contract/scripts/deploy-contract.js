@@ -30,7 +30,7 @@ const options = {
  * }} DeployOptions
  */
 
-//TODo make help test
+// TODo make help test
 const Usage = ` 
 deploy-contract [options] [--install <contract>] [--eval <proposal>]...
 
@@ -72,7 +72,7 @@ const generateDeployArtifact = async (path, name, { readFile, writeFile }) => {
   // string replace for contract name
   const finalFile = hideImportExpr(template.replace('_CONTRACT_NAME_', name));
 
-  //write result to bundles/deploy-name.js
+  // write result to bundles/deploy-name.js
   return writeFile(`bundles/deploy-${name}.js`, finalFile);
 };
 
