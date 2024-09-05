@@ -18,6 +18,7 @@ const options = {
   service: { type: 'string', default: 'agd' },
   workdir: { type: 'string', default: '/workspace/contract' },
   deploy: { type: 'string', multiple: true },
+  deploygen: { type: 'string', multiple: true },
 };
 /**
  * @typedef {{
@@ -27,6 +28,7 @@ const options = {
  *   service: string,
  *   workdir: string,
  *   deploy: string[],
+ *   deploygen?: string[],
  * }} DeployOptions
  */
 
@@ -119,6 +121,15 @@ const main = async (bundleDir = 'bundles') => {
   });
 
   const stem = path => basename(path).replace(/\..*/, '');
+
+  if (flags.deploygen) {
+    for (const contractEntry of flags.deploygen) {
+      const name = stem(contractEntry);
+      const generatedCoreEval = `bundles/deploy-${name}-entry.js`;
+      // TODO: fix
+      await generateDeployArtifact(generatedCoreEval, name, fsp);
+    }
+  }
 
   // deploy in one step
   if (flags.deploy) {
