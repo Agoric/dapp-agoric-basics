@@ -18,6 +18,7 @@ const options = {
   service: { type: 'string', default: 'agd' },
   workdir: { type: 'string', default: '/workspace/contract' },
   deploy: { type: 'string', multiple: true },
+  deploygen: { type: 'string', multiple: true },
 };
 /**
  * @typedef {{
@@ -27,10 +28,11 @@ const options = {
  *   service: string,
  *   workdir: string,
  *   deploy: string[],
+ *   deploygen?: string[],
  * }} DeployOptions
  */
 
-//TODo make help test
+// TODo make help test
 const Usage = ` 
 deploy-contract [options] [--install <contract>] [--eval <proposal>]...
 
@@ -72,7 +74,7 @@ const generateDeployArtifact = async (path, name, { readFile, writeFile }) => {
   // string replace for contract name
   const finalFile = hideImportExpr(template.replace('_CONTRACT_NAME_', name));
 
-  //write result to bundles/deploy-name.js
+  // write result to bundles/deploy-name.js
   return writeFile(`bundles/deploy-${name}.js`, finalFile);
 };
 
@@ -119,6 +121,15 @@ const main = async (bundleDir = 'bundles') => {
   });
 
   const stem = path => basename(path).replace(/\..*/, '');
+
+  if (flags.deploygen) {
+    for (const contractEntry of flags.deploygen) {
+      const name = stem(contractEntry);
+      const generatedCoreEval = `bundles/deploy-${name}-entry.js`;
+      // TODO: fix
+      await generateDeployArtifact(generatedCoreEval, name, fsp);
+    }
+  }
 
   // deploy in one step
   if (flags.deploy) {
