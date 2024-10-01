@@ -15,10 +15,20 @@ import { mockWalletFactory, seatLike } from './wallet-tools.js';
 import { INVITATION_MAKERS_DESC } from '../src/platform-goals/start-governed-contract.js';
 import { installGovContracts } from './lib-gov-test/puppet-gov.js';
 
-/** @typedef {import('./wallet-tools.js').MockWallet} MockWallet */
+/**
+ * @import {Brand} from '@agoric/ertp/src/types.js';
+ * @import {QuestionDetails} from '@agoric/governance/src/types.js';
+ * @import {OfferSpec} from '@agoric/smart-wallet/src/offers.js';
+ * @import {MockWallet} from './wallet-tools.js';
+ * @import {ExecutionContext, TestFn} from 'ava';
+ * @import {ParamChangesOfferArgs} from '@agoric/inter-protocol/src/econCommitteeCharter.js';
+ */
 
-/** @type {import('ava').TestFn<Awaited<ReturnType<makeTestContext>>>} */
-const test = anyTest;
+/**
+ * @typedef {Awaited<ReturnType<makeTestContext>>} TestContext
+ */
+
+const test = /** @type {TestFn<TestContext>}} */ (anyTest);
 
 const nodeRequire = createRequire(import.meta.url);
 
@@ -40,7 +50,7 @@ const makeTestContext = async t => {
 test.before(async t => (t.context = await makeTestContext(t)));
 
 /**
- * @param {import('ava').ExecutionContext} t
+ * @param {ExecutionContext} t
  * @param {MockWallet} wallet
  * @param {{ instance: BootstrapPowers['instance']['consume']}} wellKnown
  */
@@ -58,7 +68,7 @@ const makeVoter = (t, wallet, wellKnown) => {
   };
 
   const acceptInvitation = async (offerId, { instance, description }) => {
-    /** @type {import('./wallet-tools.js').OfferSpec} */
+    /** @type {OfferSpec} */
     const offer = {
       id: offerId,
       invitationSpec: {
@@ -93,10 +103,10 @@ const makeVoter = (t, wallet, wellKnown) => {
     const instance = await wellKnown.instance[contractName];
     const path = { paramPath: { key: 'governedParams' } };
 
-    /** @type {import('@agoric/inter-protocol/src/econCommitteeCharter.js').ParamChangesOfferArgs} */
+    /** @type {ParamChangesOfferArgs} */
     const offerArgs = harden({ deadline, params, instance, path });
 
-    /** @type {import('@agoric/smart-wallet/src/offers.js').OfferSpec} */
+    /** @type {OfferSpec} */
     const offer = {
       id: offerId,
       invitationSpec: {
@@ -118,7 +128,7 @@ const makeVoter = (t, wallet, wellKnown) => {
   const vote = async (offerId, details, position) => {
     const chosenPositions = [details.positions[position]];
 
-    /** @type {import('./wallet-tools.js').OfferSpec} */
+    /** @type {OfferSpec} */
     const offer = {
       id: offerId,
       invitationSpec: {
@@ -239,8 +249,6 @@ test.serial('vote to change swap fee', async t => {
   /** @type {ReturnType<typeof makeVoter>} */
   const victor = t.context.shared.victor;
 
-  /** @type {BootstrapPowers & import('../src/swaparoo.proposal.js').SwaparooSpace */
-  // @ts-expect-error cast
   const swapPowers = powers;
   const swapPub = E(zoe).getPublicFacet(
     swapPowers.instance.consume[contractName],

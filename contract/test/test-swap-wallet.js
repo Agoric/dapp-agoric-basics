@@ -21,10 +21,31 @@ import {
   assets as govAssets,
 } from './lib-gov-test/puppet-gov.js';
 
-/** @typedef {import('./wallet-tools.js').MockWallet} MockWallet */
+/**
+ * @import {Amount} from '@agoric/ertp/src/types.js';
+ * @import {MockWallet} from './wallet-tools.js';
+ * @import {ExecutionContext, TestFn} from 'ava';
+ * @import {OfferSpec} from '@agoric/smart-wallet/src/offers.js';
+ */
 
-/** @type {import('ava').TestFn<Awaited<ReturnType<makeTestContext>>>} */
-const test = anyTest;
+/** @typedef {MockWallet} MockWallet */
+
+/**
+ * @typedef {{
+ *   getExitMessage: () => any;
+ *   getHasExited: () => boolean;
+ *   getExitWithFailure: () => any;
+ *   installBundle: (id: any, bundle: any) => any;
+ *   installNamedBundle: (name: any, id: any, bundle: any) => any;
+ *   getCriticalVatKey: () => {};
+ *   getVatPowers: () => { D: (bcap: any) => { getBundle: () => any } };
+ * }} FakeVatAdminState
+ */
+
+/**
+ * @typedef {Awaited<ReturnType<makeTestContext>>} TestContext
+ */
+const test = /** @type {TestFn<TestContext>}} */ (anyTest);
 
 const nodeRequire = createRequire(import.meta.url);
 
@@ -107,7 +128,7 @@ test.serial('start contract', async t => {
 });
 
 /**
- * @param {import('ava').ExecutionContext} t
+ * @param {ExecutionContext} t
  * @param {*} wellKnown
  * @param {MockWallet} wallet
  * @param {Amount} beansAmount
@@ -137,7 +158,7 @@ const startAlice = async (
     },
   };
 
-  /** @type {import('@agoric/smart-wallet/src/offers.js').OfferSpec} */
+  /** @type {OfferSpec} */
   const offerSpec = {
     id: 'alice-swap-1',
     invitationSpec: {
@@ -156,7 +177,7 @@ const startAlice = async (
 };
 
 /**
- * @param {import('ava').ExecutionContext} t
+ * @param {ExecutionContext} t
  * @param {*} wellKnown
  * @param {MockWallet} wallet
  * @param {Amount} beansAmount
@@ -184,7 +205,7 @@ const startJack = async (
     },
   };
 
-  /** @type {import('@agoric/smart-wallet/src/offers.js').OfferSpec} */
+  /** @type {OfferSpec} */
   const offerSpec = {
     id: 'jack-123',
     invitationSpec: {
@@ -259,7 +280,7 @@ test.serial('basic swap', async t => {
 
   await E(wallet.alice.deposit).receive(await mintBrandedPayment(ONE_IST));
   await E(wallet.alice.deposit).receive(
-    await mintBrandedPayment(fiveBeans.value),
+    await mintBrandedPayment(/** @type {bigint} */ (fiveBeans.value)),
   );
   const aliceSeat = seatLike(
     await startAlice(

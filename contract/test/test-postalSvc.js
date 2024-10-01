@@ -1,5 +1,4 @@
 // @ts-check
-/* global setTimeout, fetch */
 // XXX what's the state-of-the-art in ava setup?
 // eslint-disable-next-line import/order
 import { test as anyTest } from './prepare-test-env-ava.js';
@@ -28,8 +27,17 @@ import {
   makeAgoricNames,
 } from '../tools/ui-kit-goals/name-service-client.js';
 
-/** @type {import('ava').TestFn<Awaited<ReturnType<makeTestContext>>>} */
-const test = anyTest;
+/**
+ * @import {WellKnown} from './market-actors.js';
+ * @import {TestFn} from 'ava';
+ * @import {ExecSync} from '../tools/agd-lib.js';
+ */
+
+/**
+ * @typedef {Awaited<ReturnType<makeTestContext>>} TestContext
+ */
+
+const test = /** @type {TestFn<TestContext>}} */ (anyTest);
 
 const nodeRequire = createRequire(import.meta.url);
 
@@ -41,7 +49,6 @@ const scriptRoots = {
   postalService: nodeRequire.resolve('../src/postal-service.proposal.js'),
 };
 
-/** @param {import('ava').ExecutionContext} t */
 const makeTestContext = async t => {
   const bc = await makeBundleCacheContext(t);
 
@@ -49,7 +56,7 @@ const makeTestContext = async t => {
   const { execFileSync, execFile } = ambientChildProcess;
   const { writeFile } = ambientFsp;
 
-  /** @type {import('../tools/agd-lib.js').ExecSync} */
+  /** @type {ExecSync} */
   const dockerExec = (file, args, opts = { encoding: 'utf-8' }) => {
     const workdir = '/workspace/contract';
     const execArgs = ['compose', 'exec', '--workdir', workdir, 'agd'];
@@ -83,6 +90,8 @@ test.before(async t => (t.context = await makeTestContext(t)));
 test.serial('well-known brand (ATOM) is available', async t => {
   const { makeQueryTool } = t.context;
   const hub0 = makeAgoricNames(makeQueryTool());
+  /** @type {WellKnown} */
+  // @ts-expect-error cast
   const agoricNames = makeNameProxy(hub0);
   await null;
   const brand = {
@@ -137,6 +146,8 @@ test.serial('deploy contract with core eval: postalService / send', async t => {
 test.serial('agoricNames.instances has contract: postalService', async t => {
   const { makeQueryTool } = t.context;
   const hub0 = makeAgoricNames(makeQueryTool());
+  /** @type {WellKnown} */
+  // @ts-expect-error cast
   const agoricNames = makeNameProxy(hub0);
   await null;
   const instance = await agoricNames.instance.postalService;
@@ -150,7 +161,8 @@ test.serial('deliver payment using offer', async t => {
   const { provisionSmartWallet, makeQueryTool } = t.context;
   const qt = makeQueryTool();
   const hub0 = makeAgoricNames(qt);
-  /** @type {import('./market-actors.js').WellKnown} */
+  /** @type {WellKnown} */
+  // @ts-expect-error cast
   const agoricNames = makeNameProxy(hub0);
 
   await null;
@@ -209,9 +221,7 @@ test('send invitation* from contract using publicFacet of postalService', async 
     { zoe, namesByAddressAdmin },
     smartWalletIssuers,
   );
-
-  /** @type {StartedInstanceKit<import('../src/postal-service.contract.js').PostalServiceFn>['instance']} */
-  // @ts-expect-error not (yet?) in BootstrapPowers
+  // @ts-expect-error mock
   const instance = await powers.instance.consume.postalService;
 
   const shared = {
