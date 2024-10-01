@@ -1,24 +1,23 @@
 // @ts-check
+/// <reference types="@agoric/zoe/src/zoeService/types-ambient.js";/>
 import { E } from '@endo/far';
 
 import { allValues, zip } from '../objectTools.js';
 import { sanitizePathSegment } from './start-contract.js';
 
+/**
+ * @import {StartResult, StartParams} from '@agoric/zoe/src/zoeService/utils.js';
+ * @import {prepare} from '@agoric/governance/src/committee.js';
+ * @import {ERef} from '@endo/far';
+ * @import {GovernableStartFn, GovernanceFacetKit} from '@agoric/governance/src/types.js';
+ * @import {NameHub} from '@agoric/vats';
+ * @import {TimerService} from '@agoric/time';
+ */
 const { values } = Object;
 
 /**
- * @template SF
- * @typedef {import('@agoric/zoe/src/zoeService/utils').StartResult<SF>} StartResult<SF>
- */
-
-/**
- * @template SF
- * @typedef {import('@agoric/zoe/src/zoeService/utils').StartParams<SF>} StartParams<SF>
- */
-
-/**
  * @typedef {StartResult<
- *   typeof import('@agoric/governance/src/committee.js').prepare
+ *   typeof prepare
  * >} CommitteeStart
  */
 
@@ -55,12 +54,14 @@ export const ParamTypes = /** @type {const} */ ({
  *   governedContractInstallation: ERef<Installation<SF>>;
  *   issuerKeywordRecord?: IssuerKeywordRecord;
  *   terms: Record<string, unknown>;
- *   privateArgs: StartParams<SF>['privateArgs'];
+ *   privateArgs?: StartParams<SF> extends { privateArgs: unknown }
+ *     ? StartParams<SF>['privateArgs']
+ *     : Record<string, unknown>; // XXX workaround for 'privateArgs cannot be used to index StartParams'
  *   label: string;
  * }} zoeArgs
  * @param {{
  *   governedParams: Record<string, unknown>;
- *   timer: ERef<import('@agoric/time/src/types').TimerService>;
+ *   timer: ERef<TimerService>;
  *   contractGovernor: ERef<Installation>;
  *   governorTerms: Record<string, unknown>;
  *   committeeCreatorFacet: CommitteeStart['creatorFacet'];
@@ -176,14 +177,13 @@ export const startMyCharter = async (contractName, powers, config) => {
 
   const {
     consume: { namesByAddress, zoe },
-    produce: { [`${charterName}Kit`]: produceKit },
+    produce,
     installation: {
       consume: { binaryVoteCounter: counterP, econCommitteeCharter: installP },
     },
-    instance: {
-      produce: { [charterName]: instanceP },
-    },
+    instance: { produce: produceInstance },
   } = powers;
+
   const {
     [committeeName]: { voterAddresses },
   } = config?.options || {};
@@ -204,8 +204,8 @@ export const startMyCharter = async (contractName, powers, config) => {
     undefined,
     'econCommitteeCharter',
   );
-  instanceP.resolve(startResult.instance);
-  produceKit.resolve(startResult);
+  produceInstance[charterName].resolve(startResult.instance);
+  produce[`${charterName}Kit`].resolve(startResult);
 
   await inviteToMyCharter(
     startResult.creatorFacet,
@@ -225,13 +225,11 @@ export const startMyCommittee = async (contractName, powers, config) => {
   const committeeName = `${contractName}Committee`;
   const {
     consume: { board, chainStorage, namesByAddress, startUpgradable },
-    produce: { [`${committeeName}Kit`]: produceKit },
+    produce,
     installation: {
       consume: { committee },
     },
-    instance: {
-      produce: { [committeeName]: produceInstance },
-    },
+    instance: { produce: produceInstance },
   } = powers;
   const {
     [committeeName]: { voterAddresses },
@@ -255,8 +253,8 @@ export const startMyCommittee = async (contractName, powers, config) => {
     terms: { committeeName, committeeSize: values(voterAddresses).length },
     privateArgs,
   });
-  produceKit.resolve(started);
-  produceInstance.resolve(started.instance);
+  produce[`${committeeName}Kit`].resolve(started);
+  produceInstance[committeeName].resolve(started.instance);
   console.log(committeeName, 'started');
 
   /** @param {[string, Promise<Invitation>][]} addrInvitations */

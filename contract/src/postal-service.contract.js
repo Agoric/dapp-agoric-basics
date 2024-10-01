@@ -4,18 +4,26 @@ import { M, mustMatch } from '@endo/patterns';
 import { withdrawFromSeat } from '@agoric/zoe/src/contractSupport/zoeHelpers.js';
 import { IssuerShape } from '@agoric/ertp/src/typeGuards.js';
 
+/**
+ * @import {ContractMeta} from './@types/zoe-contract-facet.js';
+ * @import {ERef} from '@endo/far';
+ * @import {DepositFacet, Payment, Issuer} from '@agoric/ertp/src/types.js';
+ * @import {NameHub} from '@agoric/vats';
+ */
 const { keys, values } = Object;
 
-/** @type {import('./@types/zoe-contract-facet').ContractMeta} */
+/** @type {ContractMeta} */
 export const meta = harden({
   customTermsShape: { namesByAddress: M.remotable('namesByAddress') },
 });
+harden(meta);
 // compatibility with an earlier contract metadata API
 export const { customTermsShape } = meta;
+harden(customTermsShape);
 
 /**
  * @typedef {object} PostalSvcTerms
- * @property {import('@agoric/vats').NameHub} namesByAddress
+ * @property {NameHub} namesByAddress
  */
 
 /** @param {ZCF<PostalSvcTerms>} zcf */
@@ -81,4 +89,5 @@ export const start = zcf => {
   });
   return { publicFacet };
 };
+harden(start);
 /** @typedef { typeof start } PostalServiceFn */

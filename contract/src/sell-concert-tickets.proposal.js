@@ -6,11 +6,22 @@ import {
   startContract,
 } from './platform-goals/start-contract.js';
 
+/**
+ * @import {Brand, Issuer} from '@agoric/ertp/src/types.js';
+ * @import {BootstrapManifestPermit} from '@agoric/vats/src/core/lib-boot.js';
+ * @import {Inventory} from  './sell-concert-tickets.contract.js';
+ */
 const { Fail } = assert;
 
 const contractName = 'sellConcertTickets';
 const IST_UNIT = 1_000_000n;
 
+/**
+ *
+ * @param {Brand<"copyBag">} brand
+ * @param {bigint} baseUnit
+ * @returns {Inventory}
+ */
 export const makeInventory = (brand, baseUnit) => {
   return {
     frontRow: {
@@ -81,7 +92,7 @@ export const startSellConcertTicketsContract = async (
   console.log(contractName, '(re)started');
 };
 
-/** @type { import("@agoric/vats/src/core/lib-boot.js").BootstrapManifestPermit } */
+/** @type {BootstrapManifestPermit} */
 export const permit = harden({
   consume: {
     agoricNames: true,

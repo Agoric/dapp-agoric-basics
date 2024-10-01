@@ -19,7 +19,7 @@ const watchContract = (watcher: ChainStorageWatcher) => {
     },
   );
 
-  watcher.watchLatest<Array<[string, unknown]>>(
+  watcher.watchLatest<Array<[string, Brand]>>(
     [Kind.Data, 'published.agoricNames.brand'],
     brands => {
       console.log('Got brands', brands);

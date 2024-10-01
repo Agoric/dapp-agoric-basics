@@ -3,6 +3,10 @@
 import { E, Far } from '@endo/far';
 import { createRequire } from 'node:module';
 
+/**
+ * @import {ERef} from '@endo/far';
+ * @import { makeNodeBundleCache } from '@endo/bundle-source/cache.js';
+ */
 const nodeRequire = createRequire(import.meta.url);
 export const assets = {
   binaryVoteCounter: nodeRequire.resolve(
@@ -36,7 +40,7 @@ export const installCommitteeContract = async (zoe, produce, bundleCache) => {
  * @param {BootstrapPowers['installation']['produce']} produce
  * @param {BundleCache} bundleCache
  *
- * @typedef {Awaited<ReturnType<typeof import('@endo/bundle-source/cache.js').makeNodeBundleCache>>} BundleCache
+ * @typedef {Awaited<ReturnType<typeof makeNodeBundleCache>>} BundleCache
  */
 export const installPuppetGovernance = async (zoe, produce, bundleCache) => {
   await installCommitteeContract(zoe, produce, bundleCache);

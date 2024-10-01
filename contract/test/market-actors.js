@@ -8,6 +8,13 @@ import {
   makeAgoricNames,
 } from '../tools/ui-kit-goals/name-service-client.js';
 
+/**
+ * @import {Brand, Issuer} from '@agoric/ertp/src/types.js';
+ * @import {ExecutionContext} from 'ava';
+ * @import {MockWallet} from './wallet-tools.js';
+ * @import {QueryTool} from '../tools/ui-kit-goals/queryKit.js';
+ * @import {OfferSpec} from '@agoric/smart-wallet/src/offers.js';
+ */
 const { entries, fromEntries, keys } = Object;
 
 /**
@@ -26,10 +33,10 @@ const { entries, fromEntries, keys } = Object;
  */
 
 /**
- * @param {import('ava').ExecutionContext} t
+ * @param {ExecutionContext} t
  * @param {{
- *   wallet: import('./wallet-tools.js').MockWallet;
- *   queryTool: Pick<import('../tools/ui-kit-goals/queryKit.js').QueryTool, 'queryData'>;
+ *   wallet: MockWallet;
+ *   queryTool: Pick<QueryTool, 'queryData'>;
  * }} mine
  * @param {{
  *   rxAddr: string,
@@ -44,12 +51,13 @@ export const payerPete = async (
 ) => {
   const hub = await makeAgoricNames(queryTool);
   /** @type {WellKnown} */
+  // @ts-expect-error cast
   const agoricNames = makeNameProxy(hub);
 
   const instance = await agoricNames.instance.postalService;
 
   t.log('Pete offers to send to', rxAddr, 'via contract', instance);
-  /** @type {import('@agoric/smart-wallet/src/offers.js').OfferSpec} */
+  /** @type {OfferSpec} */
   const sendOffer = {
     id: 'peteSend1',
     invitationSpec: {
@@ -93,8 +101,8 @@ const trackDeposits = async (t, initial, purseUpdates, toSend) =>
  * She expects initial balances to be empty;
  * and relies on `wellKnown.assetKind` to make an empty amount from a brand.
  *
- * @param {import('ava').ExecutionContext} t
- * @param {{ wallet: import('./wallet-tools.js').MockWallet, }} mine
+ * @param {ExecutionContext} t
+ * @param {{ wallet: MockWallet }} mine
  * @param {{ toSend: AmountKeywordRecord }} shared
  */
 export const receiverRose = async (t, { wallet }, { toSend }) => {
@@ -121,8 +129,8 @@ export const receiverRose = async (t, { wallet }, { toSend }) => {
  * Rex expects to receive `shared.toSend` amounts.
  * Rex doesn't check his initial balances
  *
- * @param {import('ava').ExecutionContext} t
- * @param {{ wallet: import('./wallet-tools.js').MockWallet, }} mine
+ * @param {ExecutionContext} t
+ * @param {{ wallet: MockWallet }} mine
  * @param {{ toSend: AmountKeywordRecord }} shared
  */
 export const receiverRex = async (t, { wallet }, { toSend }) => {
