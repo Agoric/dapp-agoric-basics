@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/* global process, fetch, setTimeout */
 // @ts-check
 import '@endo/init';
 import fsp from 'node:fs/promises';
