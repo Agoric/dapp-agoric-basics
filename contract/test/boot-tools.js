@@ -16,6 +16,8 @@ import { makeMockChainStorageRoot } from '@agoric/internal/src/storage-test-util
 import { mockWalletFactory } from './wallet-tools.js';
 import { getBundleId } from '../tools/bundle-tools.js';
 
+/** @import { makeNodeBundleCache } from '@endo/bundle-source/cache.js'; */
+
 const { entries } = Object;
 
 /**
@@ -98,7 +100,7 @@ export const mockBootstrapPowers = async (
   produce.priceAuthority.resolve(Far('NullPriceAuthority', {}));
 
   /**
-   * @type {BootstrapPowers & import('../src/types.js').NonNullChainStorage}
+   * @type {BootstrapPowers}
    */
   // @ts-expect-error mock
   const powers = { produce, consume, ...spaces, zone };
@@ -113,7 +115,7 @@ export const mockBootstrapPowers = async (
  * @param {(...args: unknown[]) => void} log
  *
  * @typedef {(id: string, bundle: CachedBundle, name: string) => Promise<void>} InstallBundle
- * @typedef {Awaited<ReturnType<import('@endo/bundle-source/cache.js').makeNodeBundleCache>>} BundleCache
+ * @typedef {Awaited<ReturnType<makeNodeBundleCache>>} BundleCache
  * @typedef {{ moduleFormat: 'endoZipBase64', endoZipBase64Sha512: string }} CachedBundle
  */
 export const installBundles = async (
