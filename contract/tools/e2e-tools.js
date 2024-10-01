@@ -9,6 +9,20 @@ import { dedup, makeQueryKit, poll } from './ui-kit-goals/queryKit.js';
 import { getBundleId } from './bundle-tools.js';
 import { makeVStorage } from './ui-kit-goals/batchQuery.js';
 
+/**
+ * @import {Issuer, Amount} from '@agoric/ertp/src/types.js';
+ * @import {MockWallet} from '../test/wallet-tools.js';
+ * @import {Agd, ExecSync} from './agd-lib.js';
+ * @import {ExecutionContext} from 'ava';
+ * @import {BundleCache, CachedBundle} from '../test/boot-tools.js';
+ * @import {RpcClient} from '@cosmjs/tendermint-rpc';
+ * @import {OfferSpec} from '@agoric/smart-wallet/src/offers.js';
+ * @import {BridgeAction} from '@agoric/smart-wallet/src/smartWallet.js';
+ * @import {QueryTool} from './ui-kit-goals/queryKit.js';
+ * @import {LCD} from './ui-kit-goals/makeHttpClient.js';
+ * @import {writeFile} from 'fs/promises';
+ * @import {execFile} from 'child_process';
+ */
 const BLD = '000000ubld';
 
 const makeRunner = execFile => {
@@ -34,7 +48,7 @@ export const txAbbr = tx => {
 
 /**
  * @param {object} io
- * @param {import('@cosmjs/tendermint-rpc').RpcClient} io.rpc
+ * @param {RpcClient} io.rpc
  * @param {(ms: number, info?: unknown) => Promise<void>} io.delay
  */
 const makeBlockTool = ({ rpc, delay }) => {
@@ -90,8 +104,8 @@ const makeBlockTool = ({ rpc, delay }) => {
  * @param {string} fullPath
  * @param {object} opts
  * @param {string} opts.id
- * @param {import('./agd-lib.js').Agd} opts.agd
- * @param {import('./ui-kit-goals/queryKit.js').QueryTool['follow']} opts.follow
+ * @param {Agd} opts.agd
+ * @param {QueryTool['follow']} opts.follow
  * @param {(ms: number) => Promise<void>} opts.delay
  * @param {typeof console.log} [opts.progress]
  * @param {string} [opts.chainId]
@@ -129,15 +143,15 @@ const installBundle = async (fullPath, opts) => {
  * @param {string} address
  * @param {Record<string, number | bigint>} balances
  * @param {{
- *   agd: import('./agd-lib.js').Agd;
+ *   agd: Agd;
  *   blockTool: BlockTool;
- *   lcd: import('./ui-kit-goals/makeHttpClient.js').LCD;
+ *   lcd: LCD;
  *   delay: (ms: number) => Promise<void>;
  *   chainId?: string;
  *   whale?: string;
  *   progress?: typeof console.log;
  * }} opts
- * @returns {Promise<import('../test/wallet-tools.js').MockWallet>}
+ * @returns {Promise<MockWallet>}
  */
 export const provisionSmartWallet = async (
   address,
@@ -202,10 +216,9 @@ export const provisionSmartWallet = async (
     used: info.offerToUsedInvitation.length,
   });
 
-  /** @param {import('@agoric/smart-wallet/src/smartWallet.js').BridgeAction} bridgeAction */
+  /** @param {BridgeAction} bridgeAction */
   const sendAction = async bridgeAction => {
-    const capData = q.toCapData(harden(bridgeAction));
-    const offerBody = JSON.stringify(capData);
+    const offerBody = JSON.stringify(harden(bridgeAction));
     const txInfo = await agd.tx(
       ['swingset', 'wallet-action', offerBody, '--allow-spend'],
       { from: address, chainId, yes: true },
@@ -213,7 +226,7 @@ export const provisionSmartWallet = async (
     return txInfo;
   };
 
-  /** @param {import('@agoric/smart-wallet/src/offers.js').OfferSpec} offer */
+  /** @param {OfferSpec} offer */
   async function* executeOffer(offer) {
     const updates = q.follow(`published.wallet.${address}`, { delay });
     const txInfo = await sendAction({ method: 'executeOffer', offer });
@@ -227,14 +240,14 @@ export const provisionSmartWallet = async (
     }
   }
 
-  /** @type {import('../test/wallet-tools.js').MockWallet['offers']} */
+  /** @type {MockWallet['offers']} */
   const offers = Far('Offers', {
     executeOffer,
     /** @param {string|number} offerId */
     tryExit: offerId => sendAction({ method: 'tryExitOffer', offerId }),
   });
 
-  /** @type {import('../test/wallet-tools.js').MockWallet['deposit']} */
+  /** @type {MockWallet['deposit']} */
   const deposit = Far('DepositFacet', {
     receive: async payment => {
       const brand = await E(payment).getAllegedBrand();
@@ -295,7 +308,7 @@ export const provisionSmartWallet = async (
     }
   }
 
-  /** @type {import('../test/wallet-tools.js').MockWallet['peek']} */
+  /** @type {MockWallet['peek']} */
   const peek = Far('Peek', { purseUpdates });
 
   return { offers, deposit, peek };
@@ -303,7 +316,7 @@ export const provisionSmartWallet = async (
 
 /**
  * @param {{
- *   agd: import('./agd-lib.js').Agd;
+ *   agd: Agd;
  *   blockTool: BlockTool;
  *   validator?: string;
  *   chainId?: string
@@ -352,14 +365,14 @@ const voteLatestProposalAndWait = async ({
 };
 
 /**
- * @param {Pick<import('ava').ExecutionContext, 'log' | 'is'>} t
+ * @param {Pick<ExecutionContext, 'log' | 'is'>} t
  * @param {{
  *   evals: {permit: string, code: string}[]
  *   title: string,
  *   description: string,
  * }} info
  * @param {{
- *   agd: import('./agd-lib.js').Agd;
+ *   agd: Agd;
  *   blockTool: BlockTool;
  *   proposer?: string;
  *   deposit?: string;
@@ -411,17 +424,17 @@ const runCoreEval = async (
 };
 
 /**
- * @param {Pick<import('ava').ExecutionContext, 'log' | 'is'>} t
- * @param {import('../test/mintStable.js').BundleCache} bundleCache
+ * @param {Pick<ExecutionContext, 'log' | 'is'>} t
+ * @param {BundleCache} bundleCache
  * @param {object} io
- * @param {import('./agd-lib.js').ExecSync} io.execFileSync
- * @param {typeof import('child_process').execFile} io.execFile
+ * @param {ExecSync} io.execFileSync
+ * @param {typeof execFile} io.execFile
  * @param {typeof window.fetch} io.fetch
  * @param {typeof window.setTimeout} io.setTimeout
  * @param {string} [io.bundleDir]
  * @param {string} [io.rpcAddress]
  * @param {string} [io.apiAddress]
- * @param {typeof import('fs/promises').writeFile} io.writeFile
+ * @param {typeof writeFile} io.writeFile
  * @param {(...parts: string[]) => string} [io.join]
  */
 export const makeE2ETools = (
@@ -470,7 +483,7 @@ export const makeE2ETools = (
    */
   const installBundles = async (bundleRoots, progress) => {
     await null;
-    /** @type {Record<string, import('../test/boot-tools.js').CachedBundle>} */
+    /** @type {Record<string, CachedBundle>} */
     const bundles = {};
     for (const [name, rootModPath] of Object.entries(bundleRoots)) {
       const bundle = await bundleCache.load(rootModPath, name);
