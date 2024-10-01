@@ -13,6 +13,7 @@ import {
   startContract,
 } from './platform-goals/start-contract.js';
 
+/** @import {BootstrapManifest} from '@agoric/vats/src/core/lib-boot.js'; */
 const { Fail } = assert;
 
 const contractName = 'postalService';
@@ -46,7 +47,8 @@ export const startPostalService = async (powers, config) => {
   });
 };
 
-export const manifest = /** @type {const} */ ({
+/** @type {BootstrapManifest} */
+export const manifest = {
   [startPostalService.name]: {
     consume: {
       agoricNames: true,
@@ -63,7 +65,7 @@ export const manifest = /** @type {const} */ ({
       produce: { postalService: true },
     },
   },
-});
+};
 
 export const permit = Object.values(manifest)[0];
 
