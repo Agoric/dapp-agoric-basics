@@ -1,5 +1,9 @@
 // @ts-check
 import { E, Far } from '@endo/far';
+/**
+ * @import {ERef} from '@endo/far';
+ * @import {NameHub} from '@agoric/vats';
+ */
 
 /** @param {{ queryData: (path: string) => any }} qt */
 export const makeAgoricNames = async qt => {
