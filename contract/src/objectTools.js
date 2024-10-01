@@ -3,6 +3,8 @@ import { E } from '@endo/far';
 
 const { entries, fromEntries } = Object;
 
+/** @import {ERef} from '@endo/far'; */
+
 /**
  * Given a record whose values may be promise, return a promise for a record with all the values resolved.
  *

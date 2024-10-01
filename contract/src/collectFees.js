@@ -2,6 +2,8 @@
 
 import { atomicTransfer } from '@agoric/zoe/src/contractSupport/index.js';
 
+/** @import {Brand} from '@agoric/ertp/src/types.js'; */
+
 /**
  * Provide shared support for providing access to fees from a service contract.
  *
