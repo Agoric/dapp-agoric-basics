@@ -12,25 +12,11 @@ import {
 } from './platform-goals/start-governed-contract.js';
 import { allValues } from './objectTools.js';
 
+/** @import { BootstrapManifestPermit } from "@agoric/vats/src/core/lib-boot.js"; */
+
 const { Fail } = assert;
 
 const contractName = 'swaparoo';
-
-/**
- * @template SF
- * @typedef {import('@agoric/zoe/src/zoeService/utils').StartResult<SF>} StartResult<SF>
- */
-
-/**
- * @typedef {PromiseSpaceOf<{
- *   swaparooKit: GovernanceFacetKit<typeof import('./swaparoo.contract.js').start>;
- *   swaparooCommitteeKit: StartResult<*>;
- *   swaparooCharterKit: StartResult<*>;
- * }> & {
- *   installation: PromiseSpaceOf<{ swaparoo: Installation }>;
- *   instance: PromiseSpaceOf<{ swaparoo: Instance }>;
- * }} SwaparooSpace
- */
 
 /**
  * @param {BootstrapPowers} powers
@@ -69,34 +55,25 @@ export const installSwapContract = async (powers, config) => {
  */
 export const startSwapContract = async powers => {
   console.error(contractName, 'startContract()...');
-  /** @type { BootstrapPowers & SwaparooSpace} */
-  // @ts-expect-error bootstrap powers evolve with BLD staker governance
-  const swapPowers = powers;
+
   const {
     consume: {
       board,
       chainTimerService,
       namesByAddressAdmin: namesByAddressAdminP,
       zoe,
-      [`${contractName}CommitteeKit`]: committeeKitP,
-      [`${contractName}CharterKit`]: charterKitP,
+      chainStorage,
     },
-    produce: { [`${contractName}Kit`]: produceContractKit },
+    produce,
     brand: {
       consume: { IST: istBrandP },
     },
-    installation: {
-      consume: { [contractName]: installationP, contractGovernor },
-    },
-    instance: {
-      produce: { [contractName]: produceInstance },
-    },
-  } = swapPowers;
+    installation,
+    instance: { produce: produceInstance },
+  } = powers;
 
-  /** @type {import('./types.js').NonNullChainStorage['consume']} */
-  // @ts-expect-error
-  const { chainStorage } = powers.consume;
-
+  const installationP = installation.consume[contractName];
+  const contractGovernor = installation.consume.contractGovernor;
   const istBrand = await istBrandP;
   const oneIST = AmountMath.make(istBrand, 1n);
   const namesByAddressAdmin = await namesByAddressAdminP;
@@ -128,25 +105,30 @@ export const startSwapContract = async powers => {
       timer: chainTimerService,
       contractGovernor,
       governorTerms: {},
-      committeeCreatorFacet: E.get(committeeKitP).creatorFacet,
+      committeeCreatorFacet: E.get(
+        powers.consume[`${contractName}CommitteeKit`],
+      ).creatorFacet,
     },
   );
-  produceContractKit.resolve(it);
-  await E(E.get(charterKitP).creatorFacet).addInstance(
-    it.instance,
-    it.governorCreatorFacet,
-  );
+  produce[`${contractName}Kit`].resolve(it);
+  await E(
+    E.get(powers.consume[`${contractName}CharterKit`]).creatorFacet,
+  ).addInstance(it.instance, it.governorCreatorFacet);
 
   console.log('CoreEval script: started contract', contractName, it.instance);
 
   console.log('CoreEval script: share via agoricNames: none');
 
-  produceInstance.reset();
-  produceInstance.resolve(it.instance);
+  produceInstance[contractName].reset();
+  produceInstance[contractName].resolve(it.instance);
 
   console.log(`${contractName} (re)started`);
 };
 
+/**
+ * @param {BootstrapPowers} permittedPowers
+ * @param {*} config
+ */
 export const main = (
   permittedPowers,
   config = {
@@ -160,7 +142,7 @@ export const main = (
     charterFacets: startSwaparooCharter(permittedPowers, config),
   });
 
-/** @type { import("@agoric/vats/src/core/lib-boot.js").BootstrapManifestPermit } */
+/** @type { BootstrapManifestPermit } */
 export const permit = harden({
   consume: {
     namesByAddress: true,
