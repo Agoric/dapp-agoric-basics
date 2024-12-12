@@ -22,7 +22,6 @@ const AmountSelectorDialog = ({
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
   const [selectedAmount, setSelectedAmount] = useState<Amount | null>(null);
   const modalRef = useRef<HTMLDialogElement | null>(null);
-
   useEffect(() => {
     if (!modalRef.current) {
       return;
@@ -141,6 +140,8 @@ const PurseAmountDisplay = ({ purse }: PurseAmountDisplayProps) => {
 };
 
 const isPurseEmpty = (purse: PurseJSONState<AssetKind>) => {
+  if (!purse.displayInfo) return true;
+
   const { assetKind } = purse.displayInfo;
   const { value } = purse.currentAmount;
   if (assetKind === 'nat') {

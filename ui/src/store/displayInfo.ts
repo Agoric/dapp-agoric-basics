@@ -37,8 +37,8 @@ export const useDisplayInfo = create<DisplayInfoState>((set, get) => ({
 
     purses.forEach(p => {
       newInfo.set(p.brand, {
-        assetKind: p.displayInfo.assetKind,
-        decimalPlaces: p.displayInfo.decimalPlaces,
+        assetKind: p.displayInfo?.assetKind,
+        decimalPlaces: p.displayInfo?.decimalPlaces,
         petname: p.brandPetname,
       });
     });

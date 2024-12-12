@@ -1,3 +1,4 @@
+import type { Brand } from '@agoric/web-components';
 import { create } from 'zustand';
 
 interface ContractState {

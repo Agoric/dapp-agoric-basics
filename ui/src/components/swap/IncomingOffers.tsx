@@ -7,12 +7,20 @@ const IncomingOffers = () => {
   const { instances } = useContractStore();
   const swaparooInstance = instances?.['swaparoo'];
   const invitationPurse = usePurse('Invitation');
-  const swaparooInvitations = Array.isArray(invitationPurse?.currentAmount.value) ?
-  invitationPurse?.currentAmount.value.filter(
-    // @ts-expect-error cast
-    ({ instance, description }: { instance: unknown; description: string }) =>
-      instance === swaparooInstance && description.startsWith('matchOffer'),
-  ): []
+  const swaparooInvitations = Array.isArray(
+    invitationPurse?.currentAmount.value,
+  )
+    ? invitationPurse?.currentAmount.value.filter(
+        ({
+          instance,
+          description,
+        }: {
+          instance: unknown;
+          description: string;
+        }) =>
+          instance === swaparooInstance && description.startsWith('matchOffer'),
+      )
+    : [];
 
   return (
     <div className="w-80">
@@ -21,7 +29,6 @@ const IncomingOffers = () => {
         {(swaparooInvitations?.length &&
           swaparooInvitations?.map(inv => (
             <IncomingOffer
-              // @ts-expect-error cast
               invitation={inv}
               key={stringifyData(inv)}
             ></IncomingOffer>

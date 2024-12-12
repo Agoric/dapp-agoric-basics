@@ -1,5 +1,5 @@
 import { AmountInput, type PurseJSONState } from '@agoric/react-components';
-import type { AssetKind } from '@agoric/web-components';
+import type { Amount, AssetKind } from '@agoric/web-components';
 import { useState } from 'react';
 import { CopyBagEntry, PurseValue, SetEntry } from './DisplayAmount';
 import { stringifyData } from '../utils/stringify';
@@ -7,7 +7,6 @@ import { makeCopyBag, Key } from '@endo/patterns';
 
 type Props = {
   purse: PurseJSONState<AssetKind>;
-  onChangeInput?: (amount: {brand: globalThis.Brand, value: unknown} | null) => void;
   onChange: (amount: Amount | null) => void;
 };
 
@@ -36,7 +35,7 @@ const PurseAmountInput = (props: Props) => {
   return <></>;
 };
 
-const SetInput = ({ purse, onChangeInput }: Props) => {
+const SetInput = ({ purse, onChange }: Props) => {
   const entries = purse.currentAmount.value;
   const [checkedEntries, setCheckedEntries] = useState(new Set<unknown>());
 
@@ -49,13 +48,13 @@ const SetInput = ({ purse, onChangeInput }: Props) => {
       updated.add(entry);
     }
     if (!updated.size) {
-      onChangeInput?.(null);
+      onChange(null);
     } else {
       const newAmount = {
         brand: purse.brand,
         value: [...updated],
       };
-      onChangeInput?.(newAmount);
+      onChange(newAmount);
     }
     setCheckedEntries(updated);
   };
@@ -86,7 +85,7 @@ const SetInput = ({ purse, onChangeInput }: Props) => {
   });
 };
 
-const CopyBagInput = ({ purse, onChangeInput }: Props) => {
+const CopyBagInput = ({ purse, onChange }: Props) => {
   const entries = purse.currentAmount.value.payload;
   const [entriesMap, setEntriesMap] = useState(
     new Map<string, [Key, bigint]>(),
@@ -100,13 +99,13 @@ const CopyBagInput = ({ purse, onChangeInput }: Props) => {
       updated.set(stringifyData(entry[0]), [entry[0], count]);
     }
     if (count > entry[1]) {
-      onChangeInput?.(null);
+      onChange(null);
     } else {
       const newAmount = {
         brand: purse.brand,
         value: makeCopyBag(updated.values()),
       };
-      onChangeInput?.(newAmount);
+      onChange(newAmount);
     }
     setEntriesMap(updated);
   };
@@ -144,16 +143,16 @@ const CopyBagInput = ({ purse, onChangeInput }: Props) => {
   });
 };
 
-const NatAmountInput = ({ purse, onChangeInput }: Props) => {
-  const [amount, setAmount] = useState({ brand: purse?.brand, value: 0n });
-  const hasError = amount.value > purse.currentAmount.value;
+const NatAmountInput = ({ purse, onChange }: Props) => {
+  const [amount, setAmount] = useState<Amount | null>(null);
+  const hasError = amount !== null && amount.value > purse.currentAmount.value;
 
   const onInputChange = (value: bigint) => {
     const newAmount = { brand: purse?.brand, value };
     if (value > purse.currentAmount.value || value === 0n) {
-      onChangeInput?.(null);
+      onChange(null);
     } else {
-      onChangeInput?.(newAmount);
+      onChange(newAmount);
     }
     setAmount(newAmount);
   };
@@ -164,7 +163,7 @@ const NatAmountInput = ({ purse, onChangeInput }: Props) => {
         <AmountInput
           onChange={onInputChange}
           decimalPlaces={purse.displayInfo.decimalPlaces ?? 0}
-          value={amount.value || null}
+          value={amount?.value}
         />
       </label>
       <div className={`p-1 ${hasError ? 'text-error' : ''}`}>

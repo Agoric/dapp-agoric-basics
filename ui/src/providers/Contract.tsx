@@ -5,6 +5,7 @@ import {
 } from '@agoric/rpc';
 import { useAgoric } from '@agoric/react-components';
 import { useContractStore } from '../store/contract';
+import type { Brand } from '@agoric/web-components';
 
 const { fromEntries } = Object;
 
