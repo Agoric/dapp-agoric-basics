@@ -25,7 +25,6 @@ fi
 : ${SECOND_INVITE_PATH:="$(pwd)/../dapp-second-invite"}
 : ${DAPP_OFFER_UP_PATH:="$(pwd)/../dapp-offer-up"}
 : ${DAPP_AGORIC_BASICS_PATH:="$(pwd)/../dapp-agoric-basics"}
-: ${DAPP_ORCHESTRATION_BASICS_PATH:="$(pwd)/../dapp-orchestration-basics"}
 
 # Start new container
 docker run -d \
@@ -41,7 +40,6 @@ docker run -d \
   $([ -d "$SECOND_INVITE_PATH" ] && echo "-v $SECOND_INVITE_PATH:/ws-secondInvite") \
   $([ -d "$DAPP_OFFER_UP_PATH" ] && echo "-v $DAPP_OFFER_UP_PATH:/ws-offerup") \
   $([ -d "$DAPP_AGORIC_BASICS_PATH" ] && echo "-v $DAPP_AGORIC_BASICS_PATH:/ws-agoricBasics") \
-  $([ -d "$DAPP_ORCHESTRATION_BASICS_PATH" ] && echo "-v $DAPP_ORCHESTRATION_BASICS_PATH:/ws-orchestrationBasics") \
   ghcr.io/agoric/agoric-3-proposals:latest \
   /ws-edcert/contract/scripts/run-chain.sh || {
     echo "Failed to start docker container. Please check if Docker is running and you have necessary permissions."
