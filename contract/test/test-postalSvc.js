@@ -58,7 +58,7 @@ const makeTestContext = async t => {
 
   /** @type {ExecSync} */
   const dockerExec = (file, args, opts = { encoding: 'utf-8' }) => {
-    const workdir = '/workspace/contract';
+    const workdir = '/ws-agoricBasics/contract';
     const execArgs = ['compose', 'exec', '--workdir', workdir, 'agd'];
     opts.verbose &&
       console.log('docker compose exec', JSON.stringify([file, ...args]));
