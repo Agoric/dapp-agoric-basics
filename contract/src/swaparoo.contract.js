@@ -3,9 +3,7 @@
 
 import { M, matches, mustMatch } from '@endo/patterns';
 import { E, Far } from '@endo/far';
-import '@agoric/zoe/exported.js';
 import { atomicRearrange } from '@agoric/zoe/src/contractSupport/atomicTransfer.js';
-import '@agoric/zoe/src/contracts/exported.js';
 import { AmountShape, IssuerShape } from '@agoric/ertp/src/typeGuards.js';
 import {
   InstanceHandleShape,
@@ -19,7 +17,14 @@ import { provide } from '@agoric/vat-data';
 import { makeCollectFeesInvitation } from './collectFees.js';
 import { fixHub } from './fixHub.js';
 
-/** @template [Slot=unknown] @typedef {import('@endo/marshal').Marshal<Slot>} Marshaller */
+/**
+ * @import {StorageNode, Marshaller} from '@agoric/internal/src/lib-chainStorage.js';
+ * @import {GovernanceTerms} from '@agoric/governance/src/types.js';
+ * @import {ERef} from '@endo/far';
+ * @import {Issuer} from '@agoric/ertp/src/types.js';
+ * @import {Baggage} from '@agoric/vat-data';
+ * @import {NamesByAddressAdmin} from '@agoric/vats';
+ */
 
 const { quote: q } = assert;
 
@@ -48,6 +53,7 @@ export const swapWithFee = (zcf, firstSeat, secondSeat, feeSeat, feeAmount) => {
   secondSeat.exit();
   return 'success';
 };
+harden(swapWithFee);
 
 const paramTypes = harden(
   /** @type {const} */ ({
@@ -55,7 +61,7 @@ const paramTypes = harden(
   }),
 );
 
-export const meta = harden({
+export const meta = {
   customTermsShape: {
     electionManager: InstanceHandleShape,
     governedParams: {
@@ -80,9 +86,12 @@ export const meta = harden({
       initialPoserInvitation: InvitationShape,
     },
   ),
-});
+};
+harden(meta);
 export const customTermsShape = meta.customTermsShape;
+harden(customTermsShape);
 export const privateArgsShape = meta.privateArgsShape;
+harden(privateArgsShape);
 
 /**
  * @param {ZCF<GovernanceTerms<paramTypes>>} zcf
@@ -94,9 +103,9 @@ export const privateArgsShape = meta.privateArgsShape;
  * }} GovPrivateArgs
  *
  * @param {GovPrivateArgs & {
- *   namesByAddressAdmin: import('@agoric/vats').NamesByAddressAdmin
+ *   namesByAddressAdmin: NamesByAddressAdmin
  * }} privateArgs
- * @param {import('@agoric/vat-data').Baggage} baggage
+ * @param {Baggage} baggage
  */
 export const start = async (zcf, privateArgs, baggage) => {
   // set up fee handling

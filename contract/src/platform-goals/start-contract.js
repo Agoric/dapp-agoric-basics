@@ -3,6 +3,11 @@
 
 import { E } from '@endo/far';
 
+/**
+ * @import {AssetKind, Brand} from '@agoric/ertp/src/types.js';
+ * @import {BoardAuxPowers} from './board-aux.core.js';
+ */
+
 const { Fail } = assert;
 
 /**
@@ -63,7 +68,7 @@ export const startContract = async (
   console.log(name, 'started');
 
   if (issuerNames) {
-    /** @type {BootstrapPowers & import('./board-aux.core').BoardAuxPowers} */
+    /** @type {BootstrapPowers & BoardAuxPowers} */
     // @ts-expect-error cast
     const auxPowers = powers;
 

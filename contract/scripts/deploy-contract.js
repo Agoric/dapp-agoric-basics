@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-/* global process, fetch, setTimeout */
 // @ts-check
 import '@endo/init';
 import fsp from 'node:fs/promises';
@@ -16,7 +15,7 @@ const options = {
   install: { type: 'string' },
   eval: { type: 'string', multiple: true },
   service: { type: 'string', default: 'agd' },
-  workdir: { type: 'string', default: '/ws-agoric-basics/contract' },
+  workdir: { type: 'string', default: '/ws-agoricBasics/contract' },
 };
 /**
  * @typedef {{

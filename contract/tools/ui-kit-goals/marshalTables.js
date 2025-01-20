@@ -12,7 +12,7 @@ import { Far, makeMarshal } from '@endo/marshal';
 /**
  * The null slot indicates that identity is not intended to be preserved.
  *
- * @typedef { string | null } WildSlot
+ * @typedef { string | null } OptionalSlot
  */
 
 /**
@@ -23,7 +23,7 @@ import { Far, makeMarshal } from '@endo/marshal';
  *
  * @template Val
  * @param {(val: Val, size: number) => string} makeSlot
- * @param {(slot: WildSlot, iface: string | undefined) => Val} makeVal
+ * @param {(slot: OptionalSlot, iface: string | undefined) => Val} makeVal
  */
 const makeTranslationTable = (makeSlot, makeVal) => {
   /** @type {Map<Val, string>} */
@@ -43,7 +43,7 @@ const makeTranslationTable = (makeSlot, makeVal) => {
     return slot;
   };
 
-  /** @type {(slot: WildSlot, iface: string | undefined) => Val} */
+  /** @type {(slot: OptionalSlot, iface: string | undefined) => Val} */
   const convertSlotToVal = (slot, iface) => {
     if (slot === null) return makeVal(slot, iface);
     if (slotToVal.has(slot)) {
@@ -59,7 +59,7 @@ const makeTranslationTable = (makeSlot, makeVal) => {
   return harden({ convertValToSlot, convertSlotToVal });
 };
 
-/** @type {(slot: string, iface: string | undefined) => any} */
+/** @type {(slot: OptionalSlot, iface: string | undefined) => any} */
 const synthesizeRemotable = (slot, iface) =>
   Far(`${(iface ?? '').replace(/^Alleged: /, '')}#${slot}`, {});
 

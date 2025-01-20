@@ -11,7 +11,7 @@ import { E } from '@endo/far';
 import { makeCopyBag } from '@endo/patterns';
 import { makeNodeBundleCache } from '@endo/bundle-source/cache.js';
 import { makeZoeKitForTest } from '@agoric/zoe/tools/setup-zoe.js';
-import { AmountMath, makeIssuerKit } from '@agoric/ertp';
+import { AmountMath, AssetKind, makeIssuerKit } from '@agoric/ertp';
 
 import { makeStableFaucet } from './mintStable.js';
 import {
@@ -29,15 +29,25 @@ import {
 } from '../src/platform-goals/board-aux.core.js';
 import { extract } from '@agoric/vats/src/core/utils.js';
 
-/** @typedef {typeof import('../src/sell-concert-tickets.contract.js').start} AssetContractFn */
+/**
+ * @import {ERef} from '@endo/far';
+ * @import {Instance} from '@agoric/zoe/src/zoeService/utils.js';
+ * @import {Purse, NatValue} from '@agoric/ertp/src/types.js';
+ * @import {start} from '../src/sell-concert-tickets.contract.js';
+ * @import {TestFn, ExecutionContext} from 'ava';
+ */
+/** @typedef {typeof start} AssetContractFn */
+
+/**
+ * @typedef {Awaited<ReturnType<makeTestContext>>} TestContext
+ */
 
 const myRequire = createRequire(import.meta.url);
 const contractPath = myRequire.resolve(
   `../src/sell-concert-tickets.contract.js`,
 );
 
-/** @type {import('ava').TestFn<Awaited<ReturnType<makeTestContext>>>} */
-const test = anyTest;
+const test = /** @type {TestFn<TestContext>}} */ (anyTest);
 
 const UNIT6 = 1_000_000n;
 const CENT = UNIT6 / 100n;
@@ -47,8 +57,7 @@ const CENT = UNIT6 / 100n;
  *
  * See test-bundle-source.js for basic use of bundleSource().
  * Here we use a bundle cache to optimize running tests multiple times.
- *
- * @param {unknown} _t
+ * @param {ExecutionContext} _t
  */
 const makeTestContext = async _t => {
   const { zoeService: zoe, feeMintAccess } = makeZoeKitForTest();
@@ -62,7 +71,7 @@ const makeTestContext = async _t => {
 test.before(async t => (t.context = await makeTestContext(t)));
 
 test('bagPrice calculates the total price correctly', async t => {
-  const money = makeIssuerKit('PlayMoney');
+  const money = makeIssuerKit('PlayMoney', AssetKind.COPY_BAG);
   const inventory = makeInventory(money.brand, 1n);
   const bag = makeCopyBag([
     ['frontRow', 3n],
@@ -106,10 +115,10 @@ test('Start the contract', async t => {
 /**
  * Alice trades by paying the price from the contract's terms.
  *
- * @param {import('ava').ExecutionContext} t
+ * @param {ExecutionContext} t
  * @param {ERef<ZoeService>} zoe
- * @param {ERef<import('@agoric/zoe/src/zoeService/utils').Instance<AssetContractFn>>} instance
- * @param {Purse} purse
+ * @param {ERef<Instance<AssetContractFn>>} instance
+ * @param {Purse<'nat'>} purse
  * @param {[string, NatValue][]} choices
  * @param {boolean} expectSuccessfulTrade
  */
@@ -125,7 +134,6 @@ const alice = async (
   expectSuccessfulTrade = true,
 ) => {
   const publicFacet = E(zoe).getPublicFacet(instance);
-  // @ts-expect-error Promise<Instance> seems to work
   const terms = await E(zoe).getTerms(instance);
   const { issuers, brands } = terms;
 
@@ -241,9 +249,9 @@ test('use the code that will go on chain to start the contract', async t => {
       options: { sellConcertTickets: { bundleID } },
     }),
   ]);
-  /** @type {import('../src/sell-concert-tickets.proposal.js').SellTicketsSpace} */
-  // @ts-expect-error cast
+
   const sellSpace = powers;
+  // @ts-expect-error mock
   const instance = await sellSpace.instance.consume.sellConcertTickets;
 
   // Now that we have the instance, resume testing as above.

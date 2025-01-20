@@ -1,6 +1,11 @@
 // @ts-check
 import { Far } from '@endo/far';
 
+/**
+ * @import {JsonRpcRequest} from '@cosmjs/json-rpc';
+ * @import {RpcClient} from '@cosmjs/tendermint-rpc';
+ */
+
 const { freeze } = Object;
 
 const jsonType = { 'Content-Type': 'application/json' };
@@ -26,11 +31,10 @@ const filterBadStatus = res => {
  *
  * @param {string} url
  * @param {typeof window.fetch} fetch
- * @returns {import('@cosmjs/tendermint-rpc').RpcClient}
+ * @returns {RpcClient}
  */
 export const makeHttpClient = (url, fetch) => {
-  const headers = { 'Access-Control-Allow-Origin': '*'
-        }; // XXX needed?
+  const headers = { 'Access-Control-Allow-Origin': '*' }; // XXX needed?
 
   // based on cosmjs 0.30.1:
   // https://github.com/cosmos/cosmjs/blob/33271bc51cdc865cadb647a1b7ab55d873637f39/packages/tendermint-rpc/src/rpcclients/http.ts#L37
@@ -41,7 +45,7 @@ export const makeHttpClient = (url, fetch) => {
     },
 
     /**
-     * @param {import('@cosmjs/json-rpc').JsonRpcRequest} request
+     * @param {JsonRpcRequest} request
      */
     execute: async request => {
       const settings = {

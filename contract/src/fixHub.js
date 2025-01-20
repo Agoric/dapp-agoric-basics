@@ -4,9 +4,14 @@ import { E, Far } from '@endo/far';
 const { Fail } = assert;
 
 /**
+ * @import {ERef} from '@endo/far';
+ * @import {NameAdmin} from '@agoric/vats';
+ */
+
+/**
  * ref https://github.com/Agoric/agoric-sdk/issues/8408#issuecomment-1741445458
  *
- * @param {ERef<import('@agoric/vats').NameAdmin>} namesByAddressAdmin
+ * @param {ERef<NameAdmin>} namesByAddressAdmin
  */
 export const fixHub = async namesByAddressAdmin => {
   assert(namesByAddressAdmin, 'no namesByAddressAdmin???');

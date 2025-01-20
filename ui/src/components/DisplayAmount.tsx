@@ -1,6 +1,6 @@
 import type { PurseJSONState } from '@agoric/react-components';
 import type { DisplayInfoForBrand } from '../store/displayInfo';
-import { stringifyValue, type AssetKind } from '@agoric/web-components';
+import { stringifyValue} from '@agoric/web-components';
 import type { Amount } from '@agoric/ertp/src/types';
 import { isCopyBagValue } from '@agoric/ertp';
 import { useEffect, useRef, useState } from 'react';
@@ -10,7 +10,7 @@ export const PurseValue = ({
   purse,
   allowPopup,
 }: {
-  purse: PurseJSONState<AssetKind>;
+  purse: PurseJSONState<'nat' | 'copyBag' | 'set'>;
   allowPopup?: boolean;
 }) => {
   const displayInfoForBrand: DisplayInfoForBrand = {
@@ -65,7 +65,7 @@ export const NonNatValue = ({
   petname,
   allowPopup = true,
 }: {
-  value: Amount<'set'>['value'] | Amount<'copyBag'>['value'];
+  value: Amount['value'];
   petname: string;
   allowPopup?: boolean;
 }) => {
@@ -86,24 +86,23 @@ export const NonNatValue = ({
 
   const count = isCopyBag
     ? String(
-        value.payload.reduce(
-          // @ts-expect-error cast
+        (value as Amount<'copyBag'>['value']).payload.reduce(
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
           (total, [_, count]) => total + count,
           0n,
         ),
       )
-    : value.length;
+    : (value as Amount<'set'>['value']).length;
 
   const items = isCopyBag
-    ? value.payload.map((entry: [unknown, bigint]) => (
+    ? (value as Amount<'copyBag'>['value']).payload.map((entry: [unknown, bigint]) => (
         <CopyBagEntry
           key={stringifyData(entry[0])}
           className="mb-4"
           entry={entry}
         />
       ))
-    : value.map((entry: unknown) => (
+    : (value as Amount<'set'>['value']).map((entry: unknown) => (
         <SetEntry className="mb-4" key={stringifyData(entry)} entry={entry} />
       ));
 

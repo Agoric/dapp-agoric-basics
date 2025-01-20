@@ -1,11 +1,24 @@
 /* eslint-disable import/order -- https://github.com/endojs/endo/issues/1235 */
-import { test } from './prepare-test-env-ava.js';
+import { test as anyTest } from './prepare-test-env-ava.js';
 import { execFile } from 'node:child_process';
 import { promises as fs } from 'node:fs';
 import { Buffer } from 'buffer';
 import { gzip } from 'zlib';
 import { promisify } from 'util';
 import { makeNodeBundleCache } from '@endo/bundle-source/cache.js';
+
+/** * @import {TestFn} from 'ava'; */
+
+/**
+ * @typedef {{
+ *   compressBundle: (name: string) => Promise<{ bundle: any; compressed: Buffer; }>,
+ *   $: (file: string, ...args: string[]) => Promise<string>,
+ *   runPackageScript: (scriptName: string, ...args: string[]) => Promise<string>,
+ *   listBundles: (bundleDir?: string) => Promise<string[]>,
+ * }} TestContext
+ */
+
+const test = /** @type {TestFn<TestContext>}} */ (anyTest);
 
 test.before(async t => {
   const bundleCache = await makeNodeBundleCache('bundles', {}, s => import(s));
@@ -15,6 +28,7 @@ test.before(async t => {
    */
   const compressBundle = async name => {
     const rootPath = undefined; // not needed since bundle is already cached
+    // @ts-expect-error intentionally passing undefined
     const bundle = await bundleCache.load(rootPath, name);
     const fileContents = JSON.stringify(bundle);
     const buffer = Buffer.from(fileContents, 'utf-8');

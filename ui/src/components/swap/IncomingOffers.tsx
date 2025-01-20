@@ -7,10 +7,12 @@ const IncomingOffers = () => {
   const { instances } = useContractStore();
   const swaparooInstance = instances?.['swaparoo'];
   const invitationPurse = usePurse('Invitation');
-  const swaparooInvitations = invitationPurse?.currentAmount.value.filter(
+  const swaparooInvitations = Array.isArray(invitationPurse?.currentAmount.value) ?
+  invitationPurse?.currentAmount.value.filter(
+    // @ts-expect-error cast
     ({ instance, description }: { instance: unknown; description: string }) =>
       instance === swaparooInstance && description.startsWith('matchOffer'),
-  ) as Array<unknown>[] | undefined;
+  ): []
 
   return (
     <div className="w-80">

@@ -7,13 +7,20 @@
 import { E } from '@endo/far';
 import { createRequire } from 'module';
 
+/**
+ * @import {ERef} from '@endo/far';
+ * @import {Payment} from '@agoric/ertp/src/types.js';
+ * @import {start} from '@agoric/vats/src/centralSupply.js';
+ * @import {makeNodeBundleCache} from '@endo/bundle-source/cache.js'
+ * @import {CopySet, CopyBag} from '@endo/patterns';
+ */
 const myRequire = createRequire(import.meta.url);
 const centralSupplyPath = myRequire.resolve(
   '@agoric/vats/src/centralSupply.js',
 );
 
-/** @typedef {Installation<typeof import('@agoric/vats/src/centralSupply').start>} CentralSupplyInstallation */
-/** @typedef {Awaited<ReturnType<import('@endo/bundle-source/cache.js').makeNodeBundleCache>>} BundleCache */
+/** @typedef {Installation<typeof start>} CentralSupplyInstallation */
+/** @typedef {Awaited<ReturnType<makeNodeBundleCache>>} BundleCache */
 
 /**
  * Make a stable faucet; that is: a tool to mint the Zoe fee token.

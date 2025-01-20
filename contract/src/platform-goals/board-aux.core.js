@@ -1,5 +1,14 @@
 // @ts-check
+/// <reference types="@agoric/vats/src/core/types-ambient.js"/>
 import { E, Far } from '@endo/far';
+
+/**
+ * @import {ERef} from '@endo/far';
+ * @import {StorageNode,Marshaller} from '@agoric/internal/src/lib-chainStorage.js';
+ * @import {Zone} from '@agoric/zone';
+ * @import {Brand} from '@agoric/ertp/src/types.js';
+ * @import {Board} from '@agoric/vats';
+ */
 
 const { Fail } = assert;
 
@@ -8,10 +17,10 @@ const { Fail } = assert;
 export const BOARD_AUX = 'boardAux';
 
 /**
- * @param {import('@agoric/zone').Zone} zone
+ * @param {Zone} zone
  * @param {Marshaller} marshalData
  * @param {{
- *   board: ERef<import('@agoric/vats').Board>;
+ *   board: ERef<Board>;
  *   chainStorage: ERef<StorageNode>;
  * }} powers
  */
@@ -73,7 +82,6 @@ export const makeBoardAuxManager = (zone, marshalData, powers) => {
 /**
  * @typedef {PromiseSpaceOf<{
  *   brandAuxPublisher: BrandAuxPublisher;
- *   boardAuxTOFU: BoardAuxTOFU;
  *   boardAuxAdmin: BoardAuxAdmin;
  * }>} BoardAuxPowers
  */
@@ -86,12 +94,12 @@ export const marshalData = harden({
   unserialize: () => Fail`not implemented`,
 });
 
-/** @param {BootstrapPowers} powers */
+/**
+ * @param {BootstrapPowers} powers
+ */
 export const produceBoardAuxManager = async powers => {
   const { zone } = powers;
   const { board } = powers.consume;
-  /** @type {import('../types').NonNullChainStorage['consume']} */
-  // @ts-expect-error cast
   const { chainStorage } = powers.consume;
 
   /** @type {BoardAuxPowers['produce']} */
@@ -100,6 +108,7 @@ export const produceBoardAuxManager = async powers => {
 
   const mgr = makeBoardAuxManager(zone, marshalData, { board, chainStorage });
   produce.brandAuxPublisher.reset();
+
   // TODO: powers.produce.boardAuxTOFU.reset();
   produce.boardAuxAdmin.reset();
   produce.brandAuxPublisher.resolve(mgr.brandAuxPublisher);

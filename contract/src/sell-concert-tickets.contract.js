@@ -23,9 +23,11 @@ import { Far } from '@endo/far';
 import { M, getCopyBagEntries, makeCopyBag } from '@endo/patterns';
 import { AssetKind } from '@agoric/ertp/src/amountMath.js';
 import { atomicRearrange } from '@agoric/zoe/src/contractSupport/atomicTransfer.js';
-import '@agoric/zoe/exported.js';
 import { AmountMath, AmountShape } from '@agoric/ertp';
 
+/**
+ * @import {Amount, NatValue, Brand} from '@agoric/ertp/src/types.js';
+ */
 const { Fail, quote: q } = assert;
 
 // #region bag utilities
@@ -62,15 +64,16 @@ const addMultiples = (sum, entry, inventory) => {
  * @returns {Amount}
  */
 export const bagPrice = (bag, inventory) => {
-  /** @type {[string, bigint][]} */
-  const entries = getCopyBagEntries(bag);
+  const entries = /** @type {[string, bigint][]} */ (getCopyBagEntries(bag));
   const values = Object.values(inventory);
   const brand = values[0].tradePrice.brand;
-  return entries.reduce(
-    (sum, entry) => addMultiples(sum, entry, inventory),
-    AmountMath.makeEmpty(brand),
-  );
+  let finalAmount = /** @type {Amount} */ (AmountMath.makeEmpty(brand));
+  for (const entry of entries) {
+    finalAmount = addMultiples(finalAmount, entry, inventory);
+  }
+  return finalAmount;
 };
+harden(bagPrice);
 // #endregion
 
 /**
@@ -82,7 +85,8 @@ export const bagPrice = (bag, inventory) => {
  *     maxTickets: 3n,
  *   },
  * }
- * @typedef {{[key: string]: {tradePrice: Amount, maxTickets: NatValue}}} Inventory
+ *
+ * @typedef {{[key: string]: {tradePrice: {brand: Brand<"copyBag">, value: any}, maxTickets: NatValue}}} Inventory
  */
 const InventoryShape = M.recordOf(M.string(), {
   tradePrice: AmountShape,
@@ -101,8 +105,10 @@ const InventoryShape = M.recordOf(M.string(), {
 export const meta = harden({
   customTermsShape: { inventory: InventoryShape },
 });
+harden(meta);
 // compatibility with an earlier contract metadata API
 export const customTermsShape = meta.customTermsShape;
+harden(customTermsShape);
 
 /**
  * Start a contract that

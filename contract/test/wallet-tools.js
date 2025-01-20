@@ -13,9 +13,12 @@ import { makeNotifier } from '@agoric/notifier';
 import { allValues, mapValues } from '../src/objectTools.js';
 
 /**
- * @typedef {import('@agoric/smart-wallet/src/offers.js').OfferSpec} OfferSpec
- * @typedef {import('@agoric/smart-wallet/src/smartWallet.js').UpdateRecord} UpdateRecord
- * @typedef {import('@agoric/smart-wallet/src/invitations.js').InvitationSpec} InvitationSpec
+ * @import {ERef} from '@endo/far';
+ * @import {OfferSpec} from '@agoric/smart-wallet/src/offers.js';
+ * @import {UpdateRecord} from '@agoric/smart-wallet/src/smartWallet.js';
+ * @import {InvitationSpec} from '@agoric/smart-wallet/src/invitations.js';
+ * @import {Brand, Purse, Payment} from '@agoric/ertp/src/types.js';
+ * @import {PromiseKit} from '@endo/promise-kit';
  */
 
 const { values } = Object;
