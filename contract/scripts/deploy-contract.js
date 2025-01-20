@@ -14,7 +14,7 @@ const options = {
   help: { type: 'boolean' },
   install: { type: 'string' },
   eval: { type: 'string', multiple: true },
-  service: { type: 'string', default: 'agd' },
+  container: { type: 'string', default: 'agdc' },
   workdir: { type: 'string', default: '/ws-agoricBasics/contract' },
 };
 /**
@@ -22,7 +22,7 @@ const options = {
  *   help: boolean,
  *   install?: string,
  *   eval?: string[],
- *   service: string,
+ *   container: string,
  *   workdir: string,
  * }} DeployOptions
  */
@@ -35,9 +35,9 @@ Options:
   --install            entry module of contract to install
   --eval               entry module of core evals to run
                        (cf rollup.config.mjs)
-  --service SVC        docker compose service to run agd (default: ${options.service.default}).
+  --container NAME     docker container name to run agd (default: ${options.container.default})
                        Use . to run agd outside docker.
-  --workdir DIR        workdir for docker service (default: ${options.workdir.default})
+  --workdir DIR        workdir for docker container (default: ${options.workdir.default})
 `;
 
 const mockExecutionContext = () => {
@@ -68,21 +68,21 @@ const main = async (bundleDir = 'bundles') => {
     progress(Usage);
     return;
   }
-  /** @type {{ workdir: string, service: string }} */
-  const { workdir, service } = flags;
+  /** @type {{ workdir: string, container: string }} */
+  const { workdir, container } = flags;
 
   /** @type {import('../tools/agd-lib.js').ExecSync} */
   const dockerExec = (file, dargs, opts = { encoding: 'utf-8' }) => {
-    const execArgs = [ 'exec', '--workdir', workdir, service];
-    opts.verbose &&
-      console.log('docker exec', JSON.stringify([file, ...dargs]));
+    const execArgs = ['exec', '--workdir', workdir, container];
+    const fullCommand = ['docker', ...execArgs, file, ...dargs];
+    console.log('Executing Docker command:', fullCommand.join(' '));
     return execFileSync('docker', [...execArgs, file, ...dargs], opts);
   };
 
   const t = mockExecutionContext();
   const tools = makeE2ETools(t, bundleCache, {
     execFile,
-    execFileSync: service === '.' ? execFileSync : dockerExec,
+    execFileSync: container === '.' ? execFileSync : dockerExec,
     fetch,
     setTimeout,
     writeFile,
@@ -93,7 +93,6 @@ const main = async (bundleDir = 'bundles') => {
 
   if (flags.install) {
     const name = stem(flags.install);
-
     await tools.installBundles({ [name]: flags.install }, progress);
   }
 

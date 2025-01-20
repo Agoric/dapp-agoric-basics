@@ -513,9 +513,9 @@ export const makeE2ETools = (
 
       const bundleSizeMb = (bundleJSON.length / 1_000_000).toFixed(3);
       progress('installing', name, shortId, bundleSizeMb, 'Mb');
-      const containerId = 'agd'; // container is named agd 
+      const containerId = 'agdc'; // container is named agd 
       const localPath = './bundles';
-      const containerPath = '/ws-agoric-basics/contract/';
+      const containerPath = '/ws-agoricBasics/contract/';
       const command = `docker cp ${localPath} ${containerId}:${containerPath}`;
       exec(command);
       const { tx, confirm } = await installBundle(fullPath, {
