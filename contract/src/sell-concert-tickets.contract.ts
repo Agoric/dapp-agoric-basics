@@ -17,57 +17,55 @@
  * @see {@link https://docs.agoric.com/guides/js-programming/hardened-js.html|Hardened JavaScript}
  * for background on `harden` and `assert`.
  */
-// @ts-check
 
 import { Far } from '@endo/far';
-import { M, getCopyBagEntries, makeCopyBag } from '@endo/patterns';
+import { CopyBag, M, getCopyBagEntries, makeCopyBag } from '@endo/patterns';
 import { AssetKind } from '@agoric/ertp/src/amountMath.js';
 import { atomicRearrange } from '@agoric/zoe/src/contractSupport/atomicTransfer.js';
 import { AmountMath, AmountShape } from '@agoric/ertp';
 
-/**
- * @import {Amount, NatValue, Brand} from '@agoric/ertp/src/types.js';
- */
+/// <reference path="@agoric/zoe" />
+
+import type { Amount, NatValue, Brand } from '@agoric/ertp/src/types.js';
+
+type Inventory = {
+  [key: string]: {
+    tradePrice: { brand: Brand<'copyBag'>; value: CopyBag };
+    maxTickets: NatValue;
+  };
+};
+
 const { Fail, quote: q } = assert;
 
 // #region bag utilities
-/**
- *
- * @param {Amount} amount
- * @param {number} n
- * @returns {Amount}
- */
-const multiply = (amount, n) => {
+const multiply = (amount: Amount, n: number): Amount => {
   const arr = Array.from({ length: n });
   return arr.reduce(
-    (sum, _) => AmountMath.add(amount, sum),
+    (sum: Amount, _) => AmountMath.add(amount, sum),
     AmountMath.make(amount.brand, 0n),
   );
 };
 
-/**
- *
- * @param {Amount} sum
- * @param {[string, bigint]} entry
- * @param {Inventory} inventory
- * @returns {Amount}
- */
-const addMultiples = (sum, entry, inventory) => {
-  const multiple = multiply(inventory[entry[0]].tradePrice, Number(entry[1]));
+const addMultiples = (
+  sum: Amount<'nat'>,
+  entry: [string, bigint],
+  inventory: Inventory,
+): Amount<'nat'> => {
+  const multiple = multiply(
+    inventory[entry[0]].tradePrice,
+    Number(entry[1]),
+  ) as Amount<'nat'>;
   return AmountMath.add(multiple, sum);
 };
 
-/**
- *
- * @param {import('@endo/patterns').CopyBag} bag
- * @param {Inventory} inventory
- * @returns {Amount}
- */
-export const bagPrice = (bag, inventory) => {
-  const entries = /** @type {[string, bigint][]} */ (getCopyBagEntries(bag));
+export const bagPrice = (
+  bag: import('@endo/patterns').CopyBag,
+  inventory: Inventory,
+): Amount => {
+  const entries = getCopyBagEntries(bag) as [string, bigint][];
   const values = Object.values(inventory);
   const brand = values[0].tradePrice.brand;
-  let finalAmount = /** @type {Amount} */ (AmountMath.makeEmpty(brand));
+  let finalAmount = /** @type {Amount} */ AmountMath.makeEmpty(brand);
   for (const entry of entries) {
     finalAmount = addMultiples(finalAmount, entry, inventory);
   }
@@ -85,22 +83,15 @@ harden(bagPrice);
  *     maxTickets: 3n,
  *   },
  * }
- *
- * @typedef {{[key: string]: {tradePrice: {brand: Brand<"copyBag">, value: any}, maxTickets: NatValue}}} Inventory
  */
 const InventoryShape = M.recordOf(M.string(), {
   tradePrice: AmountShape,
   maxTickets: M.nat(),
 });
 
-/**
- * In addition to the standard `issuers` and `brands` terms,
- * this contract is parameterized by terms for inventory
- *
- * @typedef {{
- *   inventory: Inventory
- * }} SellConcertTicketsTerms
- */
+type SellConcertTicketsTerms = {
+  inventory: Inventory;
+};
 
 export const meta = harden({
   customTermsShape: { inventory: InventoryShape },
@@ -114,10 +105,9 @@ harden(customTermsShape);
  * Start a contract that
  *   - creates a new semi-fungible asset type for Tickets, and
  *   - handles offers to buy as many tickets as inventory allows
- *
- * @param {ZCF<SellConcertTicketsTerms>} zcf
+ * @param zcf
  */
-export const start = async zcf => {
+export const start = async (zcf: ZCF<SellConcertTicketsTerms>) => {
   const { inventory } = zcf.getTerms();
 
   const inventoryValues = Object.values(inventory);
@@ -174,8 +164,7 @@ export const start = async zcf => {
   /** a seat for allocating proceeds of sales */
   const proceeds = zcf.makeEmptySeatKit().zcfSeat;
 
-  /** @type {OfferHandler} */
-  const tradeHandler = buyerSeat => {
+  const tradeHandler: OfferHandler = buyerSeat => {
     // give and want are guaranteed by Zoe to match proposalShape
     const { give, want } = buyerSeat.getProposal();
 
