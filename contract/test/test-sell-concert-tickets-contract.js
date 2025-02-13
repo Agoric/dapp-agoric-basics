@@ -44,7 +44,7 @@ import { extract } from '@agoric/vats/src/core/utils.js';
 
 const myRequire = createRequire(import.meta.url);
 const contractPath = myRequire.resolve(
-  `../src/sell-concert-tickets.contract.js`,
+  `../src/sell-concert-tickets.contract.ts`,
 );
 
 const test = /** @type {TestFn<TestContext>}} */ (anyTest);
